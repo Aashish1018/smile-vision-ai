@@ -31,7 +31,7 @@
   }
 
   html, body {
-    @apply bg-background-dark font-display antialiased;
+    @apply bg-background-dark font-display antialiased scroll-smooth;
     scroll-behavior: smooth;
   }
 }

@@ -6,7 +6,7 @@ const JawSymmetryPanel = () => (
       <span className="material-symbols-outlined text-primary">face</span>
       <span className="text-sm font-black uppercase text-ivory">JAW SYMMETRY ANALYSIS</span>
     </div>
-    <div className="p-6 flex flex-col items-center">
+    <div className="p-4 md:p-6 flex flex-col items-center">
       <div className="relative size-48 bg-slate-800 border border-white/10 rounded-full mb-6 flex items-center justify-center overflow-hidden">
         <div
           className="absolute inset-0 bg-center bg-contain opacity-40 grayscale"
