@@ -1,10 +1,10 @@
 const RecommendedTreatment = () => (
-  <div className="col-span-12 lg:col-span-7 border-2 border-black bg-primary/10 p-8 h-full flex flex-col justify-center gap-6">
+  <div className="col-span-12 lg:col-span-7 border-2 border-black bg-primary/10 p-6 md:p-8 h-full flex flex-col justify-center gap-6">
     <div className="flex items-center gap-4">
-      <div className="size-12 bg-black text-white flex items-center justify-center shrink-0">
-        <span className="material-symbols-outlined">lightbulb</span>
+      <div className="size-10 md:size-12 bg-black text-white flex items-center justify-center shrink-0">
+        <span className="material-symbols-outlined text-lg md:text-xl">lightbulb</span>
       </div>
-      <span className="text-xl font-black uppercase text-ivory">RECOMMENDED TREATMENT</span>
+      <span className="text-lg md:text-xl font-black uppercase text-ivory">RECOMMENDED TREATMENT</span>
     </div>
 
     {/* TODO: Replace hardcoded treatment recommendation with data.recommendation.text from API. Highlight treatment names from data.recommendation.treatments array */}

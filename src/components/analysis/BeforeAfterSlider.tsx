@@ -2,8 +2,8 @@ import { ReactCompareSlider, ReactCompareSliderImage } from "react-compare-slide
 
 const BeforeAfterSlider = () => (
   <div className="col-span-12 lg:col-span-8 border-2 border-black bg-primary/20 p-1">
-    <div className="bg-transparent border-b-2 border-black p-4 flex justify-between items-center">
-      <span className="text-lg font-black uppercase text-ivory">BEFORE & AFTER TRANSFORMATION</span>
+    <div className="bg-transparent border-b-2 border-black p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-2 md:gap-0">
+      <span className="text-base md:text-lg font-black uppercase text-ivory">BEFORE & AFTER TRANSFORMATION</span>
       <div className="flex gap-2">
         <span className="bg-card-dark text-ivory text-[10px] font-bold uppercase px-2 py-1">FULL HD</span>
         <span className="bg-black text-white text-[10px] font-bold uppercase px-2 py-1">AI ENHANCED</span>

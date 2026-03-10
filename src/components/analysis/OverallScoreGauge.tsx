@@ -13,7 +13,7 @@ const OverallScoreGauge = () => {
   }, []);
 
   return (
-    <div className="bg-card-dark flex flex-col items-center p-6 gap-4 grow">
+    <div className="bg-card-dark flex flex-col items-center p-4 md:p-6 gap-4 grow">
       {/* TODO: Replace hardcoded score (84) with data.overallScore from API. Recalculate strokeDashoffset as: 364 * (1 - data.overallScore / 100) */}
       <div className="relative size-32 flex items-center justify-center">
         <svg className="size-full -rotate-90" viewBox="0 0 128 128">
