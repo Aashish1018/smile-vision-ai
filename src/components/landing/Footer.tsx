@@ -1,5 +1,5 @@
 const Footer = () => (
-  <footer className="border-t border-white/5 bg-background-dark py-8 px-6 md:px-20">
+  <footer className="border-t border-white/5 bg-background-dark py-8 px-4 md:px-12">
     <div className="flex flex-col md:flex-row justify-between items-center gap-6 max-w-7xl mx-auto">
       <div className="flex items-center gap-2">
         <div className="size-6 bg-primary rounded flex items-center justify-center">

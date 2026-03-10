@@ -19,7 +19,7 @@ const HowItWorks = () => {
   }, []);
 
   return (
-    <section id="how-it-works" className="bg-slate-900/50 py-20 px-6 md:px-20" ref={ref}>
+    <section id="how-it-works" className="bg-slate-900/50 py-20 px-4 md:px-12" ref={ref}>
       <div className={`max-w-7xl mx-auto transition-all duration-700 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
         <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-16">
           <div>

@@ -1,6 +1,10 @@
-const HeroSection = () => {
+interface HeroSectionProps {
+  onAuthOpen: () => void;
+}
+
+const HeroSection = ({ onAuthOpen }: HeroSectionProps) => {
   return (
-    <section className="max-w-7xl mx-auto px-6 md:px-20 py-20 md:py-32">
+    <section className="max-w-7xl mx-auto px-4 md:px-12 py-20 md:py-32">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         {/* Left column */}
         <div>
@@ -16,25 +20,16 @@ const HeroSection = () => {
             Experience the power of AI-driven dental simulations. See your perfect, confident smile before you even start your journey.
           </p>
 
-          <div className="flex flex-wrap gap-4 mb-8">
-            <a
-              href="#upload"
+          <div className="flex flex-wrap gap-4">
+            <button
+              onClick={onAuthOpen}
               className="rounded-full h-14 px-8 bg-primary text-white text-base font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform min-w-[180px] inline-flex items-center justify-center"
             >
               Start Visualizing
-            </a>
+            </button>
             <button className="rounded-full h-14 px-8 border-2 border-primary/20 bg-transparent text-slate-200 text-base font-bold hover:bg-primary/5 transition-colors min-w-[180px]">
               View Gallery
             </button>
-          </div>
-
-          <div className="flex items-center gap-2 opacity-70">
-            {[...Array(5)].map((_, i) => (
-              <span key={i} className="material-symbols-outlined text-primary text-sm">star</span>
-            ))}
-            <span className="text-xs font-medium text-slate-400 uppercase tracking-widest ml-2">
-              TRUSTED BY 500+ DENTAL CLINICS
-            </span>
           </div>
         </div>
 
