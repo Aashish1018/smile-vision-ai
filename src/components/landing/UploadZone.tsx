@@ -85,12 +85,21 @@ const UploadZone = () => {
           <p className="text-slate-400 text-center mt-3">Our advanced AI only needs one photo to show you the possibilities.</p>
 
           <div
-            className="mt-12 border-2 border-dashed border-primary/30 rounded-2xl p-16 flex flex-col items-center gap-6 bg-slate-900/30 hover:border-primary/60 transition-colors cursor-pointer"
+            role="button"
+            tabIndex={0}
+            aria-label="Upload photo drag and drop area"
+            className="mt-12 border-2 border-dashed border-primary/30 rounded-2xl p-16 flex flex-col items-center gap-6 bg-slate-900/30 hover:border-primary/60 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background-dark"
             onClick={() => inputRef.current?.click()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                inputRef.current?.click();
+              }
+            }}
             onDragOver={(e) => e.preventDefault()}
             onDrop={onDrop}
           >
-            <span className="material-symbols-outlined text-primary text-6xl">cloud_upload</span>
+            <span className="material-symbols-outlined text-primary text-6xl" aria-hidden="true">cloud_upload</span>
             <p className="text-xl font-bold text-white">Drag and drop your photo here</p>
             <p className="text-slate-500 text-sm max-w-md text-center">
               Or click to browse your files. Supported formats: JPG, PNG, HEIC (Max 10MB).
@@ -98,6 +107,7 @@ const UploadZone = () => {
             <button
               onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
               className="rounded-full h-12 px-8 bg-primary text-white text-base font-bold shadow-md hover:bg-primary/90 transition-colors min-w-[200px]"
+              tabIndex={-1}
             >
               Upload Photo
             </button>
@@ -107,6 +117,7 @@ const UploadZone = () => {
               accept="image/jpg,image/jpeg,image/png,image/heic"
               className="hidden"
               onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); }}
+              aria-hidden="true"
             />
           </div>
           {error && <p className="text-red-400 text-sm mt-3 text-center">{error}</p>}

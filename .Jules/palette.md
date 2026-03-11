@@ -1,0 +1,3 @@
+## 2024-03-24 - Interactive Custom Components Need Full Keyboard Support
+**Learning:** When making a custom div act like a button or interactive area (like the drag-and-drop UploadZone), it requires more than just an `onClick` handler to be accessible. It needs `role="button"`, `tabIndex={0}`, an `onKeyDown` handler to trigger the click on Enter/Space, and explicit focus visible styles so keyboard users know where they are. Removing focus from inner redundant buttons (`tabIndex={-1}`) also streamlines the tab order.
+**Action:** Always test custom interactive areas with the keyboard. If it handles `onClick`, it must also handle keyboard activation and show a focus state.

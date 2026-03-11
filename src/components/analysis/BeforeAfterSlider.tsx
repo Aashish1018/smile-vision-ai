@@ -11,9 +11,10 @@ const BeforeAfterSlider = () => (
     </div>
 
     {/* TODO: Replace placeholder images with actual user-uploaded photo (itemOne) and ML-processed result (itemTwo) from FastAPI /analyze endpoint */}
-    <ReactCompareSlider
-      itemOne={
-        <div className="relative w-full h-full">
+    <div aria-label="Before and after transformation comparison slider" role="region">
+      <ReactCompareSlider
+        itemOne={
+          <div className="relative w-full h-full">
           <ReactCompareSliderImage
             src="https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800"
             alt="Original smile"
@@ -34,11 +35,12 @@ const BeforeAfterSlider = () => (
       }
       style={{ width: "100%", aspectRatio: "16/9" }}
       handle={
-        <div className="bg-card-dark border-2 border-black p-1 flex items-center justify-center h-full">
-          <span className="material-symbols-outlined text-ivory text-sm">unfold_more_double</span>
-        </div>
-      }
-    />
+          <div className="bg-card-dark border-2 border-black p-1 flex items-center justify-center h-full">
+            <span className="material-symbols-outlined text-ivory text-sm" aria-hidden="true">unfold_more_double</span>
+          </div>
+        }
+      />
+    </div>
   </div>
 );
 

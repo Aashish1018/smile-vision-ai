@@ -35,11 +35,12 @@ const Sidebar = ({ open, onClose }: SidebarProps) => {
         {navItems.map((item) => (
           <button
             key={item.label}
+            aria-label={item.label}
             className={`flex items-center gap-3 px-3 py-2 font-bold text-sm text-ivory ${
               item.active ? "bg-black text-white" : "hover:bg-black/10"
             }`}
           >
-            <span className="material-symbols-outlined text-lg">{item.icon}</span>
+            <span className="material-symbols-outlined text-lg" aria-hidden="true">{item.icon}</span>
             {item.label}
           </button>
         ))}
@@ -47,16 +48,17 @@ const Sidebar = ({ open, onClose }: SidebarProps) => {
 
       <div className="flex flex-col gap-2 mt-8">
         {bottomItems.map((item) => (
-          <button key={item.label} className="flex items-center gap-3 px-3 py-2 font-bold text-sm text-ivory hover:bg-black/10">
-            <span className="material-symbols-outlined text-lg">{item.icon}</span>
+          <button key={item.label} aria-label={item.label} className="flex items-center gap-3 px-3 py-2 font-bold text-sm text-ivory hover:bg-black/10">
+            <span className="material-symbols-outlined text-lg" aria-hidden="true">{item.icon}</span>
             {item.label}
           </button>
         ))}
         <button
           onClick={() => navigate("/")}
+          aria-label="Log out"
           className="flex items-center gap-3 px-3 py-2 font-bold text-sm text-ivory hover:bg-black/10"
         >
-          <span className="material-symbols-outlined text-lg">logout</span>
+          <span className="material-symbols-outlined text-lg" aria-hidden="true">logout</span>
           Log out
         </button>
       </div>
