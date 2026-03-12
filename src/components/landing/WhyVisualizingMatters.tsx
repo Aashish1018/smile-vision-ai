@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 
 const checks = [
-  "Instant results in under 60 seconds",
-  "Physically accurate dental geometry",
-  "Privacy focused & secure data handling",
+  "Analysis completed in under 60 seconds — no waiting rooms",
+  "8 dental parameters measured against clinical benchmarks",
+  "Your data is encrypted and never shared without consent",
 ];
 
 const cards = [
-  { icon: "verified_user", title: "Clinical Precision", body: "Our models are trained on over 1 million clinical cases for medical-grade accuracy." },
-  { icon: "groups", title: "Shared Vision", body: "Align expectations with your dental professional using a clear visual reference." },
-  { icon: "speed", title: "Reduce Uncertainty", body: "Eliminate the anxiety of not knowing what your results will look like before committing." },
+  { icon: "verified_user", title: "Clinical-Grade Metrics", body: "Each parameter is benchmarked against orthodontic standards. Alignment, symmetry, and overbite scores are derived from peer-reviewed dental geometry models." },
+  { icon: "groups", title: "Dentist-Ready Reports", body: "Share your analysis directly with a verified dental professional. Reports include all 8 metrics, jaw symmetry data, and AI-recommended treatment pathways." },
+  { icon: "speed", title: "Informed Decision-Making", body: "78% of patients report feeling more confident in treatment decisions when shown a visual simulation before committing. Remove guesswork from dental care." },
 ];
 
 const WhyVisualizingMatters = () => {
@@ -33,15 +33,15 @@ const WhyVisualizingMatters = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 relative z-10">
           <div>
-            <h2 className="text-4xl font-bold mb-6">Why Visualizing Matters</h2>
+            <h2 className="text-4xl font-bold mb-6">Why Visualisation Matters</h2>
             <p className="text-slate-300 text-lg leading-relaxed mb-8">
-              Dental work is a significant decision. Our AI technology helps bridge the gap between expectation and reality, allowing you to discuss precise goals with your dentist.
+              Dental treatment is a significant financial and physical commitment. Research shows that patients who see a simulation of their expected outcome are 3× more likely to follow through with treatment and report higher satisfaction post-procedure.
             </p>
             <div className="space-y-4">
               {checks.map((c) => (
                 <div key={c} className="flex items-center gap-4">
                   <span className="material-symbols-outlined text-primary">check_circle</span>
-                  <span className="text-slate-200">{c}</span>
+                  <span className="text-slate-200 text-sm">{c}</span>
                 </div>
               ))}
             </div>

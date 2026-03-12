@@ -1,11 +1,11 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LayoutDashboard, BarChart3, User, LogOut } from "lucide-react";
+import { LayoutDashboard, BarChart3, User, LogOut, ChevronDown, Settings, UserCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", page: "dashboard" },
   { icon: BarChart3, label: "Analytics", page: "analysis" },
-  { icon: User, label: "Profile", page: "profile" },
 ];
 
 interface AppSidebarProps {
@@ -17,11 +17,12 @@ interface AppSidebarProps {
 const AppSidebar = ({ activePage, open, onClose }: AppSidebarProps) => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const handleNav = (page: string) => {
     if (page === "dashboard") navigate("/dashboard");
     else if (page === "analysis") navigate("/analysis/scan-001");
-    // TODO: profile page
+    onClose();
   };
 
   const handleSignOut = async () => {
@@ -33,19 +34,22 @@ const AppSidebar = ({ activePage, open, onClose }: AppSidebarProps) => {
   const displayEmail = user?.email || "";
 
   const content = (
-    <div className="w-[220px] h-full bg-sidebar-dark flex flex-col py-6 px-4">
-      {/* Logo */}
-      <div className="flex items-center gap-2.5 px-2 mb-8">
+    <div className="w-[220px] h-full bg-sidebar-dark flex flex-col py-5 px-3">
+      {/* Logo — clickable to landing */}
+      <button
+        onClick={() => { navigate("/"); onClose(); }}
+        className="flex items-center gap-2.5 px-3 mb-10 hover:opacity-80 transition-opacity"
+      >
         <div className="size-8 bg-primary rounded-lg flex items-center justify-center">
           <span className="material-symbols-outlined text-white text-base">flare</span>
         </div>
         <span className="text-ivory text-base font-black tracking-tight">Dental Vision</span>
-      </div>
+      </button>
 
       {/* Nav */}
       <nav className="flex flex-col gap-1 flex-1">
         {navItems.map((item) => {
-          const isActive = item.page === activePage || (item.page === "analysis" && activePage === "analysis");
+          const isActive = item.page === activePage;
           return (
             <button
               key={item.label}
@@ -63,26 +67,53 @@ const AppSidebar = ({ activePage, open, onClose }: AppSidebarProps) => {
         })}
       </nav>
 
-      {/* User + Sign Out */}
+      {/* User section at bottom */}
       <div className="mt-auto pt-4 border-t border-white/5">
-        {/* User info */}
-        <div className="flex items-center gap-3 px-2 mb-3">
-          <div className="size-9 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
-            <User size={16} />
+        {/* User dropdown trigger */}
+        <button
+          onClick={() => setUserMenuOpen(!userMenuOpen)}
+          className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl hover:bg-white/5 transition-all duration-200"
+        >
+          <div className="size-8 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
+            <User size={15} />
           </div>
-          <div className="min-w-0">
+          <div className="flex-1 min-w-0 text-left">
             <p className="text-xs font-bold text-ivory truncate">{displayName}</p>
             <p className="text-[10px] text-slate-500 truncate">{displayEmail}</p>
           </div>
-        </div>
-
-        <button
-          onClick={handleSignOut}
-          className="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-slate-400 hover:text-red-400 hover:bg-red-400/5 rounded-xl transition-all duration-200 w-full"
-        >
-          <LogOut size={18} />
-          Sign Out
+          <ChevronDown
+            size={14}
+            className={`text-slate-500 transition-transform duration-200 ${userMenuOpen ? "rotate-180" : ""}`}
+          />
         </button>
+
+        {/* Dropdown menu */}
+        {userMenuOpen && (
+          <div className="mt-1 mx-1 bg-card-dark border border-white/10 rounded-xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <button
+              onClick={() => { /* TODO: navigate to profile page */ onClose(); }}
+              className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 hover:text-ivory hover:bg-white/5 transition-colors w-full"
+            >
+              <UserCircle size={16} />
+              Profile
+            </button>
+            <button
+              onClick={() => { /* TODO: navigate to settings page */ onClose(); }}
+              className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 hover:text-ivory hover:bg-white/5 transition-colors w-full"
+            >
+              <Settings size={16} />
+              Settings
+            </button>
+            <div className="border-t border-white/5" />
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-400/80 hover:text-red-400 hover:bg-red-400/5 transition-colors w-full"
+            >
+              <LogOut size={16} />
+              Sign Out
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

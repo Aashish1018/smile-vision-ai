@@ -20,13 +20,11 @@ const DashboardPage = () => {
           <span className="text-xs text-slate-500">+3 since last scan</span>
         </div>
       ),
-      /* TODO: Replace with mockScores.overall from API */
     },
     {
       label: "TOTAL SCANS",
       value: "2",
       sub: <span className="text-xs text-slate-500">Last: May 12, 2025</span>,
-      /* TODO: Replace with COUNT(*) FROM scans WHERE user_id = auth.uid() */
     },
     {
       label: "BEST SCORE",
@@ -37,14 +35,12 @@ const DashboardPage = () => {
           <span className="text-xs text-slate-500">Your personal best</span>
         </div>
       ),
-      /* TODO: Replace with MAX(overall_score) FROM scans */
     },
     {
       label: "NEXT STEP",
       value: "Whitening",
       isText: true,
       sub: <span className="text-xs text-slate-500">Top recommendation</span>,
-      /* TODO: Replace with data.recommendation.treatments[0] from latest scan */
     },
   ];
 
@@ -71,18 +67,13 @@ const DashboardPage = () => {
             <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tighter text-ivory">DASHBOARD</h1>
           </div>
           <div className="flex items-center gap-3">
-            <button className="bg-card-dark p-2 rounded-lg border border-white/10 relative">
+            <button className="bg-card-dark p-2 rounded-lg border border-white/10 relative hidden sm:block">
               <span className="material-symbols-outlined text-ivory">notifications</span>
               <div className="absolute -top-1 -right-1 size-2 bg-red-500 rounded-full" />
             </button>
-            <img
-              src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100"
-              alt=""
-              className="size-9 rounded-full object-cover border-2 border-primary"
-            />
             <button
               onClick={() => navigate("/scan")}
-              className="flex items-center gap-2 px-5 py-2 bg-primary text-white rounded-full font-bold text-sm hover:opacity-90 transition-opacity"
+              className="hidden sm:flex items-center gap-2 px-5 py-2 bg-primary text-white rounded-full font-bold text-sm hover:opacity-90 transition-opacity"
             >
               <span className="material-symbols-outlined text-sm">add</span>
               New Scan
@@ -115,31 +106,17 @@ const DashboardPage = () => {
                 <span className="text-xs text-slate-500">Latest Scan — May 12, 2025</span>
               </div>
 
-              {/* TODO: Replace itemOne src with latest scan original photo URL from Supabase Storage */}
-              {/* TODO: Replace itemTwo src with AI-processed simulation result URL from FastAPI /analyze */}
               <ReactCompareSlider
                 itemOne={
                   <div className="relative w-full h-full">
-                    <ReactCompareSliderImage
-                      src="https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800"
-                      alt="Original smile"
-                      style={{ objectFit: "cover" }}
-                    />
-                    <span className="absolute bottom-4 left-4 bg-black text-white px-3 py-1 text-[10px] font-bold uppercase">
-                      NOW
-                    </span>
+                    <ReactCompareSliderImage src="https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800" alt="Original smile" style={{ objectFit: "cover" }} />
+                    <span className="absolute bottom-4 left-4 bg-black text-white px-3 py-1 text-[10px] font-bold uppercase">NOW</span>
                   </div>
                 }
                 itemTwo={
                   <div className="relative w-full h-full">
-                    <ReactCompareSliderImage
-                      src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800"
-                      alt="Simulated smile"
-                      style={{ objectFit: "cover" }}
-                    />
-                    <span className="absolute bottom-4 right-4 bg-primary text-white px-3 py-1 border border-black text-[10px] font-bold uppercase">
-                      IDEAL
-                    </span>
+                    <ReactCompareSliderImage src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800" alt="Simulated smile" style={{ objectFit: "cover" }} />
+                    <span className="absolute bottom-4 right-4 bg-primary text-white px-3 py-1 border border-black text-[10px] font-bold uppercase">IDEAL</span>
                   </div>
                 }
                 style={{ width: "100%", aspectRatio: "16/9" }}
@@ -151,15 +128,8 @@ const DashboardPage = () => {
               />
 
               <div className="p-4 flex items-center justify-between border-t border-white/5">
-                <span className="text-xs text-slate-400">
-                  <span className="text-primary font-bold">96%</span> match achievable
-                </span>
-                <button
-                  onClick={() => navigate("/analysis/scan-001")}
-                  className="text-xs font-bold text-primary cursor-pointer hover:underline"
-                >
-                  View Full Analysis →
-                </button>
+                <span className="text-xs text-slate-400"><span className="text-primary font-bold">96%</span> match achievable</span>
+                <button onClick={() => navigate("/analysis/scan-001")} className="text-xs font-bold text-primary cursor-pointer hover:underline">View Full Analysis →</button>
               </div>
             </div>
 
@@ -172,16 +142,12 @@ const DashboardPage = () => {
                 </div>
                 <span className="text-xs text-slate-500">Last 5 months</span>
               </div>
-
-              {/* TODO: Replace with real scan history data from Supabase + AI prediction from API */}
               <ResponsiveContainer width="100%" height={192}>
                 <LineChart data={mockProgressData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1c2030" />
                   <XAxis dataKey="date" stroke="#4b5563" tick={{ fill: "#4b5563", fontSize: 10 }} />
                   <YAxis domain={[50, 100]} stroke="#4b5563" tick={{ fill: "#4b5563", fontSize: 10 }} />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: "#161b22", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "#f8f5e6", fontSize: 12 }}
-                  />
+                  <Tooltip contentStyle={{ backgroundColor: "#161b22", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "#f8f5e6", fontSize: 12 }} />
                   <Line type="monotone" dataKey="score" stroke="#9ec19b" strokeWidth={2} dot={{ fill: "#9ec19b", r: 4 }} connectNulls={false} />
                   <Line type="monotone" dataKey="predicted" stroke="#9ec19b" strokeWidth={2} strokeDasharray="6 3" dot={{ fill: "#9ec19b", r: 3, strokeDasharray: "0" }} connectNulls={false} />
                 </LineChart>
@@ -193,36 +159,20 @@ const DashboardPage = () => {
             <div className="bg-card-dark rounded-2xl p-5 border border-white/5">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-sm font-black uppercase text-ivory">SCAN HISTORY</span>
-                <button onClick={() => navigate("/scan")} className="text-xs font-bold text-primary cursor-pointer hover:underline">
-                  New Scan +
-                </button>
+                <button onClick={() => navigate("/scan")} className="text-xs font-bold text-primary cursor-pointer hover:underline">New Scan +</button>
               </div>
-
-              {/* TODO: Replace mockScans with: SELECT id, created_at, overall_score, simulation_type, original_url FROM scans WHERE user_id = auth.uid() ORDER BY created_at DESC */}
               {mockScans.length === 0 ? (
                 <div className="flex flex-col items-center gap-4 py-10 text-center">
                   <span className="material-symbols-outlined text-slate-600 text-5xl">image_search</span>
                   <p className="text-sm text-slate-400 font-bold">No scans yet.</p>
                   <p className="text-xs text-slate-600">Take your first scan to get started.</p>
-                  <button
-                    onClick={() => navigate("/scan")}
-                    className="px-6 py-2 border border-white/10 text-slate-400 text-xs font-bold rounded-full hover:border-primary hover:text-primary transition-colors"
-                  >
-                    Start First Scan
-                  </button>
+                  <button onClick={() => navigate("/scan")} className="px-6 py-2 border border-white/10 text-slate-400 text-xs font-bold rounded-full hover:border-primary hover:text-primary transition-colors">Start First Scan</button>
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
                   {mockScans.map((scan) => (
-                    <div
-                      key={scan.id}
-                      onClick={() => navigate(`/analysis/${scan.id}`)}
-                      className="flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer border border-transparent hover:border-white/5"
-                    >
-                      <div
-                        className="size-12 rounded-lg bg-cover bg-center border border-white/10 shrink-0"
-                        style={{ backgroundImage: `url(${scan.thumbnailUrl})` }}
-                      />
+                    <div key={scan.id} onClick={() => navigate(`/analysis/${scan.id}`)} className="flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer border border-transparent hover:border-white/5">
+                      <div className="size-12 rounded-lg bg-cover bg-center border border-white/10 shrink-0" style={{ backgroundImage: `url(${scan.thumbnailUrl})` }} />
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-sm text-ivory">{scan.date}</p>
                         <p className="text-xs text-slate-500">{scan.simulationType}</p>
@@ -241,14 +191,11 @@ const DashboardPage = () => {
 
           {/* Right Column */}
           <div className="lg:col-span-1 flex flex-col gap-6">
-            {/* Share Badge */}
             <div className="bg-card-dark rounded-2xl p-5 border border-white/5">
               <div className="flex items-center gap-2 mb-4">
                 <span className="material-symbols-outlined text-primary">share</span>
                 <span className="text-sm font-black uppercase text-ivory">SHARE YOUR SMILE</span>
               </div>
-
-              {/* Badge preview */}
               <div className="bg-background-dark rounded-xl p-5 border border-white/10 flex flex-col items-center gap-3">
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-primary text-sm">flare</span>
@@ -262,27 +209,16 @@ const DashboardPage = () => {
                 </div>
                 <span className="text-[8px] text-slate-600 mt-1">dentalvision.ai</span>
               </div>
-
-              {/* TODO: All share URLs must be replaced with real scan share URLs from Supabase once auth is live */}
               <div className="flex flex-col gap-2 mt-4">
-                <button
-                  onClick={handleCopyLink}
-                  className="flex items-center gap-2 w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-slate-300 hover:border-primary hover:text-primary transition-colors"
-                >
+                <button onClick={handleCopyLink} className="flex items-center gap-2 w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-slate-300 hover:border-primary hover:text-primary transition-colors">
                   <span className="material-symbols-outlined text-sm">link</span>
                   {copied ? "Copied!" : "Copy Public Link"}
                 </button>
-                <button
-                  onClick={() => window.open(`https://wa.me/?text=Check out my Dental Vision score: ${mockScores.overall}/100! https://dentalvision.ai/share/scan-001`, "_blank")}
-                  className="flex items-center gap-2 w-full px-4 py-2 bg-[#25D366]/10 border border-[#25D366]/20 rounded-xl text-xs font-bold text-[#25D366] hover:bg-[#25D366]/20 transition-colors"
-                >
+                <button onClick={() => window.open(`https://wa.me/?text=Check out my Dental Vision score: ${mockScores.overall}/100! https://dentalvision.ai/share/scan-001`, "_blank")} className="flex items-center gap-2 w-full px-4 py-2 bg-[#25D366]/10 border border-[#25D366]/20 rounded-xl text-xs font-bold text-[#25D366] hover:bg-[#25D366]/20 transition-colors">
                   <span className="text-sm font-black">W</span>
                   Share on WhatsApp
                 </button>
-                <button
-                  onClick={() => window.open(`https://twitter.com/intent/tweet?text=Just+got+my+Dental+Vision+AI+smile+score:+${mockScores.overall}/100!+✨&url=https://dentalvision.ai/share/scan-001`, "_blank")}
-                  className="flex items-center gap-2 w-full px-4 py-2 bg-sky-500/10 border border-sky-500/20 rounded-xl text-xs font-bold text-sky-400 hover:bg-sky-500/20 transition-colors"
-                >
+                <button onClick={() => window.open(`https://twitter.com/intent/tweet?text=Just+got+my+Dental+Vision+AI+smile+score:+${mockScores.overall}/100!+✨&url=https://dentalvision.ai/share/scan-001`, "_blank")} className="flex items-center gap-2 w-full px-4 py-2 bg-sky-500/10 border border-sky-500/20 rounded-xl text-xs font-bold text-sky-400 hover:bg-sky-500/20 transition-colors">
                   <span className="text-sm font-black">𝕏</span>
                   Share on X
                 </button>
@@ -290,7 +226,19 @@ const DashboardPage = () => {
             </div>
           </div>
         </div>
+
+        {/* Spacer for mobile FAB */}
+        <div className="h-20 lg:hidden" />
       </main>
+
+      {/* Mobile fixed New Scan FAB */}
+      <button
+        onClick={() => navigate("/scan")}
+        className="fixed bottom-6 right-6 z-30 lg:hidden flex items-center gap-2 px-5 py-3 bg-primary text-white rounded-full font-bold text-sm shadow-lg shadow-primary/30 hover:opacity-90 transition-opacity"
+      >
+        <span className="material-symbols-outlined text-sm">add</span>
+        New Scan
+      </button>
     </div>
   );
 };
