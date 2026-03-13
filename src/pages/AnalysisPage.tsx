@@ -1,31 +1,15 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import AppSidebar from "@/components/AppSidebar";
+import { LayoutDashboard, BarChart3, User, LogOut, Settings } from "lucide-react";
 import { ReactCompareSlider, ReactCompareSliderImage } from "react-compare-slider";
 import ScoreGauge from "@/components/ScoreGauge";
 import MetricBar from "@/components/MetricBar";
 import DoctorModal from "@/components/DoctorModal";
+import { useAuth } from "@/contexts/AuthContext";
+import { loadScans, type ScanResult } from "@/lib/scanStorage";
 import { mockScores, mockJaw, mockRecommendation } from "@/data/mockData";
 
 const simulationTabs = ["Braces Overlay", "Whitening", "Jaw Alignment"];
-
-const metrics = [
-  { key: "alignment", label: "Alignment", value: mockScores.alignment, icon: "straighten", unit: "%", description: "Vertical tooth position regularity" },
-  { key: "symmetry", label: "Symmetry", value: mockScores.symmetry, icon: "compare_arrows", unit: "%", description: "Left-right facial balance" },
-  { key: "whiteness", label: "Whiteness", value: mockScores.whiteness, icon: "brightness_high", unit: "%", description: "LAB colour space L-channel average" },
-  { key: "spacing", label: "Spacing", value: mockScores.spacing, icon: "space_bar", unit: "%", description: "Inter-tooth gap regularity" },
-  { key: "gumHealth", label: "Gum Health", value: mockScores.gumHealth, icon: "healing", unit: "%", description: "Gum line uniformity estimate" },
-  { key: "overbite", label: "Overbite", value: mockScores.overbite, icon: "height", unit: "%", description: "Vertical overlap estimation (Class I)" },
-  { key: "toothShape", label: "Tooth Shape", value: mockScores.toothShape, icon: "crop_square", unit: "%", description: "Regularity of individual tooth geometry" },
-  { key: "midlineDeviation", label: "Midline", value: mockScores.midlineDeviation, icon: "center_focus_strong", unit: "mm", description: "Chin-to-nose centre offset" },
-];
-
-const jawMetrics = [
-  { label: "MIDLINE", value: mockJaw.midlineStatus, status: "good" as const },
-  { label: "OCCLUSAL", value: mockJaw.occlusalStatus, status: "good" as const },
-  { label: "DEVIATION", value: `${mockJaw.deviationMm}mm`, status: "mild" as const },
-  { label: "OVERBITE", value: mockJaw.overbiteEstimate, status: "mild" as const },
-];
 
 const badgeStyles = {
   good: "bg-primary/10 text-primary border border-primary/20",
@@ -45,23 +29,104 @@ const getGrade = (score: number) => {
 const AnalysisPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user, signOut } = useAuth();
   const [activeSimulation, setActiveSimulation] = useState("Braces Overlay");
   const [doctorModalOpen, setDoctorModalOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
-  const gradeInfo = getGrade(mockScores.overall);
+  const userId = user?.id || "anonymous";
+  const scans = loadScans(userId);
+  const scan: ScanResult | undefined = scans.find(s => s.id === id);
+
+  // Use real scan data if found, fallback to mock
+  const scores = scan?.scores || mockScores;
+  const jaw = scan?.jaw || mockJaw;
+  const recommendation = scan?.recommendation || mockRecommendation;
+  const thumbnailUrl = scan?.thumbnailUrl || "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800";
+
+  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
+
+  const metrics = [
+    { key: "alignment", label: "Alignment", value: scores.alignment, icon: "straighten", unit: "%", description: "Vertical tooth position regularity" },
+    { key: "symmetry", label: "Symmetry", value: scores.symmetry, icon: "compare_arrows", unit: "%", description: "Left-right facial balance" },
+    { key: "whiteness", label: "Whiteness", value: scores.whiteness, icon: "brightness_high", unit: "%", description: "LAB colour space L-channel average" },
+    { key: "spacing", label: "Spacing", value: scores.spacing, icon: "space_bar", unit: "%", description: "Inter-tooth gap regularity" },
+    { key: "gumHealth", label: "Gum Health", value: scores.gumHealth, icon: "healing", unit: "%", description: "Gum line uniformity estimate" },
+    { key: "overbite", label: "Overbite", value: scores.overbite, icon: "height", unit: "%", description: "Vertical overlap estimation (Class I)" },
+    { key: "toothShape", label: "Tooth Shape", value: scores.toothShape, icon: "crop_square", unit: "%", description: "Regularity of individual tooth geometry" },
+    { key: "midlineDeviation", label: "Midline", value: scores.midlineDeviation, icon: "center_focus_strong", unit: "mm", description: "Chin-to-nose centre offset" },
+  ];
+
+  const jawMetrics = [
+    { label: "MIDLINE", value: jaw.midlineStatus, status: (jaw.deviationMm < 1.5 ? "good" : "mild") as keyof typeof badgeStyles },
+    { label: "OCCLUSAL", value: jaw.occlusalStatus, status: "good" as keyof typeof badgeStyles },
+    { label: "DEVIATION", value: `${jaw.deviationMm}mm`, status: (jaw.deviationMm < 2 ? "mild" : "concern") as keyof typeof badgeStyles },
+    { label: "OVERBITE", value: jaw.overbiteEstimate, status: "mild" as keyof typeof badgeStyles },
+  ];
+
+  const gradeInfo = getGrade(scores.overall);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   return (
-    <div className="h-screen overflow-hidden flex font-display bg-background-dark">
-      <AppSidebar activePage="analysis" open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+    <div className="h-screen overflow-hidden flex font-display bg-background-dark relative">
+      {/* Floating glass nav — desktop */}
+      <div className="hidden lg:flex fixed left-4 top-1/2 -translate-y-1/2 z-40 flex-col gap-2">
+        <button
+          onClick={() => navigate("/")}
+          className="size-12 rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] flex items-center justify-center mb-2 hover:bg-white/[0.08] hover:border-primary/30 transition-all duration-300 group"
+        >
+          <div className="size-7 bg-primary rounded-lg flex items-center justify-center">
+            <span className="material-symbols-outlined text-white text-sm">flare</span>
+          </div>
+        </button>
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="size-12 rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] flex items-center justify-center transition-all duration-300 group relative hover:bg-white/[0.08] hover:border-white/15"
+        >
+          <LayoutDashboard size={18} className="text-slate-400 group-hover:text-ivory" />
+          <div className="absolute left-14 px-3 py-1.5 bg-card-dark/95 backdrop-blur-md border border-white/10 rounded-lg text-xs font-bold text-ivory opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">Dashboard</div>
+        </button>
+        <button
+          className="size-12 rounded-2xl bg-primary/15 backdrop-blur-xl border border-primary/30 flex items-center justify-center transition-all duration-300 shadow-lg shadow-primary/10 group relative"
+        >
+          <BarChart3 size={18} className="text-primary" />
+          <div className="absolute left-14 px-3 py-1.5 bg-card-dark/95 backdrop-blur-md border border-white/10 rounded-lg text-xs font-bold text-ivory opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">Analytics</div>
+        </button>
+        <div className="relative mt-auto">
+          <button
+            onClick={() => setUserMenuOpen(!userMenuOpen)}
+            className={`size-12 rounded-2xl backdrop-blur-xl border flex items-center justify-center transition-all duration-300 group ${userMenuOpen ? "bg-primary/15 border-primary/30" : "bg-white/[0.04] border-white/[0.08] hover:bg-white/[0.08]"}`}
+          >
+            <User size={18} className={userMenuOpen ? "text-primary" : "text-slate-400 group-hover:text-ivory"} />
+          </button>
+          {userMenuOpen && (
+            <div className="absolute left-14 bottom-0 w-48 bg-card-dark/95 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-left-2 duration-200">
+              <div className="px-4 py-3 border-b border-white/5">
+                <p className="text-xs font-bold text-ivory truncate">{displayName}</p>
+                <p className="text-[10px] text-slate-500 truncate">{user?.email}</p>
+              </div>
+              <button className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 hover:text-ivory hover:bg-white/5 transition-colors w-full">
+                <Settings size={14} />
+                Settings
+              </button>
+              <div className="border-t border-white/5" />
+              <button onClick={handleSignOut} className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-400/80 hover:text-red-400 hover:bg-red-400/5 transition-colors w-full">
+                <LogOut size={14} />
+                Sign Out
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
 
-      <main className="flex-1 overflow-y-auto p-4 md:p-8">
+      <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:pl-20">
         {/* Top Bar */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
-            <button onClick={() => setSidebarOpen(true)} className="lg:hidden bg-card-dark p-2 rounded-lg border border-white/10">
-              <span className="material-symbols-outlined text-ivory">menu</span>
-            </button>
             <button onClick={() => navigate("/dashboard")} className="bg-card-dark p-2 rounded-lg border border-white/10">
               <span className="material-symbols-outlined text-ivory">arrow_back</span>
             </button>
@@ -72,7 +137,6 @@ const AnalysisPage = () => {
               <span className="material-symbols-outlined text-ivory">notifications</span>
               <div className="absolute -top-1 -right-1 size-2 bg-red-500 rounded-full" />
             </button>
-            {/* TODO: implement save functionality */}
             <button className="hidden sm:flex items-center gap-2 px-5 py-2 bg-primary text-white rounded-lg font-bold text-sm hover:opacity-90 transition-opacity">
               <span className="material-symbols-outlined text-sm">save</span>
               Save Plan
@@ -86,9 +150,9 @@ const AnalysisPage = () => {
 
         {/* Grid */}
         <div className="grid grid-cols-12 gap-6">
-          {/* Column A — Before/After + Metrics */}
+          {/* Column A */}
           <div className="col-span-12 lg:col-span-8 flex flex-col gap-6">
-            {/* A1 - Before/After */}
+            {/* Before/After */}
             <div className="border-2 border-black bg-primary/20 p-1 rounded-lg overflow-hidden">
               <div className="bg-transparent border-b-2 border-black p-4 flex justify-between items-center">
                 <span className="text-lg font-black uppercase text-ivory">BEFORE & AFTER TRANSFORMATION</span>
@@ -97,26 +161,16 @@ const AnalysisPage = () => {
                   <span className="bg-black text-white text-[10px] font-bold uppercase px-2 py-1">AI ENHANCED</span>
                 </div>
               </div>
-
-              {/* TODO: Replace placeholder images with actual user-uploaded photo and ML-processed result */}
               <ReactCompareSlider
                 itemOne={
                   <div className="relative w-full h-full">
-                    <ReactCompareSliderImage
-                      src="https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800"
-                      alt="Original smile"
-                      style={{ objectFit: "cover" }}
-                    />
+                    <ReactCompareSliderImage src={thumbnailUrl} alt="Original smile" style={{ objectFit: "cover" }} />
                     <span className="absolute bottom-4 left-4 bg-black text-white px-3 py-1 text-[10px] font-bold uppercase">ORIGINAL</span>
                   </div>
                 }
                 itemTwo={
                   <div className="relative w-full h-full">
-                    <ReactCompareSliderImage
-                      src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800"
-                      alt="Simulated smile"
-                      style={{ objectFit: "cover" }}
-                    />
+                    <ReactCompareSliderImage src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800" alt="Simulated smile" style={{ objectFit: "cover" }} />
                     <span className="absolute bottom-4 right-4 bg-primary text-white px-3 py-1 border border-black text-[10px] font-bold uppercase">SIMULATION</span>
                   </div>
                 }
@@ -127,8 +181,6 @@ const AnalysisPage = () => {
                   </div>
                 }
               />
-
-              {/* TODO: Each tab change should re-fetch the corresponding simulation image from API */}
               <div className="flex gap-2 p-4 border-t-2 border-black/20">
                 {simulationTabs.map((tab) => (
                   <button
@@ -146,7 +198,7 @@ const AnalysisPage = () => {
               </div>
             </div>
 
-            {/* A2 - Detailed Metrics */}
+            {/* Detailed Metrics */}
             <div className="bg-card-dark rounded-2xl border border-white/5 overflow-hidden">
               <div className="p-5 border-b border-white/5 flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">analytics</span>
@@ -155,36 +207,25 @@ const AnalysisPage = () => {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-white/5">
                 {metrics.map((m) => (
-                  <MetricBar
-                    key={m.key}
-                    label={m.label}
-                    value={m.value}
-                    unit={m.unit}
-                    icon={m.icon}
-                    description={m.description}
-                  />
+                  <MetricBar key={m.key} label={m.label} value={m.value} unit={m.unit} icon={m.icon} description={m.description} />
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Column B — Score + Jaw + Recommendations + Doctors */}
+          {/* Column B */}
           <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
-            {/* B1 — Overall Score */}
-            {/* TODO: Replace with mockScores.overall from API */}
+            {/* Overall Score */}
             <div className="bg-card-dark rounded-2xl p-6 flex flex-col items-center gap-4 border border-white/5">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">clinical_notes</span>
                 <span className="text-[10px] font-black uppercase tracking-widest text-ivory">OVERALL SMILE SCORE</span>
               </div>
-              <ScoreGauge score={mockScores.overall} size={128} />
-              <span className={`px-3 py-1 rounded-full text-xs font-black border ${gradeInfo.style}`}>
-                {gradeInfo.grade}
-              </span>
+              <ScoreGauge score={scores.overall} size={128} />
+              <span className={`px-3 py-1 rounded-full text-xs font-black border ${gradeInfo.style}`}>{gradeInfo.grade}</span>
             </div>
 
-            {/* B2 — Jaw Analysis */}
-            {/* TODO: Replace with mockJaw data from API */}
+            {/* Jaw Analysis */}
             <div className="bg-card-dark rounded-2xl border border-white/5 overflow-hidden">
               <div className="p-4 border-b border-white/5 flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">face</span>
@@ -192,10 +233,7 @@ const AnalysisPage = () => {
               </div>
               <div className="p-5 flex flex-col items-center">
                 <div className="relative size-48 bg-slate-800 border border-white/10 rounded-full mb-6 flex items-center justify-center overflow-hidden">
-                  <div
-                    className="absolute inset-0 bg-center bg-contain opacity-40 grayscale"
-                    style={{ backgroundImage: "url('https://images.unsplash.com/photo-1576086213369-97a306d36557?w=400')" }}
-                  />
+                  <div className="absolute inset-0 bg-center bg-contain opacity-40 grayscale" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1576086213369-97a306d36557?w=400')" }} />
                   <div className="absolute w-full h-px bg-primary/30" />
                   <div className="absolute h-full w-px bg-primary/30" />
                 </div>
@@ -210,8 +248,7 @@ const AnalysisPage = () => {
               </div>
             </div>
 
-            {/* B3 — Recommended Treatment */}
-            {/* TODO: Replace hardcoded recommendation with data.recommendation from API */}
+            {/* Recommended Treatment */}
             <div className="border-2 border-black bg-primary/10 rounded-2xl p-6 flex flex-col gap-4">
               <div className="flex items-center gap-4">
                 <div className="size-12 bg-black text-white flex items-center justify-center shrink-0">
@@ -220,17 +257,18 @@ const AnalysisPage = () => {
                 <span className="text-xl font-black uppercase text-ivory">RECOMMENDED TREATMENT</span>
               </div>
               <p className="text-sm font-medium leading-relaxed text-ivory">
-                Based on your results, <span className="underline font-bold">{mockRecommendation.treatments[0]}</span> combined with{" "}
-                <span className="underline font-bold">{mockRecommendation.treatments[1]}</span> would achieve a{" "}
-                {mockRecommendation.matchPct}% match to the simulation within {mockRecommendation.timelineMonths} months.
+                Based on your results, <span className="underline font-bold">{recommendation.treatments[0]}</span>
+                {recommendation.treatments.length > 1 && (
+                  <> combined with <span className="underline font-bold">{recommendation.treatments[1]}</span></>
+                )} would achieve a {recommendation.matchPct}% match to the simulation within {recommendation.timelineMonths} months.
               </p>
               <div className="flex gap-4 mt-2">
                 <div>
-                  <span className="text-2xl font-black text-primary">{mockRecommendation.matchPct}%</span>
+                  <span className="text-2xl font-black text-primary">{recommendation.matchPct}%</span>
                   <p className="text-xs text-slate-400">match achievable</p>
                 </div>
                 <div>
-                  <span className="text-2xl font-black text-primary">{mockRecommendation.timelineMonths}</span>
+                  <span className="text-2xl font-black text-primary">{recommendation.timelineMonths}</span>
                   <p className="text-xs text-slate-400">months timeline</p>
                 </div>
               </div>
@@ -242,7 +280,7 @@ const AnalysisPage = () => {
               </button>
             </div>
 
-            {/* B4 — Find a Dentist */}
+            {/* Find a Dentist */}
             <div className="bg-card-dark rounded-2xl p-5 border border-white/5">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">local_hospital</span>
@@ -259,7 +297,7 @@ const AnalysisPage = () => {
           </div>
         </div>
 
-        {/* Footer/Disclaimer */}
+        {/* Footer */}
         <div className="mt-8 border-t-2 border-black pt-6 pb-12">
           <p className="text-[10px] text-slate-400 font-medium leading-relaxed uppercase">
             Disclaimer: This simulation is for illustrative purposes only and does not constitute medical advice or a guaranteed clinical outcome. Actual results may vary based on individual biological factors and adherence to treatment plans. A physical examination by a licensed dental professional is required to confirm candidacy for the treatments shown. AI-generated metrics are estimates based on provided scan data.
@@ -269,7 +307,34 @@ const AnalysisPage = () => {
             <a href="#" className="text-[10px] font-bold underline uppercase text-slate-400 hover:text-primary transition-colors">Terms of Service</a>
           </div>
         </div>
+
+        {/* Spacer for mobile */}
+        <div className="h-20 lg:hidden" />
       </main>
+
+      {/* Mobile bottom nav */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-card-dark/90 backdrop-blur-xl border-t border-white/[0.08] flex items-center justify-around py-2 px-4">
+        <button onClick={() => navigate("/")} className="flex flex-col items-center gap-1 py-1">
+          <div className="size-6 bg-primary rounded-md flex items-center justify-center">
+            <span className="material-symbols-outlined text-white text-xs">flare</span>
+          </div>
+        </button>
+        <button onClick={() => navigate("/dashboard")} className="flex flex-col items-center gap-1 py-1">
+          <LayoutDashboard size={20} className="text-slate-400" />
+          <span className="text-[10px] font-bold text-slate-500">Home</span>
+        </button>
+        <button onClick={() => navigate("/scan")} className="size-12 -mt-4 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30">
+          <span className="material-symbols-outlined text-white">add</span>
+        </button>
+        <button className="flex flex-col items-center gap-1 py-1">
+          <BarChart3 size={20} className="text-primary" />
+          <span className="text-[10px] font-bold text-primary">Analysis</span>
+        </button>
+        <button className="flex flex-col items-center gap-1 py-1">
+          <User size={20} className="text-slate-400" />
+          <span className="text-[10px] font-bold text-slate-500">Profile</span>
+        </button>
+      </div>
 
       <DoctorModal open={doctorModalOpen} onClose={() => setDoctorModalOpen(false)} scanId={id || "scan-001"} />
     </div>

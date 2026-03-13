@@ -4,7 +4,7 @@ interface HeroSectionProps {
 
 const HeroSection = ({ onAuthOpen }: HeroSectionProps) => {
   return (
-    <section className="max-w-[1380px] mx-auto px-4 md:px-12 py-20 md:py-32">
+    <section className="max-w-[1380px] mx-auto px-4 md:px-12 pt-8 pb-16 md:pt-12 md:pb-24">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         {/* Left column */}
         <div>
@@ -16,7 +16,7 @@ const HeroSection = ({ onAuthOpen }: HeroSectionProps) => {
             <br />
             <span className="text-primary">Visualized.</span>
           </h1>
-          <p className="text-lg md:text-xl text-slate-400 leading-relaxed max-w-[540px] mb-8">
+          <p className="text-lg md:text-xl text-slate-400 leading-relaxed mb-8">
             Experience the power of AI-driven dental simulations. See your perfect, confident smile before you even start your journey.
           </p>
 

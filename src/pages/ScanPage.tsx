@@ -1,10 +1,21 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  fileToScanImage,
+  generateHeuristicScores,
+  generateJawAnalysis,
+  generateRecommendation,
+  loadScans,
+  saveScans,
+  type ScanImage,
+  type ScanResult,
+} from "@/lib/scanStorage";
 
 const steps = [
   {
     step: 1,
-    angle: "FRONT",
+    angle: "FRONT" as const,
     icon: "face",
     title: "Front-Facing Photo",
     instruction: "Look straight at the camera. Keep your chin level. Lips slightly apart, teeth just visible. Natural light preferred.",
@@ -12,7 +23,7 @@ const steps = [
   },
   {
     step: 2,
-    angle: "RIGHT",
+    angle: "RIGHT" as const,
     icon: "face_retouching_natural",
     title: "Right Profile Photo",
     instruction: "Turn your head 90° to the right. Keep your neck straight. Maintain the same natural smile. Stay in the same lighting.",
@@ -20,7 +31,7 @@ const steps = [
   },
   {
     step: 3,
-    angle: "LEFT",
+    angle: "LEFT" as const,
     icon: "face_retouching_natural",
     title: "Left Profile Photo",
     instruction: "Turn your head 90° to the left. Mirror image of the previous step. Same smile, same lighting.",
@@ -38,33 +49,103 @@ const loadingSteps = [
 
 const ScanPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [photos, setPhotos] = useState<{ [key: number]: File | null }>({ 1: null, 2: null, 3: null });
+  const [previews, setPreviews] = useState<{ [key: number]: string }>({});
   const [loading, setLoading] = useState(false);
   const [loadingStepIdx, setLoadingStepIdx] = useState(0);
   const [progressFull, setProgressFull] = useState(false);
 
   const currentStepData = steps[currentStep - 1];
 
-  const handleAnalyse = useCallback(() => {
+  // Generate preview URLs
+  const handleFileChange = (step: number, file: File) => {
+    setPhotos((prev) => ({ ...prev, [step]: file }));
+    const url = URL.createObjectURL(file);
+    setPreviews((prev) => ({ ...prev, [step]: url }));
+  };
+
+  const handleAnalyse = useCallback(async () => {
     setLoading(true);
     setLoadingStepIdx(0);
     setProgressFull(false);
-  }, []);
+
+    try {
+      // Process all 3 images
+      const angles: ScanImage["angle"][] = ["FRONT", "RIGHT", "LEFT"];
+      const scanImages: ScanImage[] = [];
+
+      for (let i = 0; i < 3; i++) {
+        const file = photos[i + 1];
+        if (!file) continue;
+        const scanImage = await fileToScanImage(file, angles[i]);
+        scanImages.push(scanImage);
+        setLoadingStepIdx(i + 1);
+      }
+
+      setLoadingStepIdx(3);
+
+      // Generate heuristic scores
+      const scores = generateHeuristicScores(scanImages);
+      const jaw = generateJawAnalysis(scores);
+      const recommendation = generateRecommendation(scores);
+
+      setLoadingStepIdx(4);
+
+      // Create scan result
+      const scanId = `scan-${Date.now()}`;
+      const scanResult: ScanResult = {
+        id: scanId,
+        date: new Date().toISOString(),
+        images: scanImages.map(img => ({
+          ...img,
+          // Store a smaller thumbnail to save localStorage space
+          dataUrl: img.dataUrl.length > 100000 ? img.dataUrl.substring(0, 100) : img.dataUrl,
+        })),
+        scores,
+        jaw,
+        recommendation,
+        thumbnailUrl: previews[1] || "",
+        simulationType: recommendation.treatments.slice(0, 2).join(" + ") || "Analysis",
+      };
+
+      // Store thumbnail as dataUrl for persistence
+      if (photos[1]) {
+        const thumbImg = await fileToScanImage(photos[1], "FRONT");
+        // Compress thumbnail
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const img = new Image();
+        img.src = thumbImg.dataUrl;
+        await new Promise(r => { img.onload = r; });
+        canvas.width = 200;
+        canvas.height = 200;
+        ctx?.drawImage(img, 0, 0, 200, 200);
+        scanResult.thumbnailUrl = canvas.toDataURL("image/jpeg", 0.6);
+      }
+
+      // Save to localStorage
+      const userId = user?.id || "anonymous";
+      const existing = loadScans(userId);
+      existing.push(scanResult);
+      saveScans(userId, existing);
+
+      // Small delay for UX
+      await new Promise(r => setTimeout(r, 800));
+
+      navigate(`/analysis/${scanId}`);
+    } catch (err) {
+      console.error("Scan processing error:", err);
+      setLoading(false);
+    }
+  }, [photos, previews, user, navigate]);
 
   useEffect(() => {
     if (!loading) return;
     const t = setTimeout(() => setProgressFull(true), 50);
-    const interval = setInterval(() => {
-      setLoadingStepIdx((prev) => Math.min(prev + 1, loadingSteps.length - 1));
-    }, 600);
-    // TODO: Replace with actual FormData upload of all 3 photos to POST /analyze endpoint, then navigate to /analysis/{returned_job_id}
-    const nav = setTimeout(() => {
-      clearInterval(interval);
-      navigate("/analysis/scan-001");
-    }, 3000);
-    return () => { clearTimeout(t); clearInterval(interval); clearTimeout(nav); };
-  }, [loading, navigate]);
+    return () => clearTimeout(t);
+  }, [loading]);
 
   return (
     <div className="min-h-screen bg-background-dark flex flex-col font-display">
@@ -103,7 +184,7 @@ const ScanPage = () => {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 max-w-xl mx-auto w-full">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 max-w-xl mx-auto w-full">
         {/* Step badge */}
         <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1 mb-6">
           <span className="material-symbols-outlined text-primary text-sm">{currentStepData.icon}</span>
@@ -138,12 +219,16 @@ const ScanPage = () => {
             className="hidden"
             onChange={(e) => {
               const file = e.target.files?.[0];
-              if (file) setPhotos((prev) => ({ ...prev, [currentStep]: file }));
+              if (file) handleFileChange(currentStep, file);
             }}
           />
           {photos[currentStep] ? (
             <>
-              <span className="material-symbols-outlined text-primary text-4xl">check_circle</span>
+              <img
+                src={previews[currentStep]}
+                alt="Preview"
+                className="w-32 h-32 object-cover rounded-xl border border-primary/30"
+              />
               <p className="text-sm font-bold text-ivory truncate max-w-full">{photos[currentStep]!.name}</p>
               <p className="text-xs text-slate-500">Click to replace</p>
             </>
@@ -175,7 +260,7 @@ const ScanPage = () => {
             </button>
           ) : (
             <button
-              disabled={!photos[3]}
+              disabled={!photos[1] || !photos[2] || !photos[3]}
               onClick={handleAnalyse}
               className="px-6 py-2 bg-primary text-white rounded-full text-sm font-bold hover:opacity-90 disabled:opacity-40 transition-opacity"
             >
@@ -187,9 +272,10 @@ const ScanPage = () => {
         {/* Step thumbnails strip */}
         <div className="flex justify-center gap-4 mt-6">
           {[1, 2, 3].map((n) => (
-            <div
+            <button
               key={n}
-              className={`size-14 rounded-xl border-2 overflow-hidden flex items-center justify-center ${
+              onClick={() => setCurrentStep(n)}
+              className={`size-14 rounded-xl border-2 overflow-hidden flex items-center justify-center transition-all ${
                 photos[n]
                   ? "border-primary"
                   : n === currentStep
@@ -197,12 +283,12 @@ const ScanPage = () => {
                   : "border-white/10"
               }`}
             >
-              {photos[n] ? (
-                <img src={URL.createObjectURL(photos[n]!)} alt="" className="w-full h-full object-cover" />
+              {previews[n] ? (
+                <img src={previews[n]} alt="" className="w-full h-full object-cover" />
               ) : (
                 <span className="material-symbols-outlined text-slate-600 text-lg">add_photo_alternate</span>
               )}
-            </div>
+            </button>
           ))}
         </div>
       </div>
