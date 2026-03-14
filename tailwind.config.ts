@@ -15,12 +15,13 @@ export default {
     },
     extend: {
       colors: {
-        "primary": "#9ec19b",
+        "primary": "hsl(var(--primary))",
         "primary-dark": "#8ca989",
-        "background-dark": "#0d1117",
-        "card-dark": "#161b22",
+        "primary-foreground": "hsl(var(--primary-foreground))",
+        "background-dark": "var(--bg-dark)",
+        "card-dark": "var(--card-bg)",
         "sidebar-dark": "#1a2319",
-        "ivory": "#f8f5e6",
+        "ivory": "var(--text-ivory)",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
