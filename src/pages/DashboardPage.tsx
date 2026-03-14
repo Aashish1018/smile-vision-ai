@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LayoutDashboard, BarChart3, User, LogOut, Settings, ChevronDown } from "lucide-react";
+import { LayoutDashboard, BarChart3, User, LogOut, Settings, ChevronDown, Sun, Moon } from "lucide-react";
 import { ReactCompareSlider, ReactCompareSliderImage } from "react-compare-slider";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { getDashboardStats, loadScans } from "@/lib/scanStorage";
 import { mockProgressData } from "@/data/mockData";
 
