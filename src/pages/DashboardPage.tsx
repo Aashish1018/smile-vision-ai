@@ -15,6 +15,7 @@ const DashboardPage = () => {
   const [activeNav, setActiveNav] = useState<"dashboard" | "analysis">("dashboard");
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   const userId = user?.id || "anonymous";
   const dashData = getDashboardStats(userId);
