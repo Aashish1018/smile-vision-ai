@@ -256,7 +256,7 @@ const DashboardPage = () => {
         {/* Stats Row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {stats.map((s) => (
-            <div key={s.label} className="bg-card-dark rounded-xl p-5 border-2 border-black shadow-[4px_4px_0px_0px_rgba(158,193,155,1)]">
+            <div key={s.label} className="bg-card-dark rounded-xl p-5 border border-black shadow-[2px_2px_0px_0px_rgba(45,60,45,1)]">
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{s.label}</p>
               <p className={`${s.isText ? "text-lg" : "text-3xl"} font-black text-ivory mt-1 truncate`}>{s.value}</p>
               <div className="mt-1">{s.sub}</div>
@@ -270,7 +270,7 @@ const DashboardPage = () => {
           <div className="lg:col-span-2 flex flex-col gap-6">
             {/* Now vs Ideal */}
             {hasData ? (
-              <div className="bg-card-dark rounded-xl overflow-hidden border-2 border-black shadow-[4px_4px_0px_0px_rgba(158,193,155,1)]">
+              <div className="bg-card-dark rounded-xl overflow-hidden border border-black shadow-[2px_2px_0px_0px_rgba(45,60,45,1)]">
                 <div className="flex justify-between items-center p-5 border-b border-white/5">
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-primary">compare</span>
@@ -308,7 +308,7 @@ const DashboardPage = () => {
                 </div>
               </div>
             ) : (
-              <div className="bg-card-dark rounded-xl p-12 border-2 border-black shadow-[4px_4px_0px_0px_rgba(158,193,155,1)] flex flex-col items-center gap-4 text-center">
+              <div className="bg-card-dark rounded-xl p-12 border border-black shadow-[2px_2px_0px_0px_rgba(45,60,45,1)] flex flex-col items-center gap-4 text-center">
                 <span className="material-symbols-outlined text-slate-600 text-6xl">add_a_photo</span>
                 <h3 className="text-lg font-black text-ivory">No scans yet</h3>
                 <p className="text-sm text-slate-400 max-w-sm">Take your first scan to see a before/after comparison and get your personalized smile health score.</p>
@@ -319,7 +319,7 @@ const DashboardPage = () => {
             )}
 
             {/* Progress Graph */}
-              <div className="bg-card-dark rounded-xl p-5 border-2 border-black shadow-[4px_4px_0px_0px_rgba(158,193,155,1)]">
+              <div className="bg-card-dark rounded-xl p-5 border border-black shadow-[2px_2px_0px_0px_rgba(45,60,45,1)]">
                 <div className="flex justify-between items-center mb-4">
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-primary">trending_up</span>
@@ -354,13 +354,13 @@ const DashboardPage = () => {
           {/* Right Column — Scan History (vertical) + Share */}
           <div className="lg:col-span-1 flex flex-col gap-6">
             {/* Scan History — vertical cards */}
-            <div className="bg-card-dark rounded-xl p-5 border-2 border-black shadow-[4px_4px_0px_0px_rgba(158,193,155,1)]">
+            <div className="bg-card-dark rounded-xl p-5 border border-black shadow-[2px_2px_0px_0px_rgba(45,60,45,1)] flex flex-col flex-1">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-sm font-black uppercase text-ivory">SCAN HISTORY</span>
                 <button onClick={() => navigate("/scan")} className="text-xs font-bold text-primary cursor-pointer hover:underline">New Scan +</button>
               </div>
               {scans.length === 0 ? (
-                <div className="flex flex-col items-center gap-4 py-8 text-center">
+                <div className="flex flex-col items-center justify-center gap-4 py-8 text-center flex-1">
                   <span className="material-symbols-outlined text-slate-600 text-4xl">image_search</span>
                   <p className="text-sm text-slate-400 font-bold">No scans yet</p>
                   <p className="text-xs text-slate-600">Take your first scan to get started.</p>
@@ -418,7 +418,7 @@ const DashboardPage = () => {
 
               {/* Shareable Badge Card */}
               {hasData && (
-                <div className="bg-card-dark rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(158,193,155,1)] p-5 flex flex-col w-full">
+                <div className="bg-card-dark rounded-xl border border-black shadow-[2px_2px_0px_0px_rgba(45,60,45,1)] p-5 flex flex-col w-full">
                   <div className="flex items-center gap-2 mb-4">
                     <span className="material-symbols-outlined text-primary">badge</span>
                     <span className="text-sm font-black uppercase text-ivory">YOUR BADGE</span>
