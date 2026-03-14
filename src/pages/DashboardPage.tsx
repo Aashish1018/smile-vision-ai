@@ -214,6 +214,13 @@ const DashboardPage = () => {
               <Settings size={14} />
               Settings
             </button>
+            <button
+              onClick={toggleTheme}
+              className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 hover:text-ivory hover:bg-white/5 transition-colors w-full"
+            >
+              {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
+              {theme === "dark" ? "Light Mode" : "Dark Mode"}
+            </button>
             <div className="border-t border-white/5" />
             <button
               onClick={handleSignOut}

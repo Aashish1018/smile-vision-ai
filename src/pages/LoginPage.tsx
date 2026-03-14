@@ -112,7 +112,11 @@ const LoginPage = () => {
 
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2 mb-3">
-              <p className="text-xs text-red-400">{error}</p>
+              <p className="text-xs text-red-400">
+                {error.includes("Database") || error.includes("relation") || error.includes("schema")
+                  ? "Something went wrong during sign up. Please try again."
+                  : error}
+              </p>
             </div>
           )}
 
