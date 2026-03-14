@@ -317,34 +317,78 @@ const DashboardPage = () => {
               </div>
             )}
 
-            {/* Progress Graph */}
-            <div className="bg-card-dark rounded-2xl p-5 border border-white/5">
-              <div className="flex justify-between items-center mb-4">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary">trending_up</span>
-                  <span className="text-sm font-black uppercase text-ivory">SMILE PROGRESS</span>
+            {/* Progress Graph + Badge Card side by side */}
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+              <div className="md:col-span-3 bg-card-dark rounded-2xl p-5 border border-white/5">
+                <div className="flex justify-between items-center mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary">trending_up</span>
+                    <span className="text-sm font-black uppercase text-ivory">SMILE PROGRESS</span>
+                  </div>
+                  <span className="text-xs text-slate-500">{hasData ? `${totalScans} scan${totalScans > 1 ? "s" : ""}` : "No data"}</span>
                 </div>
-                <span className="text-xs text-slate-500">{hasData ? `${totalScans} scan${totalScans > 1 ? "s" : ""}` : "No data"}</span>
+                {hasData ? (
+                  <>
+                    <ResponsiveContainer width="100%" height={192}>
+                      <LineChart data={progressData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1c2030" />
+                        <XAxis dataKey="date" stroke="#4b5563" tick={{ fill: "#4b5563", fontSize: 10 }} />
+                        <YAxis domain={[50, 100]} stroke="#4b5563" tick={{ fill: "#4b5563", fontSize: 10 }} />
+                        <Tooltip contentStyle={{ backgroundColor: "#161b22", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "#f8f5e6", fontSize: 12 }} />
+                        <Line type="monotone" dataKey="score" stroke="#9ec19b" strokeWidth={2} dot={{ fill: "#9ec19b", r: 4 }} connectNulls={false} />
+                        <Line type="monotone" dataKey="predicted" stroke="#9ec19b" strokeWidth={2} strokeDasharray="6 3" dot={{ fill: "#9ec19b", r: 3, strokeDasharray: "0" }} connectNulls={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                    <p className="text-xs text-slate-500 mt-2">
+                      Predicted to reach {Math.min(99, latestScore + 9)} with consistent treatment
+                    </p>
+                  </>
+                ) : (
+                  <div className="h-48 flex items-center justify-center text-slate-600 text-sm">
+                    Complete a scan to see progress tracking
+                  </div>
+                )}
               </div>
-              {hasData ? (
-                <>
-                  <ResponsiveContainer width="100%" height={192}>
-                    <LineChart data={progressData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#1c2030" />
-                      <XAxis dataKey="date" stroke="#4b5563" tick={{ fill: "#4b5563", fontSize: 10 }} />
-                      <YAxis domain={[50, 100]} stroke="#4b5563" tick={{ fill: "#4b5563", fontSize: 10 }} />
-                      <Tooltip contentStyle={{ backgroundColor: "#161b22", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "#f8f5e6", fontSize: 12 }} />
-                      <Line type="monotone" dataKey="score" stroke="#9ec19b" strokeWidth={2} dot={{ fill: "#9ec19b", r: 4 }} connectNulls={false} />
-                      <Line type="monotone" dataKey="predicted" stroke="#9ec19b" strokeWidth={2} strokeDasharray="6 3" dot={{ fill: "#9ec19b", r: 3, strokeDasharray: "0" }} connectNulls={false} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                  <p className="text-xs text-slate-500 mt-2">
-                    Predicted to reach {Math.min(99, latestScore + 9)} with consistent treatment
-                  </p>
-                </>
-              ) : (
-                <div className="h-48 flex items-center justify-center text-slate-600 text-sm">
-                  Complete a scan to see progress tracking
+
+              {/* Shareable Badge Card */}
+              {hasData && (
+                <div className="md:col-span-2 bg-card-dark rounded-2xl border border-white/5 p-5 flex flex-col">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="material-symbols-outlined text-primary">badge</span>
+                    <span className="text-sm font-black uppercase text-ivory">YOUR BADGE</span>
+                  </div>
+                  <div className="bg-background-dark rounded-xl p-6 border border-white/10 flex flex-col items-center gap-3 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-primary text-sm">flare</span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Dental Vision AI</span>
+                    </div>
+                    <ScoreGauge score={latestScore} size={100} strokeWidth={8} />
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Smile Health Score</span>
+                    <span className="text-xs text-ivory font-bold">{displayName}</span>
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <button
+                      onClick={() => window.open(`https://wa.me/?text=Check out my Dental Vision score: ${latestScore}/100! ${window.location.origin}/share/${dashData!.latest.id}`, "_blank")}
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-[#25D366]/10 border border-[#25D366]/20 rounded-xl text-xs font-bold text-[#25D366] hover:bg-[#25D366]/20 transition-colors"
+                    >
+                      <span className="text-sm font-black">W</span>
+                      WhatsApp
+                    </button>
+                    <button
+                      onClick={() => window.open(`https://twitter.com/intent/tweet?text=Just+got+my+Dental+Vision+AI+smile+score:+${latestScore}/100!+✨&url=${window.location.origin}/share/${dashData!.latest.id}`, "_blank")}
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-sky-500/10 border border-sky-500/20 rounded-xl text-xs font-bold text-sky-400 hover:bg-sky-500/20 transition-colors"
+                    >
+                      <span className="text-sm font-black">𝕏</span>
+                      Twitter
+                    </button>
+                    <button
+                      onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${window.location.origin}/share/${dashData!.latest.id}`)}`, "_blank")}
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-500/10 border border-blue-500/20 rounded-xl text-xs font-bold text-blue-400 hover:bg-blue-500/20 transition-colors"
+                    >
+                      <span className="text-sm font-black">f</span>
+                      Facebook
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
