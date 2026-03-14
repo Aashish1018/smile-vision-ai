@@ -256,7 +256,7 @@ const DashboardPage = () => {
         {/* Stats Row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {stats.map((s) => (
-            <div key={s.label} className="bg-card-dark rounded-2xl p-5 border border-white/5">
+            <div key={s.label} className="bg-card-dark rounded-xl p-5 border-2 border-black shadow-[4px_4px_0px_0px_rgba(158,193,155,1)]">
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{s.label}</p>
               <p className={`${s.isText ? "text-lg" : "text-3xl"} font-black text-ivory mt-1 truncate`}>{s.value}</p>
               <div className="mt-1">{s.sub}</div>
@@ -270,7 +270,7 @@ const DashboardPage = () => {
           <div className="lg:col-span-2 flex flex-col gap-6">
             {/* Now vs Ideal */}
             {hasData ? (
-              <div className="bg-card-dark rounded-2xl overflow-hidden border border-white/5">
+              <div className="bg-card-dark rounded-xl overflow-hidden border-2 border-black shadow-[4px_4px_0px_0px_rgba(158,193,155,1)]">
                 <div className="flex justify-between items-center p-5 border-b border-white/5">
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-primary">compare</span>
@@ -308,7 +308,7 @@ const DashboardPage = () => {
                 </div>
               </div>
             ) : (
-              <div className="bg-card-dark rounded-2xl p-12 border border-white/5 flex flex-col items-center gap-4 text-center">
+              <div className="bg-card-dark rounded-xl p-12 border-2 border-black shadow-[4px_4px_0px_0px_rgba(158,193,155,1)] flex flex-col items-center gap-4 text-center">
                 <span className="material-symbols-outlined text-slate-600 text-6xl">add_a_photo</span>
                 <h3 className="text-lg font-black text-ivory">No scans yet</h3>
                 <p className="text-sm text-slate-400 max-w-sm">Take your first scan to see a before/after comparison and get your personalized smile health score.</p>
@@ -318,9 +318,8 @@ const DashboardPage = () => {
               </div>
             )}
 
-            {/* Progress Graph + Badge Card side by side */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-              <div className="md:col-span-3 bg-card-dark rounded-2xl p-5 border border-white/5">
+            {/* Progress Graph */}
+              <div className="bg-card-dark rounded-xl p-5 border-2 border-black shadow-[4px_4px_0px_0px_rgba(158,193,155,1)]">
                 <div className="flex justify-between items-center mb-4">
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-primary">trending_up</span>
@@ -350,55 +349,12 @@ const DashboardPage = () => {
                   </div>
                 )}
               </div>
-
-              {/* Shareable Badge Card */}
-              {hasData && (
-                <div className="md:col-span-2 bg-card-dark rounded-2xl border border-white/5 p-5 flex flex-col">
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="material-symbols-outlined text-primary">badge</span>
-                    <span className="text-sm font-black uppercase text-ivory">YOUR BADGE</span>
-                  </div>
-                  <div className="bg-background-dark rounded-xl p-6 border border-white/10 flex flex-col items-center gap-3 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-primary text-sm">flare</span>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Dental Vision AI</span>
-                    </div>
-                    <ScoreGauge score={latestScore} size={100} strokeWidth={8} />
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Smile Health Score</span>
-                    <span className="text-xs text-ivory font-bold">{displayName}</span>
-                  </div>
-                  <div className="flex gap-2 mt-4">
-                    <button
-                      onClick={() => window.open(`https://wa.me/?text=Check out my Dental Vision score: ${latestScore}/100! ${window.location.origin}/share/${dashData!.latest.id}`, "_blank")}
-                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-[#25D366]/10 border border-[#25D366]/20 rounded-xl text-xs font-bold text-[#25D366] hover:bg-[#25D366]/20 transition-colors"
-                    >
-                      <span className="text-sm font-black">W</span>
-                      WhatsApp
-                    </button>
-                    <button
-                      onClick={() => window.open(`https://twitter.com/intent/tweet?text=Just+got+my+Dental+Vision+AI+smile+score:+${latestScore}/100!+✨&url=${window.location.origin}/share/${dashData!.latest.id}`, "_blank")}
-                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-sky-500/10 border border-sky-500/20 rounded-xl text-xs font-bold text-sky-400 hover:bg-sky-500/20 transition-colors"
-                    >
-                      <span className="text-sm font-black">𝕏</span>
-                      Twitter
-                    </button>
-                    <button
-                      onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${window.location.origin}/share/${dashData!.latest.id}`)}`, "_blank")}
-                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-500/10 border border-blue-500/20 rounded-xl text-xs font-bold text-blue-400 hover:bg-blue-500/20 transition-colors"
-                    >
-                      <span className="text-sm font-black">f</span>
-                      Facebook
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
 
           {/* Right Column — Scan History (vertical) + Share */}
           <div className="lg:col-span-1 flex flex-col gap-6">
             {/* Scan History — vertical cards */}
-            <div className="bg-card-dark rounded-2xl p-5 border border-white/5">
+            <div className="bg-card-dark rounded-xl p-5 border-2 border-black shadow-[4px_4px_0px_0px_rgba(158,193,155,1)]">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-sm font-black uppercase text-ivory">SCAN HISTORY</span>
                 <button onClick={() => navigate("/scan")} className="text-xs font-bold text-primary cursor-pointer hover:underline">New Scan +</button>
@@ -460,9 +416,51 @@ const DashboardPage = () => {
               )}
             </div>
 
+              {/* Shareable Badge Card */}
+              {hasData && (
+                <div className="bg-card-dark rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(158,193,155,1)] p-5 flex flex-col w-full">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="material-symbols-outlined text-primary">badge</span>
+                    <span className="text-sm font-black uppercase text-ivory">YOUR BADGE</span>
+                  </div>
+                  <div className="bg-background-dark rounded-xl p-6 border border-white/10 flex flex-col items-center gap-3 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-primary text-sm">flare</span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Dental Vision AI</span>
+                    </div>
+                    <ScoreGauge score={latestScore} size={100} strokeWidth={8} />
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Smile Health Score</span>
+                    <span className="text-xs text-ivory font-bold">{displayName}</span>
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <button
+                      onClick={() => window.open(`https://wa.me/?text=Check out my Dental Vision score: ${latestScore}/100! ${window.location.origin}/share/${dashData!.latest.id}`, "_blank")}
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-[#25D366]/10 border border-[#25D366]/20 rounded-xl text-xs font-bold text-[#25D366] hover:bg-[#25D366]/20 transition-colors"
+                    >
+                      <span className="text-sm font-black">W</span>
+                      WhatsApp
+                    </button>
+                    <button
+                      onClick={() => window.open(`https://twitter.com/intent/tweet?text=Just+got+my+Dental+Vision+AI+smile+score:+${latestScore}/100!+✨&url=${window.location.origin}/share/${dashData!.latest.id}`, "_blank")}
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-sky-500/10 border border-sky-500/20 rounded-xl text-xs font-bold text-sky-400 hover:bg-sky-500/20 transition-colors"
+                    >
+                      <span className="text-sm font-black">𝕏</span>
+                      Twitter
+                    </button>
+                    <button
+                      onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${window.location.origin}/share/${dashData!.latest.id}`)}`, "_blank")}
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-500/10 border border-blue-500/20 rounded-xl text-xs font-bold text-blue-400 hover:bg-blue-500/20 transition-colors"
+                    >
+                      <span className="text-sm font-black">f</span>
+                      Facebook
+                    </button>
+                  </div>
+                </div>
+              )}
+
             {/* Copy link button */}
             {hasData && (
-              <button onClick={handleCopyLink} className="flex items-center gap-2 w-full px-4 py-2.5 bg-card-dark border border-white/5 rounded-xl text-xs font-bold text-slate-300 hover:border-primary hover:text-primary transition-colors">
+              <button onClick={handleCopyLink} className="flex items-center gap-2 w-full px-4 py-2.5 bg-card-dark border-2 border-black rounded-xl shadow-[4px_4px_0px_0px_rgba(158,193,155,1)] text-xs font-bold text-slate-300 hover:translate-x-1 hover:-translate-y-1 transition-transform">
                 <span className="material-symbols-outlined text-sm">link</span>
                 {copied ? "Copied!" : "Copy Public Link"}
               </button>
