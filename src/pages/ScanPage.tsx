@@ -84,10 +84,11 @@ const ScanPage = () => {
         videoRef.current.srcObject = stream;
       }
       setCameraActive(true);
-    } catch (err: any) {
-      if (err.name === "NotAllowedError") {
+    } catch (err: unknown) {
+      const error = err as Error;
+      if (error.name === "NotAllowedError") {
         setCameraError("Camera permission denied. Please allow camera access in your browser settings.");
-      } else if (err.name === "NotFoundError") {
+      } else if (error.name === "NotFoundError") {
         setCameraError("No camera found on this device.");
       } else {
         setCameraError("Could not access camera. Please try uploading a photo instead.");
@@ -219,6 +220,7 @@ const ScanPage = () => {
         <button
           onClick={() => navigate("/dashboard")}
           className="bg-card-dark p-2 rounded-lg border border-white/10"
+          aria-label="Back to dashboard"
         >
           <span className="material-symbols-outlined text-ivory">arrow_back</span>
         </button>
@@ -263,12 +265,14 @@ const ScanPage = () => {
                 <button
                   onClick={capturePhoto}
                   className="size-16 rounded-full bg-white border-4 border-primary shadow-lg flex items-center justify-center"
+                  aria-label="Capture photo"
                 >
                   <div className="size-12 rounded-full bg-primary" />
                 </button>
                 <button
                   onClick={stopCamera}
                   className="size-12 rounded-full bg-card-dark/80 backdrop-blur border border-white/20 flex items-center justify-center"
+                  aria-label="Close camera"
                 >
                   <span className="material-symbols-outlined text-white">close</span>
                 </button>
@@ -368,6 +372,7 @@ const ScanPage = () => {
               <button
                 key={n}
                 onClick={() => { setCurrentStep(n); stopCamera(); }}
+                aria-label={`Go to step ${n}`}
                 className={`size-14 rounded-xl border-2 overflow-hidden flex items-center justify-center transition-all ${
                   photos[n]
                     ? "border-primary"
