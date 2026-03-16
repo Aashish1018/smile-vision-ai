@@ -5,9 +5,11 @@ import { ReactCompareSlider, ReactCompareSliderImage } from "react-compare-slide
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { getDashboardStats, loadScans } from "@/lib/scanStorage";
+import { useEffect } from "react";
+import { getDashboardStatsAsync, loadScansAsync, deleteScanAsync, type ScanResult } from "@/lib/scanStorage";
 import { mockProgressData } from "@/data/mockData";
 import ScoreGauge from "@/components/ScoreGauge";
+import { Trash2 } from "lucide-react";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -19,11 +21,34 @@ const DashboardPage = () => {
   const { theme, toggleTheme } = useTheme();
 
   const userId = user?.id || "anonymous";
-  const dashData = getDashboardStats(userId);
-  const scans = loadScans(userId);
+
+  const [dashData, setDashData] = useState<Awaited<ReturnType<typeof getDashboardStatsAsync>> | null>(null);
+  const [scans, setScans] = useState<ScanResult[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true);
+      const fetchedDashData = await getDashboardStatsAsync(userId);
+      setScans(fetchedDashData?.scans || []);
+      setDashData(fetchedDashData);
+      setLoading(false);
+    }
+    loadData();
+  }, [userId]);
+
+  const handleDeleteScan = async (e: React.MouseEvent, scanId: string) => {
+    e.stopPropagation();
+    if (confirm("Are you sure you want to delete this scan?")) {
+      await deleteScanAsync(userId, scanId);
+      const fetchedDashData = await getDashboardStatsAsync(userId);
+      setScans(fetchedDashData?.scans || []);
+      setDashData(fetchedDashData);
+    }
+  };
 
   // Use real data if available, fallback for empty state
-  const hasData = !!dashData;
+  const hasData = !loading && !!dashData;
   const latestScore = dashData?.latest.scores.overall ?? 0;
   const totalScans = scans.length;
   const bestScore = dashData?.bestScore ?? 0;
@@ -235,6 +260,12 @@ const DashboardPage = () => {
       )}
 
       <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:pl-20">
+        {loading ? (
+          <div className="h-full flex items-center justify-center">
+            <span className="material-symbols-outlined animate-spin text-primary text-4xl">sync</span>
+          </div>
+        ) : (
+          <>
         {/* Top Bar */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tighter text-ivory">DASHBOARD</h1>
@@ -291,7 +322,7 @@ const DashboardPage = () => {
                   }
                   itemTwo={
                     <div className="relative w-full h-full">
-                      <ReactCompareSliderImage src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800" alt="Simulated smile" style={{ objectFit: "cover" }} />
+                        <ReactCompareSliderImage src="https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800" alt="Simulated smile" style={{ objectFit: "cover" }} />
                       <span className="absolute bottom-4 right-4 bg-primary text-white px-3 py-1 border border-black text-[10px] font-bold uppercase">IDEAL</span>
                     </div>
                   }
@@ -387,9 +418,18 @@ const DashboardPage = () => {
                           </p>
                           <p className="text-xs text-slate-500 truncate">{scan.simulationType}</p>
                         </div>
-                        <div className="text-right shrink-0">
-                          <span className="text-lg font-black text-primary">{scan.scores.overall}</span>
-                          <span className="text-xs text-slate-500">/100</span>
+                        <div className="text-right shrink-0 flex flex-col items-end gap-1">
+                          <div>
+                            <span className="text-lg font-black text-primary">{scan.scores.overall}</span>
+                            <span className="text-xs text-slate-500">/100</span>
+                          </div>
+                          <button
+                            onClick={(e) => handleDeleteScan(e, scan.id)}
+                            className="text-red-400/60 hover:text-red-400 transition-colors p-1"
+                            title="Delete scan"
+                          >
+                            <Trash2 size={12} />
+                          </button>
                         </div>
                       </div>
                       {/* Mini score bars */}
@@ -467,6 +507,8 @@ const DashboardPage = () => {
             )}
           </div>
         </div>
+        </>
+        )}
 
         {/* Spacer for mobile bottom nav */}
         <div className="h-20 lg:hidden" />

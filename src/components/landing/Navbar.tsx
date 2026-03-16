@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { ChevronDown, LogOut, User } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
+import { ChevronDown, LogOut, User, Sun, Moon } from "lucide-react";
 
 interface NavbarProps {
   onAuthOpen: () => void;
@@ -11,6 +12,7 @@ const Navbar = ({ onAuthOpen }: NavbarProps) => {
   const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -52,6 +54,14 @@ const Navbar = ({ onAuthOpen }: NavbarProps) => {
               </a>
             ))}
           </div>
+
+          <button
+            onClick={toggleTheme}
+            className="size-10 rounded-full bg-card-dark border border-white/10 flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary/30 transition-colors"
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
 
           {user ? (
             <div className="relative">
