@@ -6,10 +6,8 @@ import ScoreGauge from "@/components/ScoreGauge";
 import MetricBar from "@/components/MetricBar";
 import DoctorModal from "@/components/DoctorModal";
 import { useAuth } from "@/contexts/AuthContext";
-import { loadScansAsync, deleteScanAsync, type ScanResult } from "@/lib/scanStorage";
+import { loadScans, type ScanResult } from "@/lib/scanStorage";
 import { mockScores, mockJaw, mockRecommendation } from "@/data/mockData";
-import { Trash2 } from "lucide-react";
-import { useEffect } from "react";
 
 const simulationTabs = ["Braces Overlay", "Whitening", "Jaw Alignment"];
 
@@ -37,28 +35,8 @@ const AnalysisPage = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const userId = user?.id || "anonymous";
-
-  const [scan, setScan] = useState<ScanResult | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchScan() {
-      setLoading(true);
-      const fetchedScans = await loadScansAsync(userId);
-      const found = fetchedScans.find(s => s.id === id);
-      setScan(found || null);
-      setLoading(false);
-    }
-    fetchScan();
-  }, [userId, id]);
-
-  const handleDeleteScan = async () => {
-    if (!scan) return;
-    if (confirm("Are you sure you want to delete this scan?")) {
-      await deleteScanAsync(userId, scan.id);
-      navigate("/dashboard");
-    }
-  };
+  const scans = loadScans(userId);
+  const scan: ScanResult | undefined = scans.find(s => s.id === id);
 
   // Use real scan data if found, fallback to mock
   const scores = scan?.scores || mockScores;
@@ -92,14 +70,6 @@ const AnalysisPage = () => {
     await signOut();
     navigate("/");
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background-dark flex items-center justify-center">
-        <span className="material-symbols-outlined animate-spin text-primary text-4xl">sync</span>
-      </div>
-    );
-  }
 
   return (
     <div className="h-screen overflow-hidden flex font-display bg-background-dark relative">
@@ -163,16 +133,6 @@ const AnalysisPage = () => {
             <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tighter text-ivory">SMILE ANALYSIS</h1>
           </div>
           <div className="flex items-center gap-3">
-            {scan && (
-              <button
-                onClick={handleDeleteScan}
-                className="hidden sm:flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg font-bold text-sm hover:bg-red-500/20 transition-colors"
-                title="Delete Scan"
-              >
-                <Trash2 size={16} />
-                Delete
-              </button>
-            )}
             <button className="bg-card-dark p-2 rounded-lg border border-white/10 relative">
               <span className="material-symbols-outlined text-ivory">notifications</span>
               <div className="absolute -top-1 -right-1 size-2 bg-red-500 rounded-full" />
@@ -210,7 +170,7 @@ const AnalysisPage = () => {
                 }
                 itemTwo={
                   <div className="relative w-full h-full">
-                    <ReactCompareSliderImage src="https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800" alt="Simulated smile" style={{ objectFit: "cover" }} />
+                    <ReactCompareSliderImage src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800" alt="Simulated smile" style={{ objectFit: "cover" }} />
                     <span className="absolute bottom-4 right-4 bg-primary text-white px-3 py-1 border border-black text-[10px] font-bold uppercase">SIMULATION</span>
                   </div>
                 }
