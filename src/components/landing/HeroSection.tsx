@@ -35,7 +35,7 @@ const HeroSection = ({ onAuthOpen }: HeroSectionProps) => {
           <img
             src="https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800"
             alt="Future Smile Visualization"
-            className="w-full h-full object-cover opacity-100 brightness-110"
+            className="w-full h-full object-cover opacity-100 brightness-95"
           />
           <div className="absolute bottom-6 left-6 right-6 p-6 bg-slate-900/90 backdrop-blur rounded-2xl shadow-xl flex items-center gap-4">
             <div className="size-12 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">

@@ -70,7 +70,7 @@ const SharePage = () => {
             itemTwo={
               <div className="relative w-full h-full">
                 <ReactCompareSliderImage
-                  src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800"
+                  src="https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800"
                   alt="Simulation"
                   style={{ objectFit: "cover" }}
                 />
