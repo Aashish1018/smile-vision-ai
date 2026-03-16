@@ -6,8 +6,8 @@ import {
   generateHeuristicScores,
   generateJawAnalysis,
   generateRecommendation,
-  loadScansAsync,
-  saveScansAsync,
+  loadScans,
+  saveScans,
   type ScanImage,
   type ScanResult,
 } from "@/lib/scanStorage";
@@ -27,7 +27,7 @@ const steps = [
     icon: "face_retouching_natural",
     title: "Right Profile Photo",
     instruction: "Turn your head 90° to the right. Keep your neck straight. Maintain the same natural smile. Stay in the same lighting.",
-    goodExample: "https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=300&q=80",
+    goodExample: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=300",
   },
   {
     step: 3,
@@ -35,7 +35,7 @@ const steps = [
     icon: "face_retouching_natural",
     title: "Left Profile Photo",
     instruction: "Turn your head 90° to the left. Mirror image of the previous step. Same smile, same lighting.",
-    goodExample: "https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=300&q=80",
+    goodExample: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=300",
   },
 ];
 
@@ -180,9 +180,9 @@ const ScanPage = () => {
       }
 
       const userId = user?.id || "anonymous";
-      const existing = await loadScansAsync(userId);
+      const existing = loadScans(userId);
       existing.push(scanResult);
-      await saveScansAsync(userId, existing);
+      saveScans(userId, existing);
 
       await new Promise(r => setTimeout(r, 800));
 
@@ -301,7 +301,7 @@ const ScanPage = () => {
                   id={`photo-input-${currentStep}`}
                   type="file"
                   accept="image/jpg,image/jpeg,image/png,image/heic"
-
+                  capture="user"
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
@@ -329,23 +329,12 @@ const ScanPage = () => {
 
               {/* Camera button — mobile friendly */}
               <button
-                onClick={() => document.getElementById(`camera-input-${currentStep}`)?.click()}
+                onClick={startCamera}
                 className="mt-3 flex items-center justify-center gap-2 w-full py-3 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-slate-300 hover:border-primary hover:text-primary transition-colors"
               >
                 <span className="material-symbols-outlined text-base">photo_camera</span>
                 Take Photo with Camera
               </button>
-              <input
-                id={`camera-input-${currentStep}`}
-                type="file"
-                accept="image/jpg,image/jpeg,image/png,image/heic"
-                capture="environment"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleFileChange(currentStep, file);
-                }}
-              />
             </>
           )}
 
