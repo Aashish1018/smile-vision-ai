@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect } from "react";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -13,6 +12,13 @@ const LoginPage = () => {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const sanitizeAuthError = (message: string) => {
+    if (!message) return "Something went wrong. Please try again.";
+    if (/(Database|relation|schema|supabase)/i.test(message)) {
+      return "Something went wrong during sign in. Please try again.";
+    }
+    return message.replace(/https?:\/\/[^\s]+/g, "").trim();
+  };
 
   useEffect(() => {
     if (!loading && user) navigate("/dashboard");
@@ -24,7 +30,7 @@ const LoginPage = () => {
       provider: "google",
       options: { redirectTo: window.location.origin + "/dashboard" },
     });
-    if (error) setError(error.message);
+    if (error) setError(sanitizeAuthError(error.message));
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -33,7 +39,7 @@ const LoginPage = () => {
     setSubmitting(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setSubmitting(false);
-    if (error) setError(error.message);
+    if (error) setError(sanitizeAuthError(error.message));
     else navigate("/dashboard");
   };
 
@@ -50,7 +56,7 @@ const LoginPage = () => {
       },
     });
     setSubmitting(false);
-    if (error) setError(error.message);
+    if (error) setError(sanitizeAuthError(error.message));
     else navigate("/dashboard");
   };
 
@@ -113,9 +119,7 @@ const LoginPage = () => {
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2 mb-3">
               <p className="text-xs text-red-400">
-                {error.includes("Database") || error.includes("relation") || error.includes("schema")
-                  ? "Something went wrong during sign up. Please try again."
-                  : error}
+                {error}
               </p>
             </div>
           )}
@@ -153,7 +157,7 @@ const LoginPage = () => {
                   const { error } = await supabase.auth.resetPasswordForEmail(email, {
                     redirectTo: window.location.origin + "/reset-password",
                   });
-                  if (error) setError(error.message);
+                  if (error) setError(sanitizeAuthError(error.message));
                   else setError("Check your email for a reset link.");
                 }}
                 className="text-xs text-slate-500 hover:text-primary transition-colors text-center mt-1"

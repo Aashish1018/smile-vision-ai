@@ -64,7 +64,7 @@ const Navbar = ({ onAuthOpen }: NavbarProps) => {
             {theme === "dark" ? (
               <Moon size={16} className="text-muted-foreground" />
             ) : (
-              <Sun size={16} className="text-amber-500" />
+              <Moon size={16} className="text-indigo-500" />
             )}
           </button>
 
