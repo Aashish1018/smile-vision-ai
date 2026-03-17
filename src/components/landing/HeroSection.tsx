@@ -11,13 +11,13 @@ const HeroSection = ({ onAuthOpen }: HeroSectionProps) => {
           <p className="text-primary font-semibold tracking-wider uppercase text-sm mb-4">
             GLOBAL CARE, LOCAL ROOTS
           </p>
-          <h1 className="text-5xl md:text-6xl font-extrabold leading-[1.1] tracking-tight text-slate-100 mb-6">
+          <h1 className="text-5xl md:text-6xl font-extrabold leading-[1.1] tracking-tight text-foreground mb-6">
             Your Future Smile,
             <br />
             <span className="text-primary">Visualized for You.</span>
           </h1>
-          <p className="text-lg md:text-xl text-slate-400 leading-relaxed mb-8">
-            Built for Indian families and global professionals alike. Preview a realistic smile journey before treatment starts.
+          <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
+            Experience the power of AI-driven dental simulations. See your perfect, confident smile before you even start your journey.
           </p>
 
           <div className="flex flex-wrap gap-4">
@@ -37,13 +37,13 @@ const HeroSection = ({ onAuthOpen }: HeroSectionProps) => {
             alt="Future Smile Visualization"
             className="w-full h-full object-cover opacity-100 brightness-[0.90]"
           />
-          <div className="absolute bottom-6 left-6 right-6 p-6 bg-slate-900/90 backdrop-blur rounded-2xl shadow-xl flex items-center gap-4">
+          <div className="absolute bottom-6 left-6 right-6 p-6 bg-card-dark/90 backdrop-blur rounded-2xl shadow-xl flex items-center gap-4">
             <div className="size-12 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
               <span className="material-symbols-outlined">auto_fix_high</span>
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-100">AI Powered Simulation</p>
-              <p className="text-xs text-slate-400">99.2% Visualization Accuracy</p>
+              <p className="text-sm font-bold text-foreground">AI Powered Simulation</p>
+              <p className="text-xs text-muted-foreground">99.2% Visualization Accuracy</p>
             </div>
           </div>
         </div>

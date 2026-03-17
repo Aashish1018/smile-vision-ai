@@ -26,7 +26,7 @@ const WhyVisualizingMatters = () => {
 
   return (
     <section className="py-20 px-4 md:px-12" ref={ref}>
-      <div className={`max-w-[1380px] mx-auto rounded-[2rem] p-10 md:p-20 text-white relative overflow-hidden transition-all duration-700 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+      <div className={`max-w-[1380px] mx-auto rounded-[2rem] p-10 md:p-20 text-foreground relative overflow-hidden transition-all duration-700 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
         {/* Glow effects */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-primary rounded-full blur-[100px] opacity-10 -translate-y-1/2 translate-x-1/2 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary rounded-full blur-[100px] opacity-10 translate-y-1/2 -translate-x-1/2 pointer-events-none" />
@@ -34,14 +34,14 @@ const WhyVisualizingMatters = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 relative z-10">
           <div>
             <h2 className="text-4xl font-bold mb-6">Why Visualizing Matters</h2>
-            <p className="text-slate-300 text-lg leading-relaxed mb-8">
+            <p className="text-muted-foreground text-lg leading-relaxed mb-8">
               Dental work is a significant decision. Our AI technology helps bridge the gap between expectation and reality, allowing you to discuss precise goals with your dentist.
             </p>
             <div className="space-y-4">
               {checks.map((c) => (
                 <div key={c} className="flex items-center gap-4">
                   <span className="material-symbols-outlined text-primary">check_circle</span>
-                  <span className="text-slate-200">{c}</span>
+                  <span className="text-foreground">{c}</span>
                 </div>
               ))}
             </div>
@@ -49,20 +49,20 @@ const WhyVisualizingMatters = () => {
 
           <div className="flex flex-col items-center lg:items-end justify-center">
             <p className="text-5xl font-black text-primary mb-1">1,200+</p>
-            <p className="text-lg text-slate-400">Scans Completed</p>
-            <p className="text-sm text-slate-500 mt-1">and growing every week</p>
+            <p className="text-lg text-muted-foreground">Scans Completed</p>
+            <p className="text-sm text-muted-foreground mt-1">and growing every week</p>
           </div>
         </div>
 
-        <div className="border-t border-white/10 pt-10 mt-10 relative z-10">
+        <div className="border-t border-border pt-10 mt-10 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {cards.map((c) => (
-              <div key={c.title} className="bg-white/5 backdrop-blur-sm p-8 rounded-2xl border border-white/10 hover:border-primary/50 transition-colors">
+              <div key={c.title} className="bg-card backdrop-blur-sm p-8 rounded-2xl border border-border hover:border-primary/50 transition-colors">
                 <div className="size-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary mb-6">
                   <span className="material-symbols-outlined">{c.icon}</span>
                 </div>
-                <h4 className="text-xl font-bold mb-3 text-white">{c.title}</h4>
-                <p className="text-slate-400 text-sm leading-relaxed">{c.body}</p>
+                <h4 className="text-xl font-bold mb-3 text-foreground">{c.title}</h4>
+                <p className="text-muted-foreground text-sm leading-relaxed">{c.body}</p>
               </div>
             ))}
           </div>
