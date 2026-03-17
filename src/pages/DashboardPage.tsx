@@ -8,6 +8,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { getDashboardStats, loadScans } from "@/lib/scanStorage";
 import { mockProgressData } from "@/data/mockData";
 import ScoreGauge from "@/components/ScoreGauge";
+import perfectSmile from "@/assets/perfect-smile-placeholder.jpg";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -291,7 +292,7 @@ const DashboardPage = () => {
                   }
                   itemTwo={
                     <div className="relative w-full h-full">
-                      <ReactCompareSliderImage src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800" alt="Simulated smile" style={{ objectFit: "cover" }} />
+                      <ReactCompareSliderImage src={perfectSmile} alt="Ideal smile" style={{ objectFit: "cover" }} />
                       <span className="absolute bottom-4 right-4 bg-primary text-white px-3 py-1 border border-black text-[10px] font-bold uppercase">IDEAL</span>
                     </div>
                   }

@@ -11,6 +11,9 @@ import {
   type ScanImage,
   type ScanResult,
 } from "@/lib/scanStorage";
+import refFront from "@/assets/ref-front.jpg";
+import refRight from "@/assets/ref-right.jpg";
+import refLeft from "@/assets/ref-left.jpg";
 
 const steps = [
   {
@@ -19,7 +22,7 @@ const steps = [
     icon: "face",
     title: "Front-Facing Photo",
     instruction: "Look straight at the camera. Keep your chin level. Lips slightly apart, teeth just visible. Natural light preferred.",
-    goodExample: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=300",
+    goodExample: refFront,
   },
   {
     step: 2,
@@ -27,7 +30,7 @@ const steps = [
     icon: "face_retouching_natural",
     title: "Right Profile Photo",
     instruction: "Turn your head 90° to the right. Keep your neck straight. Maintain the same natural smile. Stay in the same lighting.",
-    goodExample: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=300",
+    goodExample: refRight,
   },
   {
     step: 3,
@@ -35,7 +38,7 @@ const steps = [
     icon: "face_retouching_natural",
     title: "Left Profile Photo",
     instruction: "Turn your head 90° to the left. Mirror image of the previous step. Same smile, same lighting.",
-    goodExample: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=300",
+    goodExample: refLeft,
   },
 ];
 
@@ -301,7 +304,6 @@ const ScanPage = () => {
                   id={`photo-input-${currentStep}`}
                   type="file"
                   accept="image/jpg,image/jpeg,image/png,image/heic"
-                  capture="user"
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
