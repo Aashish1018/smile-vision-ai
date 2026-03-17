@@ -24,7 +24,7 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background-dark text-white font-display">
+    <div className="min-h-screen bg-background-dark text-foreground font-display">
       <Navbar onAuthOpen={() => setAuthOpen(true)} />
       <HeroSection onAuthOpen={handleCta} />
       <HowItWorks />
