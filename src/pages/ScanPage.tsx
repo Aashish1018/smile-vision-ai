@@ -20,15 +20,15 @@ const steps = [
     step: 1,
     angle: "FRONT" as const,
     icon: "face",
-    title: "Front-Facing Photo",
-    instruction: "Look straight at the camera. Keep your chin level. Lips slightly apart, teeth just visible. Natural light preferred.",
+    title: "Center Face Photo",
+    instruction: "Look straight ahead in portrait mode. Keep your chin level and both ears visible. This center shot is used in dashboard and ideal scan preview.",
     goodExample: refFront,
   },
   {
     step: 2,
     angle: "RIGHT" as const,
     icon: "face_retouching_natural",
-    title: "Right Profile Photo",
+    title: "Right Side Jaw Photo",
     instruction: "Turn your head 90° to the right. Keep your neck straight. Maintain the same natural smile. Stay in the same lighting.",
     goodExample: refRight,
   },
@@ -36,7 +36,7 @@ const steps = [
     step: 3,
     angle: "LEFT" as const,
     icon: "face_retouching_natural",
-    title: "Left Profile Photo",
+    title: "Left Side Jaw Photo",
     instruction: "Turn your head 90° to the left. Mirror image of the previous step. Same smile, same lighting.",
     goodExample: refLeft,
   },
@@ -47,7 +47,7 @@ const loadingSteps = [
   "Processing right profile…",
   "Processing left profile…",
   "Running dental geometry analysis…",
-  "Generating your simulation…",
+  "Preparing your smile preview…",
 ];
 
 const ScanPage = () => {
@@ -158,10 +158,7 @@ const ScanPage = () => {
       const scanResult: ScanResult = {
         id: scanId,
         date: new Date().toISOString(),
-        images: scanImages.map(img => ({
-          ...img,
-          dataUrl: img.dataUrl.length > 100000 ? img.dataUrl.substring(0, 100) : img.dataUrl,
-        })),
+        images: scanImages,
         scores,
         jaw,
         recommendation,
@@ -183,9 +180,9 @@ const ScanPage = () => {
       }
 
       const userId = user?.id || "anonymous";
-      const existing = loadScans(userId);
+      const existing = await loadScans(userId);
       existing.push(scanResult);
-      saveScans(userId, existing);
+      await saveScans(userId, existing);
 
       await new Promise(r => setTimeout(r, 800));
 
@@ -304,6 +301,7 @@ const ScanPage = () => {
                   id={`photo-input-${currentStep}`}
                   type="file"
                   accept="image/jpg,image/jpeg,image/png,image/heic"
+                  capture={undefined}
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
@@ -323,7 +321,7 @@ const ScanPage = () => {
                 ) : (
                   <>
                     <span className="material-symbols-outlined text-slate-400 text-4xl">cloud_upload</span>
-                    <p className="text-sm font-bold text-slate-300">Upload {currentStepData.angle} photo</p>
+                    <p className="text-sm font-bold text-slate-300">Upload {currentStepData.angle} photo from gallery</p>
                     <p className="text-xs text-slate-600">JPG, PNG, HEIC · Max 10MB</p>
                   </>
                 )}
@@ -335,7 +333,7 @@ const ScanPage = () => {
                 className="mt-3 flex items-center justify-center gap-2 w-full py-3 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-slate-300 hover:border-primary hover:text-primary transition-colors"
               >
                 <span className="material-symbols-outlined text-base">photo_camera</span>
-                Take Photo with Camera
+                Take a Pic
               </button>
             </>
           )}

@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LayoutDashboard, BarChart3, User, LogOut, Settings, ChevronDown, Sun, Moon } from "lucide-react";
 import { ReactCompareSlider, ReactCompareSliderImage } from "react-compare-slider";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { getDashboardStats, loadScans } from "@/lib/scanStorage";
+import { deleteScan, getDashboardStatsFromScans, loadScans, type ScanResult } from "@/lib/scanStorage";
 import { mockProgressData } from "@/data/mockData";
 import ScoreGauge from "@/components/ScoreGauge";
 import perfectSmile from "@/assets/perfect-smile-placeholder.jpg";
@@ -20,8 +20,13 @@ const DashboardPage = () => {
   const { theme, toggleTheme } = useTheme();
 
   const userId = user?.id || "anonymous";
-  const dashData = getDashboardStats(userId);
-  const scans = loadScans(userId);
+  const [scans, setScans] = useState<ScanResult[]>([]);
+
+  useEffect(() => {
+    loadScans(userId).then(setScans);
+  }, [userId]);
+
+  const dashData = useMemo(() => getDashboardStatsFromScans(scans), [scans]);
 
   // Use real data if available, fallback for empty state
   const hasData = !!dashData;
@@ -83,6 +88,12 @@ const DashboardPage = () => {
     navigate("/");
   };
 
+
+  const handleDeleteScan = async (scanId: string) => {
+    await deleteScan(userId, scanId);
+    const refreshed = await loadScans(userId);
+    setScans(refreshed);
+  };
   const handleNavClick = (page: "dashboard" | "analysis") => {
     setActiveNav(page);
     if (page === "analysis" && dashData) {
@@ -292,8 +303,8 @@ const DashboardPage = () => {
                   }
                   itemTwo={
                     <div className="relative w-full h-full">
-                      <ReactCompareSliderImage src={perfectSmile} alt="Ideal smile" style={{ objectFit: "cover" }} />
-                      <span className="absolute bottom-4 right-4 bg-primary text-white px-3 py-1 border border-black text-[10px] font-bold uppercase">IDEAL</span>
+                      <ReactCompareSliderImage src={perfectSmile} alt="AI smile placeholder" style={{ objectFit: "cover" }} />
+                      <span className="absolute bottom-4 right-4 bg-primary text-white px-3 py-1 border border-black text-[10px] font-bold uppercase">PLACEHOLDER</span>
                     </div>
                   }
                   style={{ width: "100%", aspectRatio: "16/9" }}
@@ -391,6 +402,12 @@ const DashboardPage = () => {
                         <div className="text-right shrink-0">
                           <span className="text-lg font-black text-primary">{scan.scores.overall}</span>
                           <span className="text-xs text-slate-500">/100</span>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDeleteScan(scan.id); }}
+                            className="block text-[10px] text-red-400 mt-1 hover:underline"
+                          >
+                            Remove
+                          </button>
                         </div>
                       </div>
                       {/* Mini score bars */}

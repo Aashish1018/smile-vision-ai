@@ -62,9 +62,9 @@ const Navbar = ({ onAuthOpen }: NavbarProps) => {
             aria-label="Toggle theme"
           >
             {theme === "dark" ? (
-              <Moon size={16} className="text-slate-300" />
+              <Sun size={16} className="text-amber-300" />
             ) : (
-              <Sun size={16} className="text-amber-500" />
+              <Moon size={16} className="text-indigo-500" />
             )}
           </button>
 
