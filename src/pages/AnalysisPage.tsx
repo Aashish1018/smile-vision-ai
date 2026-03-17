@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { LayoutDashboard, BarChart3, User, LogOut, Settings } from "lucide-react";
 import { ReactCompareSlider, ReactCompareSliderImage } from "react-compare-slider";
@@ -6,7 +6,7 @@ import ScoreGauge from "@/components/ScoreGauge";
 import MetricBar from "@/components/MetricBar";
 import DoctorModal from "@/components/DoctorModal";
 import { useAuth } from "@/contexts/AuthContext";
-import { loadScans, type ScanResult } from "@/lib/scanStorage";
+import { deleteScan, loadScans, type ScanResult } from "@/lib/scanStorage";
 import { mockScores, mockJaw, mockRecommendation } from "@/data/mockData";
 import perfectSmile from "@/assets/perfect-smile-placeholder.jpg";
 
@@ -36,7 +36,12 @@ const AnalysisPage = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const userId = user?.id || "anonymous";
-  const scans = loadScans(userId);
+  const [scans, setScans] = useState<ScanResult[]>([]);
+
+  useEffect(() => {
+    loadScans(userId).then(setScans);
+  }, [userId]);
+
   const scan: ScanResult | undefined = scans.find(s => s.id === id);
 
   // Use real scan data if found, fallback to mock
@@ -67,6 +72,12 @@ const AnalysisPage = () => {
 
   const gradeInfo = getGrade(scores.overall);
 
+
+  const handleDeleteCurrentScan = async () => {
+    if (!scan) return;
+    await deleteScan(userId, scan.id);
+    navigate("/dashboard");
+  };
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
@@ -146,6 +157,12 @@ const AnalysisPage = () => {
               <span className="material-symbols-outlined text-sm">share</span>
               Share
             </button>
+            {scan && (
+              <button onClick={handleDeleteCurrentScan} className="hidden sm:flex items-center gap-2 px-5 py-2 bg-red-500/10 border border-red-400/30 text-red-300 rounded-lg font-bold text-sm hover:bg-red-500/20 transition-colors">
+                <span className="material-symbols-outlined text-sm">delete</span>
+                Delete Scan
+              </button>
+            )}
           </div>
         </div>
 
@@ -171,8 +188,8 @@ const AnalysisPage = () => {
                 }
                 itemTwo={
                   <div className="relative w-full h-full">
-                    <ReactCompareSliderImage src={perfectSmile} alt="Ideal smile" style={{ objectFit: "cover" }} />
-                    <span className="absolute bottom-4 right-4 bg-primary text-white px-3 py-1 border border-black text-[10px] font-bold uppercase">SIMULATION</span>
+                    <ReactCompareSliderImage src={perfectSmile} alt="AI smile placeholder" style={{ objectFit: "cover" }} />
+                    <span className="absolute bottom-4 right-4 bg-primary text-white px-3 py-1 border border-black text-[10px] font-bold uppercase">PLACEHOLDER</span>
                   </div>
                 }
                 style={{ width: "100%", aspectRatio: "16/9" }}

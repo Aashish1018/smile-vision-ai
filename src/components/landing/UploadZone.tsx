@@ -12,8 +12,8 @@ const UploadZone = ({ onAuthOpen }: UploadZoneProps) => {
   return (
     <section id="upload" className="py-20 px-4 md:px-12">
       <div className="max-w-[1380px] mx-auto">
-        <h2 className="text-3xl md:text-4xl font-bold text-white text-center">Transform Your Smile Today</h2>
-        <p className="text-slate-400 text-center mt-3">Our advanced AI only needs one photo to show you the possibilities.</p>
+        <h2 className="text-3xl md:text-4xl font-bold text-white text-center">Transform Your Smile, Naturally</h2>
+        <p className="text-slate-400 text-center mt-3">Designed for Indian and global smiles with realistic, clinic-style guidance.</p>
 
         <div
           className="mt-12 border-2 border-dashed border-primary/30 rounded-2xl p-16 flex flex-col items-center gap-6 bg-slate-900/30 hover:border-primary/60 transition-colors cursor-pointer"
