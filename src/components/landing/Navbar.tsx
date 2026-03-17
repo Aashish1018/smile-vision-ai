@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { ChevronDown, LogOut, User } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
+import { ChevronDown, LogOut, User, Moon, Sun } from "lucide-react";
 
 interface NavbarProps {
   onAuthOpen: () => void;
@@ -11,6 +12,7 @@ const Navbar = ({ onAuthOpen }: NavbarProps) => {
   const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,7 +42,7 @@ const Navbar = ({ onAuthOpen }: NavbarProps) => {
           <span className="text-xl font-bold tracking-tight text-slate-100">Dental Vision</span>
         </div>
 
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-4">
           <div className="hidden md:flex items-center gap-6">
             {["How it Works"].map((label) => (
               <a
@@ -52,6 +54,19 @@ const Navbar = ({ onAuthOpen }: NavbarProps) => {
               </a>
             ))}
           </div>
+
+          {/* Theme toggle */}
+          <button
+            onClick={toggleTheme}
+            className="size-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:border-primary/30 hover:bg-primary/10 transition-all"
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? (
+              <Moon size={16} className="text-slate-300" />
+            ) : (
+              <Sun size={16} className="text-amber-500" />
+            )}
+          </button>
 
           {user ? (
             <div className="relative">

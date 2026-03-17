@@ -8,6 +8,7 @@ import DoctorModal from "@/components/DoctorModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { loadScans, type ScanResult } from "@/lib/scanStorage";
 import { mockScores, mockJaw, mockRecommendation } from "@/data/mockData";
+import perfectSmile from "@/assets/perfect-smile-placeholder.jpg";
 
 const simulationTabs = ["Braces Overlay", "Whitening", "Jaw Alignment"];
 
@@ -170,7 +171,7 @@ const AnalysisPage = () => {
                 }
                 itemTwo={
                   <div className="relative w-full h-full">
-                    <ReactCompareSliderImage src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800" alt="Simulated smile" style={{ objectFit: "cover" }} />
+                    <ReactCompareSliderImage src={perfectSmile} alt="Ideal smile" style={{ objectFit: "cover" }} />
                     <span className="absolute bottom-4 right-4 bg-primary text-white px-3 py-1 border border-black text-[10px] font-bold uppercase">SIMULATION</span>
                   </div>
                 }
