@@ -141,15 +141,15 @@ function getUserKey(userId: string) {
   return `${STORAGE_KEY}_${userId}`;
 }
 
-function saveLocal(userId: string, scans: ScanResult[]) {
+export async function saveScans(userId: string, scans: ScanResult[]) {
   try {
     localStorage.setItem(getUserKey(userId), JSON.stringify(scans));
   } catch {
-    if (scans.length > 1) saveLocal(userId, scans.slice(-3));
+    if (scans.length > 1) saveScans(userId, scans.slice(-3));
   }
 }
 
-function loadLocal(userId: string): ScanResult[] {
+export async function loadScans(userId: string): ScanResult[] {
   try {
     const raw = localStorage.getItem(getUserKey(userId));
     return raw ? JSON.parse(raw) : [];
@@ -158,15 +158,9 @@ function loadLocal(userId: string): ScanResult[] {
   }
 }
 
-export function deleteScan(userId: string, scanId: string) {
-  const scans = loadScans(userId);
-  const filtered = scans.filter(s => s.id !== scanId);
-  saveScans(userId, filtered);
-  return filtered;
-}
 
-export function getLatestScan(userId: string): ScanResult | null {
-  const scans = loadScans(userId);
+export async function getLatestScan(userId: string): ScanResult | null {
+  const scans = await loadScans(userId);
   return scans.length > 0 ? scans[scans.length - 1] : null;
 }
 

@@ -1,120 +1,10 @@
-<<<<<<< HEAD
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
-
-=======
->>>>>>> repoB/master
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-<<<<<<< HEAD
-  :root {
-    --background: 210 25% 98%;
-    --foreground: 215 30% 12%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 215 30% 12%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 215 30% 12%;
-
-    --primary: 209 78% 46%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 210 30% 95%;
-    --secondary-foreground: 215 30% 12%;
-
-    --muted: 210 20% 96%;
-    --muted-foreground: 215 12% 50%;
-
-    --accent: 195 90% 42%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 210 20% 90%;
-    --input: 210 20% 90%;
-    --ring: 209 78% 46%;
-
-    --radius: 0.75rem;
-
-    --clinical: 210 25% 98%;
-    --clinical-foreground: 215 30% 12%;
-    --glow: 209 90% 60%;
-    --surface: 210 30% 97%;
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 215 30% 6%;
-    --foreground: 210 25% 95%;
-    --card: 215 28% 10%;
-    --card-foreground: 210 25% 95%;
-    --popover: 215 28% 10%;
-    --popover-foreground: 210 25% 95%;
-    --primary: 209 78% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 215 25% 15%;
-    --secondary-foreground: 210 25% 95%;
-    --muted: 215 25% 15%;
-    --muted-foreground: 215 15% 60%;
-    --accent: 195 90% 45%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 215 25% 18%;
-    --input: 215 25% 18%;
-    --ring: 209 78% 50%;
-    --clinical: 215 30% 8%;
-    --clinical-foreground: 210 25% 95%;
-    --glow: 209 90% 55%;
-    --surface: 215 28% 10%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground font-body antialiased;
-  }
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-heading;
-  }
-}
-
-@layer utilities {
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
-  }
-  .glass {
-    @apply bg-card/80 backdrop-blur-xl border border-border/50;
-  }
-  .glow-sm {
-    box-shadow: 0 0 20px hsl(var(--glow) / 0.15);
-  }
-  .glow-md {
-    box-shadow: 0 0 40px hsl(var(--glow) / 0.2);
-=======
   :root, .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -178,6 +68,6 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
->>>>>>> repoB/master
+
   }
 }
