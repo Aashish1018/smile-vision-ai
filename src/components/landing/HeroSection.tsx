@@ -9,14 +9,14 @@ const HeroSection = ({ onAuthOpen }: HeroSectionProps) => {
         {/* Left column */}
         <div>
           <p className="text-primary font-semibold tracking-wider uppercase text-sm mb-4">
-            REVOLUTIONIZING SMILES
+            GLOBAL CARE, LOCAL ROOTS
           </p>
-          <h1 className="text-5xl md:text-6xl font-extrabold leading-[1.1] tracking-tight text-slate-100 mb-6">
+          <h1 className="text-5xl md:text-6xl font-extrabold leading-[1.1] tracking-tight text-foreground mb-6">
             Your Future Smile,
             <br />
-            <span className="text-primary">Visualized.</span>
+            <span className="text-primary">Visualized for You.</span>
           </h1>
-          <p className="text-lg md:text-xl text-slate-400 leading-relaxed mb-8">
+          <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
             Experience the power of AI-driven dental simulations. See your perfect, confident smile before you even start your journey.
           </p>
 
@@ -33,17 +33,17 @@ const HeroSection = ({ onAuthOpen }: HeroSectionProps) => {
         {/* Right column */}
         <div className="aspect-square rounded-3xl bg-primary/10 overflow-hidden relative shadow-2xl">
           <img
-            src="https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800"
+            src="https://images.unsplash.com/photo-1594824475544-3d242f2f0f74?auto=format&fit=crop&w=900&q=80"
             alt="Future Smile Visualization"
-            className="w-full h-full object-cover opacity-100 brightness-[0.95]"
+            className="w-full h-full object-cover opacity-100 brightness-[0.90]"
           />
-          <div className="absolute bottom-6 left-6 right-6 p-6 bg-slate-900/90 backdrop-blur rounded-2xl shadow-xl flex items-center gap-4">
+          <div className="absolute bottom-6 left-6 right-6 p-6 bg-card-dark/90 backdrop-blur rounded-2xl shadow-xl flex items-center gap-4">
             <div className="size-12 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
               <span className="material-symbols-outlined">auto_fix_high</span>
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-100">AI Powered Simulation</p>
-              <p className="text-xs text-slate-400">99.2% Visualization Accuracy</p>
+              <p className="text-sm font-bold text-foreground">AI Powered Simulation</p>
+              <p className="text-xs text-muted-foreground">99.2% Visualization Accuracy</p>
             </div>
           </div>
         </div>

@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LayoutDashboard, BarChart3, User, LogOut, Settings, ChevronDown, Sun, Moon } from "lucide-react";
 import { ReactCompareSlider, ReactCompareSliderImage } from "react-compare-slider";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { getDashboardStats, loadScans, deleteScan } from "@/lib/scanStorage";
+import { deleteScan, getDashboardStatsFromScans, loadScans, type ScanResult } from "@/lib/scanStorage";
 import { mockProgressData } from "@/data/mockData";
 import ScoreGauge from "@/components/ScoreGauge";
 import perfectSmile from "@/assets/perfect-smile-placeholder.jpg";
@@ -21,8 +21,13 @@ const DashboardPage = () => {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const userId = user?.id || "anonymous";
-  const dashData = getDashboardStats(userId);
-  const scans = loadScans(userId);
+  const [scans, setScans] = useState<ScanResult[]>([]);
+
+  useEffect(() => {
+    loadScans(userId).then(setScans);
+  }, [userId]);
+
+  const dashData = useMemo(() => getDashboardStatsFromScans(scans), [scans]);
 
   const handleDeleteScan = (scanId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -92,6 +97,12 @@ const DashboardPage = () => {
     navigate("/");
   };
 
+
+  const handleDeleteScan = async (scanId: string) => {
+    await deleteScan(userId, scanId);
+    const refreshed = await loadScans(userId);
+    setScans(refreshed);
+  };
   const handleNavClick = (page: "dashboard" | "analysis") => {
     setActiveNav(page);
     if (page === "analysis" && dashData) {
@@ -301,8 +312,8 @@ const DashboardPage = () => {
                   }
                   itemTwo={
                     <div className="relative w-full h-full">
-                      <ReactCompareSliderImage src={perfectSmile} alt="Ideal smile" style={{ objectFit: "cover" }} />
-                      <span className="absolute bottom-4 right-4 bg-primary text-white px-3 py-1 border border-black text-[10px] font-bold uppercase">IDEAL</span>
+                      <ReactCompareSliderImage src={perfectSmile} alt="AI smile placeholder" style={{ objectFit: "cover" }} />
+                      <span className="absolute bottom-4 right-4 bg-primary text-white px-3 py-1 border border-black text-[10px] font-bold uppercase">PLACEHOLDER</span>
                     </div>
                   }
                   style={{ width: "100%", aspectRatio: "16/9" }}
