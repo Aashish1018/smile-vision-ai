@@ -5,7 +5,7 @@ import { ReactCompareSlider, ReactCompareSliderImage } from "react-compare-slide
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { getDashboardStats, loadScans } from "@/lib/scanStorage";
+import { getDashboardStats, loadScans, deleteScan } from "@/lib/scanStorage";
 import { mockProgressData } from "@/data/mockData";
 import ScoreGauge from "@/components/ScoreGauge";
 import perfectSmile from "@/assets/perfect-smile-placeholder.jpg";
@@ -18,10 +18,19 @@ const DashboardPage = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const userId = user?.id || "anonymous";
   const dashData = getDashboardStats(userId);
   const scans = loadScans(userId);
+
+  const handleDeleteScan = (scanId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm("Delete this scan? This cannot be undone.")) {
+      deleteScan(userId, scanId);
+      setRefreshKey(k => k + 1);
+    }
+  };
 
   // Use real data if available, fallback for empty state
   const hasData = !!dashData;
@@ -388,9 +397,18 @@ const DashboardPage = () => {
                           </p>
                           <p className="text-xs text-slate-500 truncate">{scan.simulationType}</p>
                         </div>
-                        <div className="text-right shrink-0">
-                          <span className="text-lg font-black text-primary">{scan.scores.overall}</span>
-                          <span className="text-xs text-slate-500">/100</span>
+                        <div className="text-right shrink-0 flex items-center gap-2">
+                          <div>
+                            <span className="text-lg font-black text-primary">{scan.scores.overall}</span>
+                            <span className="text-xs text-slate-500">/100</span>
+                          </div>
+                          <button
+                            onClick={(e) => handleDeleteScan(scan.id, e)}
+                            className="size-7 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center hover:bg-red-500/20 transition-colors"
+                            aria-label="Delete scan"
+                          >
+                            <span className="material-symbols-outlined text-red-400 text-sm">delete</span>
+                          </button>
                         </div>
                       </div>
                       {/* Mini score bars */}

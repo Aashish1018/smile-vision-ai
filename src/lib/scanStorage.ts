@@ -176,6 +176,13 @@ export function loadScans(userId: string): ScanResult[] {
   }
 }
 
+export function deleteScan(userId: string, scanId: string) {
+  const scans = loadScans(userId);
+  const filtered = scans.filter(s => s.id !== scanId);
+  saveScans(userId, filtered);
+  return filtered;
+}
+
 export function getLatestScan(userId: string): ScanResult | null {
   const scans = loadScans(userId);
   return scans.length > 0 ? scans[scans.length - 1] : null;
