@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+# Welcome to your Lovable project
+
+TODO: Document your project here
+=======
 # Dental Vision
 
 Dental Vision is an AI-powered dental simulation dashboard built to visualize confident smiles before treatment begins. The application uses a neo-brutalism design aesthetic characterized by bold borders, solid shadows, and high-contrast styling.
@@ -54,3 +59,4 @@ Ensure you have Node.js and **pnpm** installed on your system.
 - `pnpm build` - Build the application for production.
 - `pnpm lint` - Run ESLint to check for code issues.
 - `pnpm test` - Run tests using Vitest.
+>>>>>>> repoB/master

@@ -1,9 +1,16 @@
 import type { Config } from "tailwindcss";
+<<<<<<< HEAD
+
+export default {
+  darkMode: ["class"],
+  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+=======
 import tailwindcssAnimate from "tailwindcss-animate";
 
 export default {
   darkMode: ["class"],
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}", "./index.html"],
+>>>>>>> repoB/master
   prefix: "",
   theme: {
     container: {
@@ -14,6 +21,13 @@ export default {
       },
     },
     extend: {
+<<<<<<< HEAD
+      fontFamily: {
+        heading: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+        body: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+      },
+      colors: {
+=======
       colors: {
         "primary": "hsl(var(--primary))",
         "primary-dark": "#8ca989",
@@ -22,11 +36,19 @@ export default {
         "card-dark": "var(--card-bg)",
         "sidebar-dark": "#1a2319",
         "ivory": "var(--text-ivory)",
+>>>>>>> repoB/master
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+<<<<<<< HEAD
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+=======
+>>>>>>> repoB/master
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
@@ -51,9 +73,28 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+<<<<<<< HEAD
+        clinical: {
+          DEFAULT: "hsl(var(--clinical))",
+          foreground: "hsl(var(--clinical-foreground))",
+        },
+        glow: "hsl(var(--glow))",
+        surface: "hsl(var(--surface))",
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar-background))",
+          foreground: "hsl(var(--sidebar-foreground))",
+          primary: "hsl(var(--sidebar-primary))",
+          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+          accent: "hsl(var(--sidebar-accent))",
+          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+          border: "hsl(var(--sidebar-border))",
+          ring: "hsl(var(--sidebar-ring))",
+        },
+=======
       },
       fontFamily: {
         display: ["Plus Jakarta Sans", "sans-serif"],
+>>>>>>> repoB/master
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -69,17 +110,36 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+<<<<<<< HEAD
+        "float": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
+        "pulse-glow": {
+          "0%, 100%": { opacity: "0.4" },
+          "50%": { opacity: "0.8" },
+=======
         "fade-up": {
           "0%": { opacity: "0", transform: "translateY(2rem)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
+>>>>>>> repoB/master
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+<<<<<<< HEAD
+        "float": "float 6s ease-in-out infinite",
+        "pulse-glow": "pulse-glow 3s ease-in-out infinite",
+      },
+    },
+  },
+  plugins: [require("tailwindcss-animate")],
+=======
         "fade-up": "fade-up 0.7s ease-out forwards",
       },
     },
   },
   plugins: [tailwindcssAnimate],
+>>>>>>> repoB/master
 } satisfies Config;

@@ -18,6 +18,7 @@ const DashboardPage = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const userId = user?.id || "anonymous";
   const [scans, setScans] = useState<ScanResult[]>([]);
@@ -27,6 +28,14 @@ const DashboardPage = () => {
   }, [userId]);
 
   const dashData = useMemo(() => getDashboardStatsFromScans(scans), [scans]);
+
+  const handleDeleteScan = (scanId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm("Delete this scan? This cannot be undone.")) {
+      deleteScan(userId, scanId);
+      setRefreshKey(k => k + 1);
+    }
+  };
 
   // Use real data if available, fallback for empty state
   const hasData = !!dashData;
@@ -399,14 +408,17 @@ const DashboardPage = () => {
                           </p>
                           <p className="text-xs text-slate-500 truncate">{scan.simulationType}</p>
                         </div>
-                        <div className="text-right shrink-0">
-                          <span className="text-lg font-black text-primary">{scan.scores.overall}</span>
-                          <span className="text-xs text-slate-500">/100</span>
+                        <div className="text-right shrink-0 flex items-center gap-2">
+                          <div>
+                            <span className="text-lg font-black text-primary">{scan.scores.overall}</span>
+                            <span className="text-xs text-slate-500">/100</span>
+                          </div>
                           <button
-                            onClick={(e) => { e.stopPropagation(); handleDeleteScan(scan.id); }}
-                            className="block text-[10px] text-red-400 mt-1 hover:underline"
+                            onClick={(e) => handleDeleteScan(scan.id, e)}
+                            className="size-7 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center hover:bg-red-500/20 transition-colors"
+                            aria-label="Delete scan"
                           >
-                            Remove
+                            <span className="material-symbols-outlined text-red-400 text-sm">delete</span>
                           </button>
                         </div>
                       </div>

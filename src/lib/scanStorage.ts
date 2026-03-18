@@ -158,44 +158,16 @@ function loadLocal(userId: string): ScanResult[] {
   }
 }
 
-export async function saveScans(userId: string, scans: ScanResult[]) {
-  saveLocal(userId, scans);
-  if (!userId || userId === "anonymous") return;
-
-  try {
-    await supabase.from(SCANS_TABLE).delete().eq("user_id", userId);
-    if (scans.length === 0) return;
-    const rows = scans.map((scan) => ({ user_id: userId, scan_id: scan.id, created_at: scan.date, payload: scan }));
-    await supabase.from(SCANS_TABLE).insert(rows);
-  } catch {
-    // fallback stays in local cache
-  }
+export function deleteScan(userId: string, scanId: string) {
+  const scans = loadScans(userId);
+  const filtered = scans.filter(s => s.id !== scanId);
+  saveScans(userId, filtered);
+  return filtered;
 }
 
-export async function loadScans(userId: string): Promise<ScanResult[]> {
-  const local = loadLocal(userId);
-  if (!userId || userId === "anonymous") return local;
-
-  try {
-    const { data, error } = await supabase
-      .from(SCANS_TABLE)
-      .select("scan_id,created_at,payload")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: true });
-
-    if (error || !data) return local;
-
-    const scans = data.map((row) => ({
-      ...(row.payload as ScanResult),
-      id: (row.payload as ScanResult).id || row.scan_id,
-      date: (row.payload as ScanResult).date || row.created_at,
-    }));
-
-    saveLocal(userId, scans);
-    return scans;
-  } catch {
-    return local;
-  }
+export function getLatestScan(userId: string): ScanResult | null {
+  const scans = loadScans(userId);
+  return scans.length > 0 ? scans[scans.length - 1] : null;
 }
 
 export async function deleteScan(userId: string, scanId: string) {
