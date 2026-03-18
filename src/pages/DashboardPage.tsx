@@ -18,10 +18,19 @@ const DashboardPage = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const userId = user?.id || "anonymous";
   const dashData = getDashboardStats(userId);
   const scans = loadScans(userId);
+
+  const handleDeleteScan = (scanId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm("Delete this scan? This cannot be undone.")) {
+      deleteScan(userId, scanId);
+      setRefreshKey(k => k + 1);
+    }
+  };
 
   // Use real data if available, fallback for empty state
   const hasData = !!dashData;
