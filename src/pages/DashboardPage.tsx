@@ -5,7 +5,7 @@ import { ReactCompareSlider, ReactCompareSliderImage } from "react-compare-slide
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { getDashboardStats, loadScans } from "@/lib/scanStorage";
+import { getDashboardStats, loadScans, deleteScan } from "@/lib/scanStorage";
 import { mockProgressData } from "@/data/mockData";
 import ScoreGauge from "@/components/ScoreGauge";
 import perfectSmile from "@/assets/perfect-smile-placeholder.jpg";
