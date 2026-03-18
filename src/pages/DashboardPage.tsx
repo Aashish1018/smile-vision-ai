@@ -29,13 +29,6 @@ const DashboardPage = () => {
 
   const dashData = useMemo(() => getDashboardStatsFromScans(scans), [scans]);
 
-  const handleDeleteScan = (scanId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (window.confirm("Delete this scan? This cannot be undone.")) {
-      deleteScan(userId, scanId);
-      setRefreshKey(k => k + 1);
-    }
-  };
 
   // Use real data if available, fallback for empty state
   const hasData = !!dashData;
@@ -98,11 +91,16 @@ const DashboardPage = () => {
   };
 
 
-  const handleDeleteScan = async (scanId: string) => {
-    await deleteScan(userId, scanId);
-    const refreshed = await loadScans(userId);
-    setScans(refreshed);
+
+  const handleDeleteScan = async (scanId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm("Delete this scan? This cannot be undone.")) {
+      await deleteScan(userId, scanId);
+      const refreshed = await loadScans(userId);
+      setScans(refreshed);
+    }
   };
+
   const handleNavClick = (page: "dashboard" | "analysis") => {
     setActiveNav(page);
     if (page === "analysis" && dashData) {
