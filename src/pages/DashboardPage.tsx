@@ -397,9 +397,18 @@ const DashboardPage = () => {
                           </p>
                           <p className="text-xs text-slate-500 truncate">{scan.simulationType}</p>
                         </div>
-                        <div className="text-right shrink-0">
-                          <span className="text-lg font-black text-primary">{scan.scores.overall}</span>
-                          <span className="text-xs text-slate-500">/100</span>
+                        <div className="text-right shrink-0 flex items-center gap-2">
+                          <div>
+                            <span className="text-lg font-black text-primary">{scan.scores.overall}</span>
+                            <span className="text-xs text-slate-500">/100</span>
+                          </div>
+                          <button
+                            onClick={(e) => handleDeleteScan(scan.id, e)}
+                            className="size-7 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center hover:bg-red-500/20 transition-colors"
+                            aria-label="Delete scan"
+                          >
+                            <span className="material-symbols-outlined text-red-400 text-sm">delete</span>
+                          </button>
                         </div>
                       </div>
                       {/* Mini score bars */}
