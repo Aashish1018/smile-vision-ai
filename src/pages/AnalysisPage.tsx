@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { LayoutDashboard, BarChart3, User, LogOut, Settings } from "lucide-react";
-import { ReactCompareSlider, ReactCompareSliderImage } from "react-compare-slider";
 import ScoreGauge from "@/components/ScoreGauge";
 import MetricBar from "@/components/MetricBar";
 import DoctorModal from "@/components/DoctorModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { deleteScan, loadScans, type ScanResult } from "@/lib/scanStorage";
 import { mockScores, mockJaw, mockRecommendation } from "@/data/mockData";
-import perfectSmile from "@/assets/perfect-smile-placeholder.jpg";
 
 const simulationTabs = ["Braces Overlay", "Whitening", "Jaw Alignment"];
 
@@ -179,26 +177,23 @@ const AnalysisPage = () => {
                   <span className="bg-black text-white text-[10px] font-bold uppercase px-2 py-1">AI ENHANCED</span>
                 </div>
               </div>
-              <ReactCompareSlider
-                itemOne={
-                  <div className="relative w-full h-full">
-                    <ReactCompareSliderImage src={thumbnailUrl} alt="Original smile" style={{ objectFit: "cover" }} />
-                    <span className="absolute bottom-4 left-4 bg-black text-white px-3 py-1 text-[10px] font-bold uppercase">ORIGINAL</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border-t-2 border-black/20">
+                <div className="relative aspect-[16/11] overflow-hidden bg-background-dark">
+                  <img src={thumbnailUrl} alt="Original smile" className="h-full w-full object-cover" />
+                  <span className="absolute bottom-4 left-4 bg-black text-white px-3 py-1 text-[10px] font-bold uppercase">Original</span>
+                </div>
+                <div className="flex aspect-[16/11] flex-col items-center justify-center gap-4 bg-gradient-to-br from-primary/10 via-white/0 to-primary/15 px-8 text-center">
+                  <div className="size-16 rounded-2xl border border-primary/20 bg-primary/10 flex items-center justify-center text-primary">
+                    <span className="material-symbols-outlined text-3xl">motion_photos_on</span>
                   </div>
-                }
-                itemTwo={
-                  <div className="relative w-full h-full">
-                    <ReactCompareSliderImage src={perfectSmile} alt="AI smile placeholder" style={{ objectFit: "cover" }} />
-                    <span className="absolute bottom-4 right-4 bg-primary text-white px-3 py-1 border border-black text-[10px] font-bold uppercase">PLACEHOLDER</span>
+                  <div>
+                    <p className="text-sm font-black uppercase tracking-[0.24em] text-primary">Ideal simulation pending</p>
+                    <p className="mt-2 text-sm leading-relaxed text-slate-400 max-w-xs">
+                      The default image has been removed. Your personalized simulation will appear here after the ML model is implemented.
+                    </p>
                   </div>
-                }
-                style={{ width: "100%", aspectRatio: "16/9" }}
-                handle={
-                  <div className="bg-card-dark border-2 border-black p-1 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-ivory text-sm">unfold_more_double</span>
-                  </div>
-                }
-              />
+                </div>
+              </div>
               <div className="flex gap-2 p-4 border-t-2 border-black/20">
                 {simulationTabs.map((tab) => (
                   <button

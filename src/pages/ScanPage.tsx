@@ -11,9 +11,9 @@ import {
   type ScanImage,
   type ScanResult,
 } from "@/lib/scanStorage";
-import refFront from "@/assets/ref-front.jpg";
-import refRight from "@/assets/ref-right.jpg";
-import refLeft from "@/assets/ref-left.jpg";
+import refFront from "@/assets/guide-front.svg";
+import refRight from "@/assets/guide-right.svg";
+import refLeft from "@/assets/guide-left.svg";
 
 const steps = [
   {
@@ -29,7 +29,7 @@ const steps = [
     angle: "RIGHT" as const,
     icon: "face_retouching_natural",
     title: "Right Side Jaw Photo",
-    instruction: "Turn your head 90° to the right. Keep your neck straight. Maintain the same natural smile. Stay in the same lighting.",
+    instruction: "Turn your head 90° to the right so only the right profile is visible. Keep your jaw relaxed and stay in the same light.",
     goodExample: refRight,
   },
   {
@@ -37,7 +37,7 @@ const steps = [
     angle: "LEFT" as const,
     icon: "face_retouching_natural",
     title: "Left Side Jaw Photo",
-    instruction: "Turn your head 90° to the left. Mirror image of the previous step. Same smile, same lighting.",
+    instruction: "Turn your head 90° to the left so only the left profile is visible. Keep your jaw relaxed and use the same light.",
     goodExample: refLeft,
   },
 ];
@@ -251,11 +251,17 @@ const ScanPage = () => {
           <p className="text-sm text-slate-400 text-center leading-relaxed max-w-sm mb-8">{currentStepData.instruction}</p>
 
           {/* Guide example */}
-          <img
-            src={currentStepData.goodExample}
-            alt={`${currentStepData.angle} guide`}
-            className="size-32 rounded-full border-4 border-primary/30 object-cover mx-auto mb-8 shadow-[0_0_0_4px_rgba(158,193,155,0.15)]"
-          />
+          <div className="w-full max-w-sm rounded-[28px] border border-white/10 bg-card-dark/80 p-5 mb-8 shadow-[0_18px_40px_rgba(0,0,0,0.16)]">
+            <img
+              src={currentStepData.goodExample}
+              alt={`${currentStepData.angle} guide`}
+              className="size-40 rounded-[24px] object-cover mx-auto"
+            />
+            <div className="mt-4 rounded-2xl bg-white/5 px-4 py-3 text-left">
+              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-primary">Framing guide</p>
+              <p className="mt-1 text-sm text-slate-300">Use this reference for head direction only. Upload from your gallery, or tap <span className="font-semibold text-ivory">Take a Pic</span> to open the camera.</p>
+            </div>
+          </div>
 
           {/* Camera view */}
           {cameraActive && (

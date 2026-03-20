@@ -71,16 +71,16 @@ const LoginPage = () => {
           <span className="text-2xl font-black tracking-tight text-ivory">Dental Vision</span>
         </div>
 
-        <div className="bg-card-dark border border-white/10 rounded-2xl p-8 shadow-2xl">
+        <div className="bg-card-dark border border-white/10 rounded-2xl p-8 shadow-2xl dv-panel">
           <h2 className="text-2xl font-black tracking-tight text-ivory text-center">Welcome back</h2>
-          <p className="text-sm text-slate-400 mt-1 text-center">Sign in to analyse your smile and track your progress.</p>
+          <p className="text-sm dv-muted mt-1 text-center">Sign in to analyse your smile and track your progress.</p>
 
           {/* Tab switcher */}
-          <div className="flex rounded-full bg-background-dark p-1 mt-6">
+          <div className="flex rounded-full dv-input-surface p-1 mt-6">
             <button
               onClick={() => { setActiveTab("signin"); setError(""); }}
               className={`flex-1 py-2 text-sm font-bold rounded-full transition-colors ${
-                activeTab === "signin" ? "bg-primary text-white" : "text-slate-400 hover:text-white"
+                activeTab === "signin" ? "bg-primary text-white" : "text-slate-400 hover:text-ivory"
               }`}
             >
               Sign In
@@ -88,7 +88,7 @@ const LoginPage = () => {
             <button
               onClick={() => { setActiveTab("signup"); setError(""); }}
               className={`flex-1 py-2 text-sm font-bold rounded-full transition-colors ${
-                activeTab === "signup" ? "bg-primary text-white" : "text-slate-400 hover:text-white"
+                activeTab === "signup" ? "bg-primary text-white" : "text-slate-400 hover:text-ivory"
               }`}
             >
               Create Account
@@ -133,7 +133,7 @@ const LoginPage = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-background-dark border border-white/10 rounded-xl px-4 py-3 text-sm text-ivory placeholder:text-slate-600 focus:outline-none focus:border-primary transition-colors"
+                className="w-full dv-input-surface rounded-xl px-4 py-3 text-sm text-ivory placeholder:text-slate-500 focus:outline-none focus:border-primary transition-colors"
               />
               <input
                 type="password"
@@ -141,7 +141,7 @@ const LoginPage = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full bg-background-dark border border-white/10 rounded-xl px-4 py-3 text-sm text-ivory placeholder:text-slate-600 focus:outline-none focus:border-primary transition-colors"
+                className="w-full dv-input-surface rounded-xl px-4 py-3 text-sm text-ivory placeholder:text-slate-500 focus:outline-none focus:border-primary transition-colors"
               />
               <button
                 type="submit"
@@ -176,7 +176,7 @@ const LoginPage = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full bg-background-dark border border-white/10 rounded-xl px-4 py-3 text-sm text-ivory placeholder:text-slate-600 focus:outline-none focus:border-primary transition-colors"
+                className="w-full dv-input-surface rounded-xl px-4 py-3 text-sm text-ivory placeholder:text-slate-500 focus:outline-none focus:border-primary transition-colors"
               />
               <input
                 type="email"
@@ -184,7 +184,7 @@ const LoginPage = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-background-dark border border-white/10 rounded-xl px-4 py-3 text-sm text-ivory placeholder:text-slate-600 focus:outline-none focus:border-primary transition-colors"
+                className="w-full dv-input-surface rounded-xl px-4 py-3 text-sm text-ivory placeholder:text-slate-500 focus:outline-none focus:border-primary transition-colors"
               />
               <input
                 type="password"
@@ -192,7 +192,7 @@ const LoginPage = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full bg-background-dark border border-white/10 rounded-xl px-4 py-3 text-sm text-ivory placeholder:text-slate-600 focus:outline-none focus:border-primary transition-colors"
+                className="w-full dv-input-surface rounded-xl px-4 py-3 text-sm text-ivory placeholder:text-slate-500 focus:outline-none focus:border-primary transition-colors"
               />
               <button
                 type="submit"
@@ -204,7 +204,7 @@ const LoginPage = () => {
             </form>
           )}
 
-          <p className="text-[10px] text-slate-600 text-center mt-4">
+          <p className="text-[10px] dv-muted text-center mt-4">
             By continuing, you agree to our Terms of Service and Privacy Policy.
           </p>
         </div>

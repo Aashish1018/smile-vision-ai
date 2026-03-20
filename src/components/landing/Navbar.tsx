@@ -29,44 +29,37 @@ const Navbar = ({ onAuthOpen }: NavbarProps) => {
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
 
   return (
-    <nav
-      className={`sticky top-0 z-50 border-b border-border transition-colors ${
-        scrolled ? "backdrop-blur-md bg-background/80" : "bg-transparent"
-      }`}
-    >
-      <div className="max-w-[1380px] mx-auto px-4 md:px-12 flex items-center justify-between h-16">
+    <nav className={`sticky top-0 z-50 border-b border-white/5 transition-colors ${scrolled ? "dv-topbar" : "bg-transparent"}`}>
+      <div className="max-w-[1380px] mx-auto px-4 md:px-12 flex items-center justify-between h-16 md:h-[72px]">
         <div className="flex items-center gap-3">
-          <div className="size-8 bg-primary rounded-lg flex items-center justify-center">
+          <div className="size-8 bg-primary rounded-lg flex items-center justify-center shadow-sm">
             <span className="material-symbols-outlined text-white text-base">flare</span>
           </div>
-          <span className="text-xl font-bold tracking-tight text-foreground">Dental Vision</span>
+          <span className="text-xl font-bold tracking-tight text-ivory">Dental Vision</span>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="hidden md:flex items-center gap-6">
-            {["How it Works"].map((label) => (
+        <div className="flex items-center gap-3 md:gap-4">
+          <button
+            onClick={toggleTheme}
+            className="size-10 rounded-full dv-panel-soft flex items-center justify-center dv-hover"
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? <Sun size={16} className="text-amber-400" /> : <Moon size={16} className="text-slate-700" />}
+          </button>
+
+          <div className="hidden md:flex items-center gap-4 lg:gap-6 pr-1">
+            {[
+              { label: "How it Works", href: "#how-it-works" },
+            ].map((item) => (
               <a
-                key={label}
-                href={`#${label.toLowerCase().replace(/\s+/g, "-")}`}
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                key={item.label}
+                href={item.href}
+                className="text-sm font-medium text-slate-300 hover:text-primary transition-colors whitespace-nowrap"
               >
-                {label}
+                {item.label}
               </a>
             ))}
           </div>
-
-          {/* Theme toggle */}
-          <button
-            onClick={toggleTheme}
-            className="size-9 rounded-full bg-muted border border-border flex items-center justify-center hover:border-primary/30 hover:bg-primary/10 transition-all"
-            aria-label="Toggle theme"
-          >
-            {theme === "dark" ? (
-              <Moon size={16} className="text-muted-foreground" />
-            ) : (
-              <Moon size={16} className="text-indigo-500" />
-            )}
-          </button>
 
           {user ? (
             <div className="relative">
