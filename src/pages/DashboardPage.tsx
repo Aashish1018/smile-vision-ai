@@ -1,14 +1,12 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LayoutDashboard, BarChart3, User, LogOut, Settings, ChevronDown, Sun, Moon } from "lucide-react";
-import { ReactCompareSlider, ReactCompareSliderImage } from "react-compare-slider";
+import { LayoutDashboard, BarChart3, User, LogOut, Settings, Sun, Moon } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { getDashboardStats, loadScans } from "@/lib/scanStorage";
+import { deleteScan, getDashboardStatsFromScans, loadScans, type ScanResult } from "@/lib/scanStorage";
 import { mockProgressData } from "@/data/mockData";
 import ScoreGauge from "@/components/ScoreGauge";
-import perfectSmile from "@/assets/perfect-smile-placeholder.jpg";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -20,8 +18,13 @@ const DashboardPage = () => {
   const { theme, toggleTheme } = useTheme();
 
   const userId = user?.id || "anonymous";
-  const dashData = getDashboardStats(userId);
-  const scans = loadScans(userId);
+  const [scans, setScans] = useState<ScanResult[]>([]);
+
+  useEffect(() => {
+    loadScans(userId).then(setScans);
+  }, [userId]);
+
+  const dashData = useMemo(() => getDashboardStatsFromScans(scans), [scans]);
 
   // Use real data if available, fallback for empty state
   const hasData = !!dashData;
@@ -83,6 +86,12 @@ const DashboardPage = () => {
     navigate("/");
   };
 
+
+  const handleDeleteScan = async (scanId: string) => {
+    await deleteScan(userId, scanId);
+    const refreshed = await loadScans(userId);
+    setScans(refreshed);
+  };
   const handleNavClick = (page: "dashboard" | "analysis") => {
     setActiveNav(page);
     if (page === "analysis" && dashData) {
@@ -279,30 +288,27 @@ const DashboardPage = () => {
                   </div>
                   <span className="text-xs text-slate-500">Latest Scan — {latestDate}</span>
                 </div>
-                <ReactCompareSlider
-                  itemOne={
-                    <div className="relative w-full h-full">
-                      <ReactCompareSliderImage
-                        src={dashData!.latest.thumbnailUrl || "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800"}
-                        alt="Original smile"
-                        style={{ objectFit: "cover" }}
-                      />
-                      <span className="absolute bottom-4 left-4 bg-black text-white px-3 py-1 text-[10px] font-bold uppercase">NOW</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border-t border-white/5">
+                  <div className="relative aspect-[16/11] overflow-hidden bg-background-dark">
+                    <img
+                      src={dashData!.latest.thumbnailUrl || "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800"}
+                      alt="Latest center smile scan"
+                      className="h-full w-full object-cover"
+                    />
+                    <span className="absolute bottom-4 left-4 rounded-full bg-black/75 px-3 py-1 text-[10px] font-bold uppercase text-white">Current center scan</span>
+                  </div>
+                  <div className="flex aspect-[16/11] flex-col items-center justify-center gap-4 bg-gradient-to-br from-primary/8 via-white/0 to-primary/12 p-8 text-center">
+                    <div className="flex size-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+                      <span className="material-symbols-outlined text-3xl">auto_awesome</span>
                     </div>
-                  }
-                  itemTwo={
-                    <div className="relative w-full h-full">
-                      <ReactCompareSliderImage src={perfectSmile} alt="Ideal smile" style={{ objectFit: "cover" }} />
-                      <span className="absolute bottom-4 right-4 bg-primary text-white px-3 py-1 border border-black text-[10px] font-bold uppercase">IDEAL</span>
+                    <div>
+                      <p className="text-sm font-black uppercase tracking-[0.24em] text-primary">Ideal simulation</p>
+                      <p className="mt-2 max-w-xs text-sm leading-relaxed text-slate-400">
+                        No default image is shown here. This panel will render your ML-generated smile simulation once the model is connected.
+                      </p>
                     </div>
-                  }
-                  style={{ width: "100%", aspectRatio: "16/9" }}
-                  handle={
-                    <div className="bg-card-dark border-2 border-black p-1 flex items-center justify-center">
-                      <span className="material-symbols-outlined text-ivory text-sm">unfold_more_double</span>
-                    </div>
-                  }
-                />
+                  </div>
+                </div>
                 <div className="p-4 flex items-center justify-between border-t border-white/5">
                   <span className="text-xs text-slate-400"><span className="text-primary font-bold">{dashData!.latest.recommendation.matchPct}%</span> match achievable</span>
                   <button onClick={() => navigate(`/analysis/${dashData!.latest.id}`)} className="text-xs font-bold text-primary cursor-pointer hover:underline">View Full Analysis →</button>
@@ -391,6 +397,12 @@ const DashboardPage = () => {
                         <div className="text-right shrink-0">
                           <span className="text-lg font-black text-primary">{scan.scores.overall}</span>
                           <span className="text-xs text-slate-500">/100</span>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDeleteScan(scan.id); }}
+                            className="block text-[10px] text-red-400 mt-1 hover:underline"
+                          >
+                            Remove
+                          </button>
                         </div>
                       </div>
                       {/* Mini score bars */}

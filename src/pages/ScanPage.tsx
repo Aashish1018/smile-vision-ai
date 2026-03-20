@@ -11,33 +11,33 @@ import {
   type ScanImage,
   type ScanResult,
 } from "@/lib/scanStorage";
-import refFront from "@/assets/ref-front.jpg";
-import refRight from "@/assets/ref-right.jpg";
-import refLeft from "@/assets/ref-left.jpg";
+import refFront from "@/assets/guide-front.svg";
+import refRight from "@/assets/guide-right.svg";
+import refLeft from "@/assets/guide-left.svg";
 
 const steps = [
   {
     step: 1,
     angle: "FRONT" as const,
     icon: "face",
-    title: "Front-Facing Photo",
-    instruction: "Look straight at the camera. Keep your chin level. Lips slightly apart, teeth just visible. Natural light preferred.",
+    title: "Center Face Photo",
+    instruction: "Look straight ahead in portrait mode. Keep your chin level and both ears visible. This center shot is used in dashboard and ideal scan preview.",
     goodExample: refFront,
   },
   {
     step: 2,
     angle: "RIGHT" as const,
     icon: "face_retouching_natural",
-    title: "Right Profile Photo",
-    instruction: "Turn your head 90° to the right. Keep your neck straight. Maintain the same natural smile. Stay in the same lighting.",
+    title: "Right Side Jaw Photo",
+    instruction: "Turn your head 90° to the right so only the right profile is visible. Keep your jaw relaxed and stay in the same light.",
     goodExample: refRight,
   },
   {
     step: 3,
     angle: "LEFT" as const,
     icon: "face_retouching_natural",
-    title: "Left Profile Photo",
-    instruction: "Turn your head 90° to the left. Mirror image of the previous step. Same smile, same lighting.",
+    title: "Left Side Jaw Photo",
+    instruction: "Turn your head 90° to the left so only the left profile is visible. Keep your jaw relaxed and use the same light.",
     goodExample: refLeft,
   },
 ];
@@ -47,7 +47,7 @@ const loadingSteps = [
   "Processing right profile…",
   "Processing left profile…",
   "Running dental geometry analysis…",
-  "Generating your simulation…",
+  "Preparing your smile preview…",
 ];
 
 const ScanPage = () => {
@@ -158,10 +158,7 @@ const ScanPage = () => {
       const scanResult: ScanResult = {
         id: scanId,
         date: new Date().toISOString(),
-        images: scanImages.map(img => ({
-          ...img,
-          dataUrl: img.dataUrl.length > 100000 ? img.dataUrl.substring(0, 100) : img.dataUrl,
-        })),
+        images: scanImages,
         scores,
         jaw,
         recommendation,
@@ -183,9 +180,9 @@ const ScanPage = () => {
       }
 
       const userId = user?.id || "anonymous";
-      const existing = loadScans(userId);
+      const existing = await loadScans(userId);
       existing.push(scanResult);
-      saveScans(userId, existing);
+      await saveScans(userId, existing);
 
       await new Promise(r => setTimeout(r, 800));
 
@@ -254,11 +251,17 @@ const ScanPage = () => {
           <p className="text-sm text-slate-400 text-center leading-relaxed max-w-sm mb-8">{currentStepData.instruction}</p>
 
           {/* Guide example */}
-          <img
-            src={currentStepData.goodExample}
-            alt={`${currentStepData.angle} guide`}
-            className="size-32 rounded-full border-4 border-primary/30 object-cover mx-auto mb-8 shadow-[0_0_0_4px_rgba(158,193,155,0.15)]"
-          />
+          <div className="w-full max-w-sm rounded-[28px] border border-white/10 bg-card-dark/80 p-5 mb-8 shadow-[0_18px_40px_rgba(0,0,0,0.16)]">
+            <img
+              src={currentStepData.goodExample}
+              alt={`${currentStepData.angle} guide`}
+              className="size-40 rounded-[24px] object-cover mx-auto"
+            />
+            <div className="mt-4 rounded-2xl bg-white/5 px-4 py-3 text-left">
+              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-primary">Framing guide</p>
+              <p className="mt-1 text-sm text-slate-300">Use this reference for head direction only. Upload from your gallery, or tap <span className="font-semibold text-ivory">Take a Pic</span> to open the camera.</p>
+            </div>
+          </div>
 
           {/* Camera view */}
           {cameraActive && (
@@ -304,6 +307,7 @@ const ScanPage = () => {
                   id={`photo-input-${currentStep}`}
                   type="file"
                   accept="image/jpg,image/jpeg,image/png,image/heic"
+                  capture={undefined}
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
@@ -323,7 +327,7 @@ const ScanPage = () => {
                 ) : (
                   <>
                     <span className="material-symbols-outlined text-slate-400 text-4xl">cloud_upload</span>
-                    <p className="text-sm font-bold text-slate-300">Upload {currentStepData.angle} photo</p>
+                    <p className="text-sm font-bold text-slate-300">Upload {currentStepData.angle} photo from gallery</p>
                     <p className="text-xs text-slate-600">JPG, PNG, HEIC · Max 10MB</p>
                   </>
                 )}
@@ -335,7 +339,7 @@ const ScanPage = () => {
                 className="mt-3 flex items-center justify-center gap-2 w-full py-3 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-slate-300 hover:border-primary hover:text-primary transition-colors"
               >
                 <span className="material-symbols-outlined text-base">photo_camera</span>
-                Take Photo with Camera
+                Take a Pic
               </button>
             </>
           )}

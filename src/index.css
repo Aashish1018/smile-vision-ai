@@ -28,32 +28,38 @@
     --bg-dark: #0d1117;
     --card-bg: #161b22;
     --text-ivory: #f8f5e6;
+    --surface-soft: rgba(255, 255, 255, 0.04);
+    --surface-strong: rgba(255, 255, 255, 0.08);
+    --page-gradient: radial-gradient(circle at top, rgba(158, 193, 155, 0.12), transparent 38%);
   }
 
   .light {
-    --background: 40 33% 96%;
-    --foreground: 222.2 47.4% 11.2%;
-    --card: 40 20% 94%;
-    --card-foreground: 222.2 47.4% 11.2%;
-    --popover: 40 20% 94%;
-    --popover-foreground: 222.2 47.4% 11.2%;
-    --primary: 115 22% 48%;
+    --background: 38 45% 97%;
+    --foreground: 222.2 30% 18%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 30% 18%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 30% 18%;
+    --primary: 117 24% 43%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 40 10% 88%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 40 10% 88%;
-    --muted-foreground: 215 16% 40%;
-    --accent: 40 10% 88%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --secondary: 35 36% 93%;
+    --secondary-foreground: 222.2 30% 18%;
+    --muted: 35 30% 93%;
+    --muted-foreground: 215 16% 42%;
+    --accent: 35 30% 93%;
+    --accent-foreground: 222.2 30% 18%;
     --destructive: 0 62.8% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 40 10% 82%;
-    --input: 40 10% 82%;
-    --ring: 115 22% 48%;
+    --border: 35 22% 86%;
+    --input: 35 22% 86%;
+    --ring: 117 24% 43%;
 
-    --bg-dark: #f5f2e8;
-    --card-bg: #efe9da;
-    --text-ivory: #1a1a2e;
+    --bg-dark: #fbf7f1;
+    --card-bg: #ffffff;
+    --text-ivory: #1e293b;
+    --surface-soft: rgba(148, 163, 184, 0.12);
+    --surface-strong: rgba(148, 163, 184, 0.2);
+    --page-gradient: radial-gradient(circle at top, rgba(158, 193, 155, 0.16), transparent 44%);
   }
 
   * {
@@ -62,9 +68,56 @@
 
   html, body {
     background-color: var(--bg-dark);
+    background-image: var(--page-gradient);
+    background-repeat: no-repeat;
     font-family: "Plus Jakarta Sans", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
+    color: hsl(var(--foreground));
+  }
+
+  body {
+    min-height: 100vh;
+  }
+}
+
+@layer utilities {
+  .dv-shell {
+    @apply bg-background-dark text-ivory;
+  }
+
+  .dv-panel {
+    background: color-mix(in srgb, var(--card-bg) 92%, transparent);
+    border: 1px solid color-mix(in srgb, hsl(var(--border)) 72%, transparent);
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  }
+
+  .dv-panel-soft {
+    background: var(--surface-soft);
+    border: 1px solid color-mix(in srgb, hsl(var(--border)) 65%, transparent);
+  }
+
+  .dv-topbar {
+    background: color-mix(in srgb, var(--bg-dark) 88%, transparent);
+    backdrop-filter: blur(16px);
+  }
+
+  .dv-muted {
+    color: hsl(var(--muted-foreground));
+  }
+
+  .dv-input-surface {
+    background: color-mix(in srgb, var(--card-bg) 96%, transparent);
+    border: 1px solid color-mix(in srgb, hsl(var(--border)) 78%, transparent);
+  }
+
+  .dv-hover {
+    transition: all 180ms ease;
+  }
+
+  .dv-hover:hover {
+    border-color: color-mix(in srgb, hsl(var(--ring)) 42%, transparent);
+    background: color-mix(in srgb, var(--card-bg) 98%, white 2%);
   }
 }
