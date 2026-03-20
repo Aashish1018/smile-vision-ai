@@ -469,14 +469,14 @@ const DashboardPage = () => {
                       WhatsApp
                     </button>
                     <button
-                      onClick={() => window.open(`https://twitter.com/intent/tweet?text=Just+got+my+Dental+Vision+AI+smile+score:+${latestScore}/100!+✨&url=${window.location.origin}/share/${dashData!.latest.id}`, "_blank", "noopener,noreferrer")}
+                      onClick={() => window.open(`https://twitter.com/intent/tweet?text=Just+got+my+Dental+Vision+AI+smile+score:+${latestScore}/100!+✨&url=${window.location.origin}/share/${dashData!.latest.id}`, "_blank")}
                       className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-sky-500/10 border border-sky-500/20 rounded-xl text-xs font-bold text-sky-400 hover:bg-sky-500/20 transition-colors"
                     >
                       <span className="text-sm font-black">𝕏</span>
                       Twitter
                     </button>
                     <button
-                      onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${window.location.origin}/share/${dashData!.latest.id}`)}`, "_blank", "noopener,noreferrer")}
+                      onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${window.location.origin}/share/${dashData!.latest.id}`)}`, "_blank")}
                       className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-500/10 border border-blue-500/20 rounded-xl text-xs font-bold text-blue-400 hover:bg-blue-500/20 transition-colors"
                     >
                       <span className="text-sm font-black">f</span>

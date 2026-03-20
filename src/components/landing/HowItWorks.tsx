@@ -19,12 +19,12 @@ const HowItWorks = () => {
   }, []);
 
   return (
-    <section id="how-it-works" className="bg-[#111820] py-20 px-4 md:px-12" ref={ref}>
+    <section id="how-it-works" className="bg-card-dark py-20 px-4 md:px-12" ref={ref}>
       <div className={`max-w-[1380px] mx-auto transition-all duration-700 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
         <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-16">
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">Precision at every step</h2>
-            <p className="text-slate-400 text-lg max-w-xl">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">Precision at every step</h2>
+            <p className="text-muted-foreground text-lg max-w-xl">
               Our proprietary AI engine analyzes your unique facial structure to generate medical-grade dental simulations in seconds.
             </p>
           </div>
@@ -39,8 +39,8 @@ const HowItWorks = () => {
                 <div className="size-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6">
                   <span className="material-symbols-outlined text-2xl">{s.icon}</span>
                 </div>
-                <h3 className="text-xl font-bold text-white mb-3">{s.title}</h3>
-                <p className="text-slate-400 leading-relaxed">{s.body}</p>
+                <h3 className="text-xl font-bold text-foreground mb-3">{s.title}</h3>
+                <p className="text-muted-foreground leading-relaxed">{s.body}</p>
               </div>
             </div>
           ))}
