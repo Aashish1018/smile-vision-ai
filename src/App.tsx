@@ -10,6 +10,7 @@ import ScanPage from "./pages/ScanPage";
 import AnalysisPage from "./pages/AnalysisPage";
 import SharePage from "./pages/SharePage";
 import NotFound from "./pages/NotFound.tsx";
+import TeethSimulatorPage from "./pages/TeethSimulatorPage";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/login" element={<LoginPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/scan" element={<ScanPage />} />
+          <Route path="/teeth-simulator" element={<TeethSimulatorPage />} />
           <Route path="/analysis/:id" element={<AnalysisPage />} />
           <Route path="/share/:id" element={<SharePage />} />
           <Route path="*" element={<NotFound />} />
