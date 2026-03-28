@@ -1,5 +1,11 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { ReactCompareSlider, ReactCompareSliderImage } from "react-compare-slider";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Loader2 } from "lucide-react";
 
 interface SimulationResult {
   success: boolean;
@@ -15,17 +21,14 @@ const TeethSimulatorPage = () => {
   const [result, setResult] = useState<SimulationResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const progressLabel = useMemo(() => {
-    if (!loading) return null;
-    return "Running pipeline: segmenting teeth, analyzing ideal smile, simulating, and detecting visible issues...";
-  }, [loading]);
+  const [progressState, setProgressState] = useState<{ step: number; message: string } | null>(null);
 
   const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const next = event.target.files?.[0] ?? null;
     setFile(next);
     setResult(null);
     setError(null);
+    setProgressState(null);
 
     if (!next) {
       setPreview(null);
@@ -43,6 +46,7 @@ const TeethSimulatorPage = () => {
 
     setLoading(true);
     setError(null);
+    setProgressState({ step: 0, message: "Uploading image..." });
 
     const formData = new FormData();
     formData.append("image", file);
@@ -57,60 +61,119 @@ const TeethSimulatorPage = () => {
         throw new Error("Simulation failed");
       }
 
-      const json = (await response.json()) as SimulationResult;
-      setResult(json);
+      if (!response.body) {
+        throw new Error("No response body");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+      let buffer = "";
+
+      while (!done) {
+        const { value, done: readerDone } = await reader.read();
+        done = readerDone;
+        if (value) {
+          buffer += decoder.decode(value, { stream: true });
+          const parts = buffer.split("\n\n");
+          buffer = parts.pop() || "";
+
+          for (const part of parts) {
+            const lines = part.split("\n");
+            let eventType = "message";
+            let data = "";
+            for (const line of lines) {
+              if (line.startsWith("event: ")) {
+                eventType = line.substring(7);
+              } else if (line.startsWith("data: ")) {
+                data = line.substring(6);
+              }
+            }
+
+            if (data) {
+              const parsed = JSON.parse(data);
+              if (eventType === "progress") {
+                setProgressState({ step: parsed.step, message: parsed.message });
+              } else if (eventType === "complete") {
+                setResult(parsed);
+                setLoading(false);
+                setProgressState(null);
+              } else if (eventType === "error") {
+                throw new Error(parsed.error);
+              }
+            }
+          }
+        }
+      }
     } catch (requestError) {
       const message = requestError instanceof Error ? requestError.message : "Simulation failed";
       setError(message);
-    } finally {
       setLoading(false);
+      setProgressState(null);
     }
   };
 
   return (
-    <main className="min-h-screen bg-background-dark text-ivory px-6 py-10 font-display">
+    <main className="min-h-screen bg-background text-foreground px-6 py-10 font-sans">
       <div className="mx-auto max-w-5xl space-y-8">
         <header className="space-y-2">
-          <h1 className="text-3xl md:text-4xl font-black tracking-tight">Ideal Teeth Simulator</h1>
-          <p className="text-slate-300 text-sm md:text-base">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Ideal Teeth Simulator</h1>
+          <p className="text-muted-foreground text-sm md:text-base">
             Upload one selfie or close-up smile photo to run a 4-step ML pipeline and preview an idealized simulation.
           </p>
         </header>
 
-        <section className="rounded-2xl border border-white/10 bg-card-dark p-5 space-y-4">
-          <input
-            className="block w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-primary file:px-4 file:py-2 file:text-white file:font-bold"
-            type="file"
-            accept="image/*"
-            onChange={onFileChange}
-          />
-
-          {preview && (
-            <img
-              src={preview}
-              alt="Selected upload preview"
-              className="max-h-80 rounded-xl border border-white/10 object-contain w-full bg-black/20"
+        <Card className="border-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)]">
+          <CardHeader>
+            <CardTitle>Upload Photo</CardTitle>
+            <CardDescription>Select a clear photo showing your teeth.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={onFileChange}
+              className="cursor-pointer"
             />
-          )}
 
-          <button
-            type="button"
-            disabled={!file || loading}
-            onClick={handleSimulate}
-            className="rounded-lg bg-primary px-5 py-2 font-bold text-white disabled:opacity-60"
-          >
-            {loading ? "Simulating..." : "Simulate"}
-          </button>
+            {preview && (
+              <div className="relative rounded-lg overflow-hidden border-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] bg-muted/30">
+                <img
+                  src={preview}
+                  alt="Selected upload preview"
+                  className="max-h-80 w-full object-contain"
+                />
+              </div>
+            )}
 
-          {progressLabel && <p className="text-xs text-slate-300">{progressLabel}</p>}
-          {error && <p className="text-sm text-red-300">{error}</p>}
-        </section>
+            <Button
+              type="button"
+              disabled={!file || loading}
+              onClick={handleSimulate}
+              className="w-full sm:w-auto font-bold border-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+            >
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {loading ? "Simulating..." : "Simulate"}
+            </Button>
+
+            {progressState && (
+              <div className="space-y-2 mt-4">
+                <div className="flex justify-between text-sm text-muted-foreground font-medium">
+                  <span>Step {Math.max(1, progressState.step)}/4</span>
+                  <span>{progressState.message}</span>
+                </div>
+                <Progress value={Math.max(5, (progressState.step / 4) * 100)} className="h-2 border" />
+              </div>
+            )}
+            {error && <p className="text-sm font-medium text-destructive">{error}</p>}
+          </CardContent>
+        </Card>
 
         {result && (
           <section className="grid gap-6 lg:grid-cols-2">
             <div className="space-y-4">
-              <h2 className="text-xl font-black">Before / After</h2>
-              <div className="rounded-2xl overflow-hidden border border-white/10">
+              <h2 className="text-xl font-bold">Before / After</h2>
+              <div className="rounded-xl overflow-hidden border-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] bg-card">
                 <ReactCompareSlider
                   itemOne={<ReactCompareSliderImage src={result.originalImage} alt="Original image" />}
                   itemTwo={<ReactCompareSliderImage src={result.simulatedImage} alt="Simulated image" />}
@@ -119,22 +182,34 @@ const TeethSimulatorPage = () => {
             </div>
 
             <div className="space-y-4">
-              <div className="rounded-2xl border border-white/10 bg-card-dark p-4">
-                <h3 className="text-lg font-black mb-2">Visible Surface Analysis</h3>
-                <p className="text-xs text-amber-300 mb-3">Not a medical diagnosis.</p>
-                <ul className="list-disc ml-5 text-sm text-slate-200 space-y-1">
-                  {result.issuesList.length > 0 ? (
-                    result.issuesList.map((issue) => <li key={issue}>{issue}</li>)
-                  ) : (
-                    <li>No visible issues detected.</li>
-                  )}
-                </ul>
-              </div>
+              <Card className="border-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)]">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Visible Surface Analysis</CardTitle>
+                  <CardDescription className="text-amber-600 dark:text-amber-400 font-medium">
+                    Not a medical diagnosis.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="list-disc ml-5 text-sm space-y-1 text-muted-foreground">
+                    {result.issuesList.length > 0 ? (
+                      result.issuesList.map((issue) => <li key={issue}>{issue}</li>)
+                    ) : (
+                      <li>No visible issues detected.</li>
+                    )}
+                  </ul>
+                </CardContent>
+              </Card>
 
-              <details className="rounded-2xl border border-white/10 bg-card-dark p-4">
-                <summary className="cursor-pointer font-black">AI Ideal Smile Prompt</summary>
-                <p className="mt-2 text-sm text-slate-200">{result.idealDescription}</p>
-              </details>
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="prompt" className="border-2 rounded-lg px-4 bg-card shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)]">
+                  <AccordionTrigger className="font-bold hover:no-underline">
+                    AI Ideal Smile Prompt
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-sm">
+                    {result.idealDescription}
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </div>
           </section>
         )}

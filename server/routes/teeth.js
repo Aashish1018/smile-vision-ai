@@ -21,10 +21,23 @@ router.post("/simulate", upload.single("image"), async (req, res) => {
     return res.status(400).json({ error: "No image uploaded" });
   }
 
-  try {
-    const result = await runTeethPipeline(req.file.buffer);
+  // Set headers for Server-Sent Events (SSE)
+  res.writeHead(200, {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    "Connection": "keep-alive",
+  });
 
-    res.json({
+  const sendEvent = (event, data) => {
+    res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+  };
+
+  try {
+    const result = await runTeethPipeline(req.file.buffer, (progress) => {
+      sendEvent("progress", progress);
+    });
+
+    sendEvent("complete", {
       success: true,
       simulatedImage: `data:image/png;base64,${result.simulatedImage}`,
       originalImage: `data:image/png;base64,${result.originalImage}`,
@@ -33,7 +46,9 @@ router.post("/simulate", upload.single("image"), async (req, res) => {
     });
   } catch (error) {
     console.error("Pipeline error:", error);
-    res.status(500).json({ error: error.message || "Pipeline failed" });
+    sendEvent("error", { error: error.message || "Pipeline failed" });
+  } finally {
+    res.end();
   }
 });
 
