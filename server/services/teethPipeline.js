@@ -118,16 +118,21 @@ async function simulateTeeth(imageBuffer, maskBuffer, idealPrompt) {
   return Buffer.from(arrayBuffer);
 }
 
-export async function runTeethPipeline(rawImageBuffer) {
+export async function runTeethPipeline(rawImageBuffer, onProgress) {
+  if (onProgress) onProgress({ step: 1, message: "Analyzing your photo..." });
   const imageBuffer = await normalizeImage(rawImageBuffer);
   const maskBuffer = await segmentTeeth(imageBuffer);
 
+  if (onProgress) onProgress({ step: 2, message: "Understanding your ideal smile and detecting surface issues..." });
   const [idealPrompt, issuesList] = await Promise.all([
     analyzeIdealTeeth(imageBuffer),
     detectIssues(imageBuffer),
   ]);
 
+  if (onProgress) onProgress({ step: 3, message: "Simulating ideal teeth..." });
   const simulatedBuffer = await simulateTeeth(imageBuffer, maskBuffer, idealPrompt);
+
+  if (onProgress) onProgress({ step: 4, message: "Finalizing..." });
 
   return {
     simulatedImage: simulatedBuffer.toString("base64"),
