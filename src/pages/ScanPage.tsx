@@ -8,8 +8,10 @@ import {
   generateRecommendation,
   loadScans,
   saveScans,
+  type AngleModelResult,
   type ScanImage,
   type ScanResult,
+  type ScanScores,
 } from "@/lib/scanStorage";
 import refFront from "@/assets/guide-front.svg";
 import refRight from "@/assets/guide-right.svg";
@@ -49,6 +51,84 @@ const loadingSteps = [
   "Running dental geometry analysis…",
   "Preparing your smile preview…",
 ];
+
+
+interface ApiSimulationResult {
+  success: boolean;
+  simulatedImage: string;
+  originalImage: string;
+  issuesList: string[];
+  idealDescription: string;
+  scores: ScanScores;
+  jaw: ScanResult["jaw"];
+  recommendation: ScanResult["recommendation"];
+  modelMeta?: {
+    segmentConfidence?: number;
+    brightness?: number;
+    maskCoverage?: number;
+  };
+}
+
+const averageScores = (items: ScanScores[]): ScanScores => {
+  const fields: (keyof ScanScores)[] = ["alignment", "symmetry", "whiteness", "spacing", "gumHealth", "overbite", "toothShape", "midlineDeviation", "overall"];
+  const output = {} as ScanScores;
+
+  for (const field of fields) {
+    const total = items.reduce((sum, row) => sum + row[field], 0);
+    output[field] = Number((total / items.length).toFixed(field === "midlineDeviation" ? 1 : 0));
+  }
+
+  return output;
+};
+
+async function runModelForFile(file: File): Promise<ApiSimulationResult> {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const response = await fetch("/api/teeth/simulate", {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok || !response.body) {
+    throw new Error("ML pipeline did not return a valid response.");
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let done = false;
+  let buffer = "";
+  let completePayload: ApiSimulationResult | null = null;
+
+  while (!done) {
+    const { value, done: readerDone } = await reader.read();
+    done = readerDone;
+
+    if (!value) continue;
+    buffer += decoder.decode(value, { stream: true });
+    const parts = buffer.split("\n\n");
+    buffer = parts.pop() || "";
+
+    for (const part of parts) {
+      const lines = part.split("\n");
+      let eventType = "message";
+      let data = "";
+
+      for (const line of lines) {
+        if (line.startsWith("event: ")) eventType = line.substring(7);
+        if (line.startsWith("data: ")) data = line.substring(6);
+      }
+
+      if (!data) continue;
+      const parsed = JSON.parse(data);
+      if (eventType === "error") throw new Error(parsed.error || "ML pipeline failed.");
+      if (eventType === "complete") completePayload = parsed as ApiSimulationResult;
+    }
+  }
+
+  if (!completePayload) throw new Error("ML pipeline completed without payload.");
+  return completePayload;
+}
 
 const ScanPage = () => {
   const navigate = useNavigate();
@@ -148,13 +228,41 @@ const ScanPage = () => {
 
       setLoadingStepIdx(3);
 
-      const scores = generateHeuristicScores(scanImages);
+      const angleResults: AngleModelResult[] = [];
+      let frontResult: ApiSimulationResult | null = null;
+
+      try {
+        for (let i = 0; i < 3; i += 1) {
+          const file = photos[i + 1];
+          if (!file) continue;
+          const result = await runModelForFile(file);
+          if (i === 0) frontResult = result;
+          angleResults.push({
+            angle: angles[i],
+            issuesList: result.issuesList,
+            idealDescription: result.idealDescription,
+            scores: result.scores,
+            jaw: result.jaw,
+            recommendation: result.recommendation,
+            modelMeta: result.modelMeta,
+          });
+          setLoadingStepIdx(Math.min(4, i + 1));
+        }
+      } catch (mlError) {
+        console.warn("ML pipeline fallback to heuristic scoring:", mlError);
+      }
+
+      const scores = angleResults.length
+        ? averageScores(angleResults.map((item) => item.scores))
+        : generateHeuristicScores(scanImages);
       const jaw = generateJawAnalysis(scores);
       const recommendation = generateRecommendation(scores);
 
       setLoadingStepIdx(4);
 
       const scanId = `scan-${Date.now()}`;
+      const mergedIssues = angleResults.flatMap((item) => item.issuesList);
+      const uniqueIssues = [...new Set(mergedIssues)].slice(0, 12);
       const scanResult: ScanResult = {
         id: scanId,
         date: new Date().toISOString(),
@@ -164,6 +272,11 @@ const ScanPage = () => {
         recommendation,
         thumbnailUrl: previews[1] || "",
         simulationType: recommendation.treatments.slice(0, 2).join(" + ") || "Analysis",
+        originalImage: frontResult?.originalImage,
+        simulatedImage: frontResult?.simulatedImage,
+        idealDescription: frontResult?.idealDescription,
+        issuesList: uniqueIssues,
+        angleResults,
       };
 
       if (photos[1]) {

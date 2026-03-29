@@ -2,6 +2,7 @@ import { HfInference } from "@huggingface/inference";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import fetch from "node-fetch";
 import sharp from "sharp";
+import { generateJawAnalysis, generateRecommendation, toScanScores } from "./scoreUtils.js";
 
 // Configure proxy agent if provided in environment variables
 const proxyUrl =
@@ -46,20 +47,23 @@ function extractTeethMask(segmentationResult) {
     .filter((segment) => segment?.label?.toLowerCase().includes("teeth"))
     .sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
 
-  if (labelled.length > 0) {
-    return Buffer.from(labelled[0].mask, "base64");
-  }
+  const selected = labelled[0]
+    || segmentationResult
+      .filter((segment) => typeof segment?.score === "number")
+      .sort((a, b) => b.score - a.score)[0];
 
-  const fallback = segmentationResult
-    .filter((segment) => typeof segment?.score === "number")
-    .sort((a, b) => b.score - a.score)[0];
-
-  if (!fallback?.mask) {
+  if (!selected?.mask) {
     throw new Error("Could not isolate teeth region");
   }
 
-  console.warn("No explicit teeth label from segmentation; using highest-score fallback segment.");
-  return Buffer.from(fallback.mask, "base64");
+  if (!labelled.length) {
+    console.warn("No explicit teeth label from segmentation; using highest-score fallback segment.");
+  }
+
+  return {
+    maskBuffer: Buffer.from(selected.mask, "base64"),
+    segmentConfidence: typeof selected.score === "number" ? selected.score : 0.75,
+  };
 }
 
 async function segmentTeeth(imageBuffer) {
@@ -82,9 +86,10 @@ async function segmentTeeth(imageBuffer) {
     });
   }
 
-  const rawMask = extractTeethMask(result);
+  const { maskBuffer: rawMask, segmentConfidence } = extractTeethMask(result);
   const metadata = await sharp(imageBuffer).metadata();
-  return ensureMaskDimensions(rawMask, metadata);
+  const normalizedMask = await ensureMaskDimensions(rawMask, metadata);
+  return { maskBuffer: normalizedMask, segmentConfidence };
 }
 
 async function analyzeIdealTeeth(imageBuffer) {
@@ -117,17 +122,41 @@ async function detectIssues(imageBuffer) {
       inputs: {
         image: imageBlob,
         question:
-          "List visible dental issues such as discoloration, yellowing, gaps, chips, misalignment, overcrowding, or missing teeth. Be concise.",
+          "List visible dental issues such as discoloration, yellowing, gaps, chips, misalignment, overcrowding, gum inflammation, or missing teeth. Be concise.",
       },
     });
 
-    return (result?.answer || "")
+    const issuesList = (result?.answer || "")
       .split(/[\n,.]/)
       .map((entry) => entry.trim())
       .filter((entry) => entry.length > 3);
+
+    const normalized = issuesList.join(" ").toLowerCase();
+    const issueFlags = {
+      discoloration: /discolor|yellow|stain/.test(normalized),
+      gaps: /gap|spacing|space/.test(normalized),
+      chips: /chip|crack|fracture/.test(normalized),
+      misalignment: /misalign|crooked|rotat|tilt/.test(normalized),
+      crowding: /crowd|overlap/.test(normalized),
+      missingTeeth: /missing|absent/.test(normalized),
+      gumIssue: /gum|inflam|gingiv/.test(normalized),
+    };
+
+    return { issuesList, issueFlags };
   } catch (error) {
     console.warn("Issue detection failed:", error.message);
-    return ["Could not complete visible surface analysis"];
+    return {
+      issuesList: ["Could not complete visible surface analysis"],
+      issueFlags: {
+        discoloration: false,
+        gaps: false,
+        chips: false,
+        misalignment: false,
+        crowding: false,
+        missingTeeth: false,
+        gumIssue: false,
+      },
+    };
   }
 }
 
@@ -162,26 +191,67 @@ async function simulateTeeth(imageBuffer, maskBuffer, idealPrompt) {
   return Buffer.from(arrayBuffer);
 }
 
+async function computeImageStats(imageBuffer, maskBuffer) {
+  const stats = await sharp(imageBuffer)
+    .greyscale()
+    .resize({ width: 256, withoutEnlargement: true })
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  const pixels = stats.data;
+  let total = 0;
+  for (let i = 0; i < pixels.length; i += 1) total += pixels[i];
+  const brightness = total / pixels.length / 2.55;
+
+  const maskStats = await sharp(maskBuffer).raw().toBuffer({ resolveWithObject: true });
+  let active = 0;
+  for (let i = 0; i < maskStats.data.length; i += maskStats.info.channels) {
+    if (maskStats.data[i] > 20) active += 1;
+  }
+  const maskCoverage = active / (maskStats.info.width * maskStats.info.height);
+
+  return { brightness, maskCoverage };
+}
+
 export async function runTeethPipeline(rawImageBuffer, onProgress) {
   if (onProgress) onProgress({ step: 1, message: "Analyzing your photo..." });
   const imageBuffer = await normalizeImage(rawImageBuffer);
-  const maskBuffer = await segmentTeeth(imageBuffer);
+  const { maskBuffer, segmentConfidence } = await segmentTeeth(imageBuffer);
 
   if (onProgress) onProgress({ step: 2, message: "Understanding your ideal smile and detecting surface issues..." });
-  const [idealPrompt, issuesList] = await Promise.all([
+  const [idealPrompt, issueData, imageStats] = await Promise.all([
     analyzeIdealTeeth(imageBuffer),
     detectIssues(imageBuffer),
+    computeImageStats(imageBuffer, maskBuffer),
   ]);
 
   if (onProgress) onProgress({ step: 3, message: "Simulating ideal teeth..." });
   const simulatedBuffer = await simulateTeeth(imageBuffer, maskBuffer, idealPrompt);
+
+  const scores = toScanScores({
+    brightness: imageStats.brightness,
+    maskCoverage: imageStats.maskCoverage,
+    issueFlags: issueData.issueFlags,
+    issueCount: issueData.issuesList.length,
+    segmentConfidence,
+  });
+  const jaw = generateJawAnalysis(scores);
+  const recommendation = generateRecommendation(scores);
 
   if (onProgress) onProgress({ step: 4, message: "Finalizing..." });
 
   return {
     simulatedImage: simulatedBuffer.toString("base64"),
     originalImage: imageBuffer.toString("base64"),
-    issuesList,
+    issuesList: issueData.issuesList,
     idealDescription: idealPrompt,
+    scores,
+    jaw,
+    recommendation,
+    modelMeta: {
+      segmentConfidence: Math.round(segmentConfidence * 1000) / 1000,
+      brightness: Math.round(imageStats.brightness * 10) / 10,
+      maskCoverage: Math.round(imageStats.maskCoverage * 10000) / 10000,
+    },
   };
 }

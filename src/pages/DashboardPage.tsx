@@ -303,16 +303,25 @@ const DashboardPage = () => {
                     />
                     <span className="absolute bottom-4 left-4 rounded-full bg-black/75 px-3 py-1 text-[10px] font-bold uppercase text-white">Current center scan</span>
                   </div>
-                  <div className="flex aspect-[16/11] flex-col items-center justify-center gap-4 bg-gradient-to-br from-primary/8 via-white/0 to-primary/12 p-8 text-center">
-                    <div className="flex size-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
-                      <span className="material-symbols-outlined text-3xl">auto_awesome</span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-black uppercase tracking-[0.24em] text-primary">Ideal simulation</p>
-                      <p className="mt-2 max-w-xs text-sm leading-relaxed text-slate-400">
-                        No default image is shown here. This panel will render your ML-generated smile simulation once the model is connected.
-                      </p>
-                    </div>
+                  <div className="relative aspect-[16/11] overflow-hidden bg-background-dark">
+                    {dashData!.latest.simulatedImage ? (
+                      <img
+                        src={dashData!.latest.simulatedImage}
+                        alt="AI ideal smile simulation"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-gradient-to-br from-primary/8 via-white/0 to-primary/12 p-8 text-center">
+                        <div className="flex size-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+                          <span className="material-symbols-outlined text-3xl">auto_awesome</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-black uppercase tracking-[0.24em] text-primary">Ideal simulation</p>
+                          <p className="mt-2 max-w-xs text-sm leading-relaxed text-slate-400">Simulation is not available for this older scan.</p>
+                        </div>
+                      </div>
+                    )}
+                    <span className="absolute bottom-4 left-4 rounded-full bg-black/75 px-3 py-1 text-[10px] font-bold uppercase text-white">AI simulation</span>
                   </div>
                 </div>
                 <div className="p-4 flex items-center justify-between border-t border-white/5">

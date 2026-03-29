@@ -35,6 +35,20 @@ export interface Recommendation {
   summary: string;
 }
 
+export interface AngleModelResult {
+  angle: ScanImage["angle"];
+  issuesList: string[];
+  idealDescription: string;
+  scores: ScanScores;
+  jaw: JawAnalysis;
+  recommendation: Recommendation;
+  modelMeta?: {
+    segmentConfidence?: number;
+    brightness?: number;
+    maskCoverage?: number;
+  };
+}
+
 export interface ScanResult {
   id: string;
   date: string;
@@ -44,6 +58,11 @@ export interface ScanResult {
   recommendation: Recommendation;
   thumbnailUrl: string;
   simulationType: string;
+  originalImage?: string;
+  simulatedImage?: string;
+  issuesList?: string[];
+  idealDescription?: string;
+  angleResults?: AngleModelResult[];
 }
 
 function simpleHash(str: string): number {
@@ -163,9 +182,25 @@ export async function saveScans(userId: string, scans: ScanResult[]) {
   if (!userId || userId === "anonymous") return;
 
   try {
-    await supabase.from(SCANS_TABLE).delete().eq("user_id", userId);
-    if (scans.length === 0) return;
-    const rows = scans.map((scan) => ({ user_id: userId, scan_id: scan.id, created_at: scan.date, payload: scan }));
+    const { data: existingRows } = await supabase
+      .from(SCANS_TABLE)
+      .select("scan_id")
+      .eq("user_id", userId);
+
+    const existingIds = new Set((existingRows || []).map((row) => row.scan_id));
+    const missing = scans.filter((scan) => !existingIds.has(scan.id));
+
+    if (missing.length === 0) return;
+
+    const rows = missing.map((scan) => ({
+      user_id: userId,
+      scan_id: scan.id,
+      created_at: scan.date,
+      payload: scan,
+      overall_score: scan.scores.overall,
+      simulation_type: scan.simulationType,
+    }));
+
     await supabase.from(SCANS_TABLE).insert(rows);
   } catch {
     // fallback stays in local cache
@@ -185,11 +220,24 @@ export async function loadScans(userId: string): Promise<ScanResult[]> {
 
     if (error || !data) return local;
 
-    const scans = data.map((row) => ({
-      ...(row.payload as ScanResult),
-      id: (row.payload as ScanResult).id || row.scan_id,
-      date: (row.payload as ScanResult).date || row.created_at,
-    }));
+    const scanMap = new Map<string, ScanResult>();
+
+    for (const row of data) {
+      const payload = (row.payload as ScanResult) || ({} as ScanResult);
+      const id = payload.id || row.scan_id;
+      const existing = scanMap.get(id);
+      const candidate = {
+        ...payload,
+        id,
+        date: payload.date || row.created_at,
+      } as ScanResult;
+
+      if (!existing || new Date(candidate.date).getTime() >= new Date(existing.date).getTime()) {
+        scanMap.set(id, candidate);
+      }
+    }
+
+    const scans = Array.from(scanMap.values()).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     saveLocal(userId, scans);
     return scans;
