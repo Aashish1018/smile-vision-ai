@@ -43,6 +43,10 @@ router.post("/simulate", upload.single("image"), async (req, res) => {
       originalImage: `data:image/png;base64,${result.originalImage}`,
       issuesList: result.issuesList,
       idealDescription: result.idealDescription,
+      scores: result.scores,
+      jaw: result.jaw,
+      recommendation: result.recommendation,
+      modelMeta: result.modelMeta,
     });
   } catch (error) {
     console.error("Pipeline error:", error);

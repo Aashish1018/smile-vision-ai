@@ -47,6 +47,8 @@ const AnalysisPage = () => {
   const jaw = scan?.jaw || mockJaw;
   const recommendation = scan?.recommendation || mockRecommendation;
   const thumbnailUrl = scan?.thumbnailUrl || "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800";
+  const simulatedImage = scan?.simulatedImage;
+  const issuesList = scan?.issuesList || [];
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
 
@@ -182,16 +184,23 @@ const AnalysisPage = () => {
                   <img src={thumbnailUrl} alt="Original smile" className="h-full w-full object-cover" />
                   <span className="absolute bottom-4 left-4 bg-black text-white px-3 py-1 text-[10px] font-bold uppercase">Original</span>
                 </div>
-                <div className="flex aspect-[16/11] flex-col items-center justify-center gap-4 bg-gradient-to-br from-primary/10 via-white/0 to-primary/15 px-8 text-center">
-                  <div className="size-16 rounded-2xl border border-primary/20 bg-primary/10 flex items-center justify-center text-primary">
-                    <span className="material-symbols-outlined text-3xl">motion_photos_on</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-black uppercase tracking-[0.24em] text-primary">Ideal simulation pending</p>
-                    <p className="mt-2 text-sm leading-relaxed text-slate-400 max-w-xs">
-                      The default image has been removed. Your personalized simulation will appear here after the ML model is implemented.
-                    </p>
-                  </div>
+                <div className="relative aspect-[16/11] overflow-hidden bg-background-dark">
+                  {simulatedImage ? (
+                    <img src={simulatedImage} alt="AI simulated smile" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-gradient-to-br from-primary/10 via-white/0 to-primary/15 px-8 text-center">
+                      <div className="size-16 rounded-2xl border border-primary/20 bg-primary/10 flex items-center justify-center text-primary">
+                        <span className="material-symbols-outlined text-3xl">motion_photos_on</span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-black uppercase tracking-[0.24em] text-primary">Ideal simulation pending</p>
+                        <p className="mt-2 text-sm leading-relaxed text-slate-400 max-w-xs">
+                          Simulation is unavailable for this historic scan.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  <span className="absolute bottom-4 left-4 bg-black text-white px-3 py-1 text-[10px] font-bold uppercase">AI Simulated</span>
                 </div>
               </div>
               <div className="flex gap-2 p-4 border-t-2 border-black/20">
@@ -224,6 +233,20 @@ const AnalysisPage = () => {
                 ))}
               </div>
             </div>
+
+            {issuesList.length > 0 && (
+              <div className="bg-card-dark rounded-2xl p-5 border border-white/5">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="material-symbols-outlined text-primary">fact_check</span>
+                  <span className="text-sm font-black uppercase text-ivory">VISIBLE ISSUE SUMMARY</span>
+                </div>
+                <ul className="list-disc pl-5 text-sm text-slate-300 space-y-1">
+                  {issuesList.map((issue) => (
+                    <li key={issue}>{issue}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           {/* Column B */}
