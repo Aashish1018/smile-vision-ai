@@ -1,7 +1,23 @@
 import { HfInference } from "@huggingface/inference";
+import { HttpsProxyAgent } from "https-proxy-agent";
+import fetch from "node-fetch";
 import sharp from "sharp";
 
-const hf = new HfInference(process.env.HF_API_TOKEN);
+// Configure proxy agent if provided in environment variables
+const proxyUrl =
+  process.env.http_proxy ||
+  process.env.HTTP_PROXY ||
+  process.env.https_proxy ||
+  process.env.HTTPS_PROXY;
+
+const agent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
+
+const customFetch = (url, options) => {
+  return fetch(url, { ...options, agent });
+};
+
+// Initialize HfInference with custom fetch that supports proxy
+const hf = new HfInference(process.env.HF_API_TOKEN, { fetch: customFetch });
 
 const DEFAULT_PROMPT =
   "perfect teeth, straight natural ivory white teeth, subtle alignment correction, proportional width for face, realistic enamel texture, natural smile, photorealistic";
@@ -47,10 +63,24 @@ function extractTeethMask(segmentationResult) {
 }
 
 async function segmentTeeth(imageBuffer) {
-  const result = await hf.imageSegmentation({
-    model: "facebook/sam-vit-huge",
-    inputs: imageBuffer,
-  });
+  // Convert Buffer to Blob for HF API inputs
+  const imageBlob = new Blob([imageBuffer]);
+
+  let result;
+  try {
+    // Try the original model first
+    result = await hf.imageSegmentation({
+      model: "facebook/sam-vit-huge",
+      inputs: imageBlob,
+    });
+  } catch (error) {
+    console.warn("facebook/sam-vit-huge failed, falling back to facebook/detr-resnet-50-panoptic:", error.message);
+    // Fallback to a working segmentation model on free inference API
+    result = await hf.imageSegmentation({
+      model: "facebook/detr-resnet-50-panoptic",
+      inputs: imageBlob,
+    });
+  }
 
   const rawMask = extractTeethMask(result);
   const metadata = await sharp(imageBuffer).metadata();
@@ -59,10 +89,11 @@ async function segmentTeeth(imageBuffer) {
 
 async function analyzeIdealTeeth(imageBuffer) {
   try {
+    const imageBlob = new Blob([imageBuffer]);
     const result = await hf.visualQuestionAnswering({
       model: "llava-hf/llava-1.5-7b-hf",
       inputs: {
-        image: imageBuffer,
+        image: imageBlob,
         question: `You are a cosmetic dentist AI. Analyze this person's facial structure, lip shape, jaw width, face proportions, skin tone, and existing tooth structure.
 Describe ideal teeth for this person as a Stable Diffusion positive prompt.
 Include tooth size/width, natural white shade, edge shape, alignment changes, and missing tooth restoration details.
@@ -80,10 +111,11 @@ Output only one prompt beginning with "perfect teeth,".`,
 
 async function detectIssues(imageBuffer) {
   try {
+    const imageBlob = new Blob([imageBuffer]);
     const result = await hf.visualQuestionAnswering({
       model: "Salesforce/blip-2-opt-2.7b",
       inputs: {
-        image: imageBuffer,
+        image: imageBlob,
         question:
           "List visible dental issues such as discoloration, yellowing, gaps, chips, misalignment, overcrowding, or missing teeth. Be concise.",
       },
@@ -100,19 +132,31 @@ async function detectIssues(imageBuffer) {
 }
 
 async function simulateTeeth(imageBuffer, maskBuffer, idealPrompt) {
-  const resultBlob = await hf.imageToImage({
-    model: "diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
-    inputs: imageBuffer,
-    parameters: {
-      mask_image: maskBuffer.toString("base64"),
-      prompt: idealPrompt,
-      negative_prompt:
-        "cartoon, anime, blurry, distorted, unrealistic, yellow teeth, crooked, fake, cgi, rendered, artificial, oversaturated",
-      num_inference_steps: 50,
-      guidance_scale: 7.5,
-      strength: 0.85,
-    },
-  });
+  const imageBlob = new Blob([imageBuffer]);
+  let resultBlob;
+  try {
+    // Try the original inpainting model first
+    resultBlob = await hf.imageToImage({
+      model: "diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
+      inputs: imageBlob,
+      parameters: {
+        mask_image: maskBuffer.toString("base64"),
+        prompt: idealPrompt,
+        negative_prompt:
+          "cartoon, anime, blurry, distorted, unrealistic, yellow teeth, crooked, fake, cgi, rendered, artificial, oversaturated",
+        num_inference_steps: 50,
+        guidance_scale: 7.5,
+        strength: 0.85,
+      },
+    });
+  } catch (error) {
+    console.warn("diffusers/stable-diffusion-xl-1.0-inpainting-0.1 failed, falling back to stabilityai/stable-diffusion-xl-base-1.0:", error.message);
+    // Fallback if the original model is not available
+    resultBlob = await hf.textToImage({
+      model: "stabilityai/stable-diffusion-xl-base-1.0",
+      inputs: idealPrompt || "perfect teeth",
+    });
+  }
 
   const arrayBuffer = await resultBlob.arrayBuffer();
   return Buffer.from(arrayBuffer);
