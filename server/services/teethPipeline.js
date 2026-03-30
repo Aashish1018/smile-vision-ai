@@ -23,6 +23,15 @@ const hf = new HfInference(process.env.HF_API_TOKEN, { fetch: customFetch });
 const DEFAULT_PROMPT =
   "perfect teeth, straight natural ivory white teeth, subtle alignment correction, proportional width for face, realistic enamel texture, natural smile, photorealistic";
 
+async function withModelFallback(primaryCall, fallbackCall, warningMessage) {
+  try {
+    return await primaryCall();
+  } catch (error) {
+    console.warn(warningMessage, error.message);
+    return fallbackCall();
+  }
+}
+
 async function normalizeImage(buffer) {
   return sharp(buffer)
     .rotate()
@@ -70,21 +79,18 @@ async function segmentTeeth(imageBuffer) {
   // Convert Buffer to Blob for HF API inputs
   const imageBlob = new Blob([imageBuffer]);
 
-  let result;
-  try {
-    // Try the original model first
-    result = await hf.imageSegmentation({
+  const result = await withModelFallback(
+    () => hf.imageSegmentation({
       model: "facebook/sam-vit-huge",
       inputs: imageBlob,
-    });
-  } catch (error) {
-    console.warn("facebook/sam-vit-huge failed, falling back to facebook/detr-resnet-50-panoptic:", error.message);
-    // Fallback to a working segmentation model on free inference API
-    result = await hf.imageSegmentation({
-      model: "facebook/detr-resnet-50-panoptic",
-      inputs: imageBlob,
-    });
-  }
+    }),
+    () =>
+      hf.imageSegmentation({
+        model: "facebook/detr-resnet-50-panoptic",
+        inputs: imageBlob,
+      }),
+    "facebook/sam-vit-huge failed, falling back to facebook/detr-resnet-50-panoptic:",
+  );
 
   const { maskBuffer: rawMask, segmentConfidence } = extractTeethMask(result);
   const metadata = await sharp(imageBuffer).metadata();
@@ -162,30 +168,28 @@ async function detectIssues(imageBuffer) {
 
 async function simulateTeeth(imageBuffer, maskBuffer, idealPrompt) {
   const imageBlob = new Blob([imageBuffer]);
-  let resultBlob;
-  try {
-    // Try the original inpainting model first
-    resultBlob = await hf.imageToImage({
-      model: "diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
-      inputs: imageBlob,
-      parameters: {
-        mask_image: maskBuffer.toString("base64"),
-        prompt: idealPrompt,
-        negative_prompt:
-          "cartoon, anime, blurry, distorted, unrealistic, yellow teeth, crooked, fake, cgi, rendered, artificial, oversaturated",
-        num_inference_steps: 50,
-        guidance_scale: 7.5,
-        strength: 0.85,
-      },
-    });
-  } catch (error) {
-    console.warn("diffusers/stable-diffusion-xl-1.0-inpainting-0.1 failed, falling back to stabilityai/stable-diffusion-xl-base-1.0:", error.message);
-    // Fallback if the original model is not available
-    resultBlob = await hf.textToImage({
-      model: "stabilityai/stable-diffusion-xl-base-1.0",
-      inputs: idealPrompt || "perfect teeth",
-    });
-  }
+  const resultBlob = await withModelFallback(
+    () =>
+      hf.imageToImage({
+        model: "diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
+        inputs: imageBlob,
+        parameters: {
+          mask_image: maskBuffer.toString("base64"),
+          prompt: idealPrompt,
+          negative_prompt:
+            "cartoon, anime, blurry, distorted, unrealistic, yellow teeth, crooked, fake, cgi, rendered, artificial, oversaturated",
+          num_inference_steps: 50,
+          guidance_scale: 7.5,
+          strength: 0.85,
+        },
+      }),
+    () =>
+      hf.textToImage({
+        model: "stabilityai/stable-diffusion-xl-base-1.0",
+        inputs: idealPrompt || "perfect teeth",
+      }),
+    "diffusers/stable-diffusion-xl-1.0-inpainting-0.1 failed, falling back to stabilityai/stable-diffusion-xl-base-1.0:",
+  );
 
   const arrayBuffer = await resultBlob.arrayBuffer();
   return Buffer.from(arrayBuffer);

@@ -1,5 +1,6 @@
 import express from "express";
 import multer from "multer";
+import sharp from "sharp";
 import { runTeethPipeline } from "../services/teethPipeline.js";
 
 const router = express.Router();
@@ -16,16 +17,38 @@ const upload = multer({
   },
 });
 
+function toPublicErrorMessage(error) {
+  const message = error?.message || "";
+  if (message.includes("Only image files are allowed") || message.includes("No image uploaded")) {
+    return message;
+  }
+
+  return "We couldn't process the uploaded image. Please try another image.";
+}
+
+async function assertValidImage(buffer) {
+  const metadata = await sharp(buffer).metadata();
+  if (!metadata.width || !metadata.height) {
+    throw new Error("Invalid image payload");
+  }
+}
+
 router.post("/simulate", upload.single("image"), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: "No image uploaded" });
+  }
+
+  try {
+    await assertValidImage(req.file.buffer);
+  } catch {
+    return res.status(400).json({ error: "Only valid image files are allowed" });
   }
 
   // Set headers for Server-Sent Events (SSE)
   res.writeHead(200, {
     "Content-Type": "text/event-stream",
     "Cache-Control": "no-cache",
-    "Connection": "keep-alive",
+    Connection: "keep-alive",
   });
 
   const sendEvent = (event, data) => {
@@ -50,7 +73,7 @@ router.post("/simulate", upload.single("image"), async (req, res) => {
     });
   } catch (error) {
     console.error("Pipeline error:", error);
-    sendEvent("error", { error: error.message || "Pipeline failed" });
+    sendEvent("error", { error: toPublicErrorMessage(error) });
   } finally {
     res.end();
   }
