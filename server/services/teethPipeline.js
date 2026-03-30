@@ -17,8 +17,14 @@ const customFetch = (url, options) => {
   return fetch(url, { ...options, agent });
 };
 
+const hfToken = process.env.HF_API_TOKEN || process.env.HUGGINGFACEHUB_API_TOKEN;
+
+if (!hfToken) {
+  console.warn("HF token is missing. Set HF_API_TOKEN (or HUGGINGFACEHUB_API_TOKEN) to enable AI simulation.");
+}
+
 // Initialize HfInference with custom fetch that supports proxy
-const hf = new HfInference(process.env.HF_API_TOKEN, { fetch: customFetch });
+const hf = new HfInference(hfToken, { fetch: customFetch });
 
 const DEFAULT_PROMPT =
   "perfect teeth, straight natural ivory white teeth, subtle alignment correction, proportional width for face, realistic enamel texture, natural smile, photorealistic";
