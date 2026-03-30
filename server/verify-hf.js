@@ -1,3 +1,4 @@
+import "dotenv/config";
 import fs from "fs";
 import { HfInference } from "@huggingface/inference";
 import { HttpsProxyAgent } from "https-proxy-agent";
@@ -15,12 +16,12 @@ const agent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
 if (proxyUrl) {
   console.log(`[INFO] Using proxy: ${proxyUrl}`);
 } else {
-  console.log(`[INFO] No proxy configured.`);
+  console.log("[INFO] No proxy configured.");
 }
 
-const token = process.env.HF_API_TOKEN;
+const token = process.env.HF_API_TOKEN || process.env.HUGGINGFACEHUB_API_TOKEN;
 if (!token) {
-  console.error("[ERROR] HF_API_TOKEN is missing in the environment!");
+  console.error("[ERROR] HF_API_TOKEN (or HUGGINGFACEHUB_API_TOKEN) is missing in the environment!");
   process.exit(1);
 }
 
@@ -45,12 +46,12 @@ async function checkHealth() {
       const data = await res.json();
       console.log(`[OK] Token is valid. Authenticated as: ${data.name}`);
       return true;
-    } else {
-      console.error(
-        `[FAIL] Invalid token or connection error. Status: ${res.status}`
-      );
-      return false;
     }
+
+    console.error(
+      `[FAIL] Invalid token or connection error. Status: ${res.status}`
+    );
+    return false;
   } catch (err) {
     console.error(`[ERROR] Health check failed: ${err.message}`);
     return false;
@@ -69,8 +70,8 @@ async function testModel(task, modelName, inputs, parameters = undefined) {
       res = await hf.imageToImage({ model: modelName, inputs, parameters });
       console.log(`[OK] Success! Generated image blob size: ${res.size}`);
     } else if (task === "textToImage") {
-        res = await hf.textToImage({ model: modelName, inputs });
-        console.log(`[OK] Success! Generated image blob size: ${res.size}`);
+      res = await hf.textToImage({ model: modelName, inputs });
+      console.log(`[OK] Success! Generated image blob size: ${res.size}`);
     } else {
       console.error(`[ERROR] Unsupported task for test: ${task}`);
       return false;
@@ -99,7 +100,7 @@ async function runTests() {
   console.log("================================================");
 
   // Test original segmentation model
-  let samSuccess = await testModel(
+  const samSuccess = await testModel(
     "imageSegmentation",
     "facebook/sam-vit-huge",
     imageBlob
@@ -116,7 +117,7 @@ async function runTests() {
   }
 
   // Test original image-to-image model
-  let sdxlSuccess = await testModel(
+  const sdxlSuccess = await testModel(
     "imageToImage",
     "diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
     imageBlob,
