@@ -33,14 +33,23 @@ async function assertValidImage(buffer) {
   }
 }
 
-router.post("/simulate", upload.single("image"), async (req, res) => {
+router.post("/simulate", (req, res, next) => {
+  upload.single("image")(req, res, (err) => {
+    if (err) {
+      console.error("Multer upload error:", err.message);
+      return res.status(400).json({ error: err.message || "File upload error" });
+    }
+    next();
+  });
+}, async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: "No image uploaded" });
   }
 
   try {
     await assertValidImage(req.file.buffer);
-  } catch {
+  } catch (err) {
+    console.error("Image validation error:", err.message);
     return res.status(400).json({ error: "Only valid image files are allowed" });
   }
 
