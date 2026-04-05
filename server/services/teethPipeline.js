@@ -3,6 +3,7 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 import fetch from "node-fetch";
 import sharp from "sharp";
 import { generateJawAnalysis, generateRecommendation, toScanScores } from "./scoreUtils.js";
+import { issueExtractionSchema, pipelineResultSchema } from "./pipelineSchema.js";
 
 // Configure proxy agent if provided in environment variables
 const proxyUrl =
@@ -138,27 +139,40 @@ async function detectIssues(imageBuffer) {
       },
     });
 
-    const issuesList = (result?.answer || "")
-      .split(/[\n,.]/)
-      .map((entry) => entry.trim())
-      .filter((entry) => entry.length > 3);
+    const summary = result?.answer?.trim();
+    if (!summary) throw new Error("Issue detector returned empty summary");
 
-    const normalized = issuesList.join(" ").toLowerCase();
-    const issueFlags = {
-      discoloration: /discolor|yellow|stain/.test(normalized),
-      gaps: /gap|spacing|space/.test(normalized),
-      chips: /chip|crack|fracture/.test(normalized),
-      misalignment: /misalign|crooked|rotat|tilt/.test(normalized),
-      crowding: /crowd|overlap/.test(normalized),
-      missingTeeth: /missing|absent/.test(normalized),
-      gumIssue: /gum|inflam|gingiv/.test(normalized),
-    };
+    const structured = await hf.textGeneration({
+      model: "google/flan-t5-large",
+      inputs: `Convert this dental issue summary to strict JSON.
+Return ONLY minified JSON with this exact schema:
+{"issuesList":["string"],"issueFlags":{"discoloration":boolean,"gaps":boolean,"chips":boolean,"misalignment":boolean,"crowding":boolean,"missingTeeth":boolean,"gumIssue":boolean}}
+Rules:
+- issuesList should have 1 to 8 concise entries inferred from the summary.
+- All booleans must be explicitly true or false.
+Summary: ${summary}`,
+      parameters: {
+        max_new_tokens: 220,
+        temperature: 0.1,
+        return_full_text: false,
+      },
+    });
 
-    return { issuesList, issueFlags };
+    const rawText = structured?.generated_text?.trim() || "";
+    const jsonStart = rawText.indexOf("{");
+    const jsonEnd = rawText.lastIndexOf("}");
+    if (jsonStart === -1 || jsonEnd === -1 || jsonEnd <= jsonStart) {
+      throw new Error("Could not locate JSON payload in structured issue output");
+    }
+
+    const parsed = JSON.parse(rawText.slice(jsonStart, jsonEnd + 1));
+    const normalized = issueExtractionSchema.parse(parsed);
+
+    return normalized;
   } catch (error) {
     console.warn("Issue detection failed:", error.message);
     return {
-      issuesList: ["Could not complete visible surface analysis"],
+      issuesList: ["Visible issue extraction requires a clearer or brighter smile photo"],
       issueFlags: {
         discoloration: false,
         gaps: false,
@@ -250,7 +264,7 @@ export async function runTeethPipeline(rawImageBuffer, onProgress) {
 
   if (onProgress) onProgress({ step: 4, message: "Finalizing..." });
 
-  return {
+  const finalResult = {
     simulatedImage: simulatedBuffer.toString("base64"),
     originalImage: imageBuffer.toString("base64"),
     issuesList: issueData.issuesList,
@@ -264,4 +278,6 @@ export async function runTeethPipeline(rawImageBuffer, onProgress) {
       maskCoverage: Math.round(imageStats.maskCoverage * 10000) / 10000,
     },
   };
+
+  return pipelineResultSchema.parse(finalResult);
 }
