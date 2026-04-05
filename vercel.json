@@ -1,5 +1,10 @@
 {
   "version": 2,
+  "functions": {
+    "server/app.js": {
+      "maxDuration": 60
+    }
+  },
   "builds": [
     {
       "src": "package.json",
