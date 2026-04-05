@@ -7,6 +7,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { deleteScan, getDashboardStatsFromScans, loadScans, type ScanResult } from "@/lib/scanStorage";
 import { mockProgressData } from "@/data/mockData";
 import ScoreGauge from "@/components/ScoreGauge";
+import UserMenu from "@/components/UserMenu";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -115,7 +116,7 @@ const DashboardPage = () => {
           className="size-12 rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] flex items-center justify-center mb-2 hover:bg-white/[0.08] hover:border-primary/30 transition-all duration-300 group"
         >
           <div className="size-7 bg-primary rounded-lg flex items-center justify-center">
-            <span className="material-symbols-outlined text-white text-sm">flare</span>
+            <span className="material-symbols-outlined text-primary-foreground text-sm">flare</span>
           </div>
         </button>
 
@@ -161,33 +162,7 @@ const DashboardPage = () => {
           >
             <User size={18} className={userMenuOpen ? "text-primary" : "text-slate-400 group-hover:text-ivory"} />
           </button>
-          {userMenuOpen && (
-            <div className="absolute left-14 bottom-0 w-48 bg-card-dark/95 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-left-2 duration-200">
-              <div className="px-4 py-3 border-b border-white/5">
-                <p className="text-xs font-bold text-ivory truncate">{displayName}</p>
-                <p className="text-[10px] text-slate-500 truncate">{user?.email}</p>
-              </div>
-              <button className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 hover:text-ivory hover:bg-white/5 transition-colors w-full">
-                <Settings size={14} />
-                Settings
-              </button>
-              <button
-                onClick={toggleTheme}
-                className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 hover:text-ivory hover:bg-white/5 transition-colors w-full"
-              >
-                {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
-                {theme === "dark" ? "Light Mode" : "Dark Mode"}
-              </button>
-              <div className="border-t border-white/5" />
-              <button
-                onClick={handleSignOut}
-                className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-400/80 hover:text-red-400 hover:bg-red-400/5 transition-colors w-full"
-              >
-                <LogOut size={14} />
-                Sign Out
-              </button>
-            </div>
-          )}
+          <UserMenu userMenuOpen={userMenuOpen} setUserMenuOpen={setUserMenuOpen} />
         </div>
       </div>
 
@@ -195,7 +170,7 @@ const DashboardPage = () => {
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-card-dark/90 backdrop-blur-xl border-t border-white/[0.08] flex items-center justify-around py-2 px-4">
         <button onClick={() => navigate("/")} className="flex flex-col items-center gap-1 py-1">
           <div className="size-6 bg-primary rounded-md flex items-center justify-center">
-            <span className="material-symbols-outlined text-white text-xs">flare</span>
+            <span className="material-symbols-outlined text-primary-foreground text-xs">flare</span>
           </div>
         </button>
         <button onClick={() => handleNavClick("dashboard")} className="flex flex-col items-center gap-1 py-1">
@@ -206,7 +181,7 @@ const DashboardPage = () => {
           onClick={() => navigate("/scan")}
           className="size-12 -mt-4 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30"
         >
-          <span className="material-symbols-outlined text-white">add</span>
+          <span className="material-symbols-outlined text-primary-foreground">add</span>
         </button>
         <button onClick={() => handleNavClick("analysis")} className="flex flex-col items-center gap-1 py-1">
           <BarChart3 size={20} className={activeNav === "analysis" ? "text-primary" : "text-slate-400"} />
@@ -219,36 +194,7 @@ const DashboardPage = () => {
       </div>
 
       {/* Mobile user menu overlay */}
-      {mobileNavOpen && (
-        <>
-          <div className="fixed inset-0 z-50 bg-black/40 lg:hidden" onClick={() => setMobileNavOpen(false)} />
-          <div className="fixed bottom-16 right-4 z-50 w-56 bg-card-dark/95 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-2 duration-200 lg:hidden">
-            <div className="px-4 py-3 border-b border-white/5">
-              <p className="text-xs font-bold text-ivory truncate">{displayName}</p>
-              <p className="text-[10px] text-slate-500 truncate">{user?.email}</p>
-            </div>
-            <button className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 hover:text-ivory hover:bg-white/5 transition-colors w-full">
-              <Settings size={14} />
-              Settings
-            </button>
-            <button
-              onClick={toggleTheme}
-              className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 hover:text-ivory hover:bg-white/5 transition-colors w-full"
-            >
-              {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
-              {theme === "dark" ? "Light Mode" : "Dark Mode"}
-            </button>
-            <div className="border-t border-white/5" />
-            <button
-              onClick={handleSignOut}
-              className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-400/80 hover:text-red-400 hover:bg-red-400/5 transition-colors w-full"
-            >
-              <LogOut size={14} />
-              Sign Out
-            </button>
-          </div>
-        </>
-      )}
+      <UserMenu userMenuOpen={mobileNavOpen} setUserMenuOpen={setMobileNavOpen} showBackdrop />
 
       <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:pl-20">
         {/* Top Bar */}
@@ -261,7 +207,7 @@ const DashboardPage = () => {
             </button>
             <button
               onClick={() => navigate("/scan")}
-              className="flex items-center gap-2 px-5 py-2 bg-primary text-white rounded-full font-bold text-sm hover:opacity-90 transition-opacity"
+              className="flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground rounded-full font-bold text-sm hover:opacity-90 transition-opacity"
             >
               <span className="material-symbols-outlined text-sm">add</span>
               New Scan
@@ -334,7 +280,7 @@ const DashboardPage = () => {
                 <span className="material-symbols-outlined text-slate-600 text-6xl">add_a_photo</span>
                 <h3 className="text-lg font-black text-ivory">No scans yet</h3>
                 <p className="text-sm text-slate-400 max-w-sm">Take your first scan to see a before/after comparison and get your personalized smile health score.</p>
-                <button onClick={() => navigate("/scan")} className="mt-2 px-6 py-2.5 bg-primary text-white rounded-full font-bold text-sm hover:opacity-90 transition-opacity">
+                <button onClick={() => navigate("/scan")} className="mt-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-bold text-sm hover:opacity-90 transition-opacity">
                   Start First Scan
                 </button>
               </div>

@@ -139,10 +139,6 @@ const ScanPage = () => {
   const [loading, setLoading] = useState(false);
   const [loadingStepIdx, setLoadingStepIdx] = useState(0);
   const [progressFull, setProgressFull] = useState(false);
-  const [cameraError, setCameraError] = useState("");
-  const [cameraActive, setCameraActive] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
   const currentStepData = steps[currentStep - 1];
@@ -156,58 +152,12 @@ const ScanPage = () => {
   };
 
   const startCamera = async () => {
-    setCameraError("");
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 960 } },
-        audio: false,
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-      setCameraActive(true);
-    } catch (err: unknown) {
-      const error = err as Error;
-      if (error.name === "NotAllowedError") {
-        setCameraError("Camera permission denied. Please allow camera access in your browser settings.");
-      } else if (error.name === "NotFoundError") {
-        setCameraError("No camera found on this device.");
-      } else {
-        setCameraError("Could not access camera. Please try uploading a photo instead.");
-      }
+    // Instead of using a custom UI, trigger the native file input with 'capture' attribute
+    const input = document.getElementById(`camera-input-${currentStep}`);
+    if (input) {
+      input.click();
     }
   };
-
-  const capturePhoto = () => {
-    if (!videoRef.current) return;
-    const video = videoRef.current;
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.drawImage(video, 0, 0);
-    canvas.toBlob((blob) => {
-      if (!blob) return;
-      const file = new File([blob], `${currentStepData.angle.toLowerCase()}-capture.jpg`, { type: "image/jpeg" });
-      handleFileChange(currentStep, file);
-      stopCamera();
-    }, "image/jpeg", 0.9);
-  };
-
-  const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((t) => t.stop());
-      streamRef.current = null;
-    }
-    setCameraActive(false);
-  };
-
-  // Cleanup camera on unmount
-  useEffect(() => {
-    return () => { stopCamera(); };
-  }, []);
 
   const handleAnalyse = useCallback(async () => {
     setLoading(true);
@@ -318,7 +268,7 @@ const ScanPage = () => {
       {loading && (
         <div className="fixed inset-0 z-50 bg-background-dark/95 backdrop-blur-md flex flex-col items-center justify-center gap-6">
           <span className="material-symbols-outlined text-primary text-6xl animate-pulse">auto_fix_high</span>
-          <p className="text-lg font-bold text-white animate-fade-up">{loadingSteps[loadingStepIdx]}</p>
+          <p className="text-lg font-bold text-foreground animate-fade-up">{loadingSteps[loadingStepIdx]}</p>
           <div className="w-64 h-1.5 bg-slate-800 rounded-full overflow-hidden">
             <div
               className="h-full bg-primary rounded-full transition-all duration-[3000ms] ease-linear"
@@ -376,58 +326,29 @@ const ScanPage = () => {
             </div>
           </div>
 
-          {/* Camera view */}
-          {cameraActive && (
-            <div className="w-full rounded-2xl overflow-hidden border-2 border-primary mb-4 relative">
-              <video ref={videoRef} autoPlay playsInline muted className="w-full aspect-[4/3] object-cover bg-black" />
-              <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
-                <button
-                  onClick={capturePhoto}
-                  className="size-16 rounded-full bg-white border-4 border-primary shadow-lg flex items-center justify-center"
-                  aria-label="Capture photo"
-                >
-                  <div className="size-12 rounded-full bg-primary" />
-                </button>
-                <button
-                  onClick={stopCamera}
-                  className="size-12 rounded-full bg-card-dark/80 backdrop-blur border border-white/20 flex items-center justify-center"
-                  aria-label="Close camera"
-                >
-                  <span className="material-symbols-outlined text-white">close</span>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {cameraError && (
-            <div className="w-full bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2 mb-4">
-              <p className="text-xs text-red-400">{cameraError}</p>
-            </div>
-          )}
-
           {/* Upload zone */}
-          {!cameraActive && (
-            <>
-              <div
-                onClick={() => document.getElementById(`photo-input-${currentStep}`)?.click()}
-                className={`border-2 border-dashed rounded-2xl p-10 flex flex-col items-center gap-4 cursor-pointer transition-all w-full ${
-                  photos[currentStep]
-                    ? "border-primary bg-primary/5"
-                    : "border-white/10 hover:border-primary/50 bg-white/[0.02]"
-                }`}
-              >
-                <input
-                  id={`photo-input-${currentStep}`}
-                  type="file"
-                  accept="image/jpg,image/jpeg,image/png,image/heic"
-                  capture={undefined}
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleFileChange(currentStep, file);
-                  }}
-                />
-                {photos[currentStep] ? (
+          <>
+            <div
+              onClick={() => document.getElementById(`photo-input-${currentStep}`)?.click()}
+              className={`border-2 border-dashed rounded-2xl p-10 flex flex-col items-center gap-4 cursor-pointer transition-all w-full ${
+                photos[currentStep]
+                  ? "border-primary bg-primary/5"
+                  : "border-white/10 hover:border-primary/50 bg-white/[0.02]"
+              }`}
+            >
+              <input
+                id={`photo-input-${currentStep}`}
+                type="file"
+                accept="image/jpg,image/jpeg,image/png,image/heic"
+                capture={undefined}
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleFileChange(currentStep, file);
+                  e.target.value = '';
+                }}
+              />
+              {photos[currentStep] ? (
                   <>
                     <img
                       src={previews[currentStep]}
@@ -438,30 +359,43 @@ const ScanPage = () => {
                     <p className="text-xs text-slate-500">Click to replace</p>
                   </>
                 ) : (
-                  <>
-                    <span className="material-symbols-outlined text-slate-400 text-4xl">cloud_upload</span>
-                    <p className="text-sm font-bold text-slate-300">Upload {currentStepData.angle} photo from gallery</p>
-                    <p className="text-xs text-slate-600">JPG, PNG, HEIC · Max 10MB</p>
-                  </>
-                )}
-              </div>
+                <>
+                  <span className="material-symbols-outlined text-slate-400 text-4xl">cloud_upload</span>
+                  <p className="text-sm font-bold text-slate-300">Upload {currentStepData.angle} photo from gallery</p>
+                  <p className="text-xs text-slate-600">JPG, PNG, HEIC · Max 10MB</p>
+                </>
+              )}
+            </div>
 
-              {/* Camera button — mobile friendly */}
-              <button
-                onClick={startCamera}
-                className="mt-3 flex items-center justify-center gap-2 w-full py-3 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-slate-300 hover:border-primary hover:text-primary transition-colors"
-              >
-                <span className="material-symbols-outlined text-base">photo_camera</span>
-                Take a Pic
-              </button>
-            </>
-          )}
+            {/* Native Camera Input (hidden) */}
+            <input
+              id={`camera-input-${currentStep}`}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleFileChange(currentStep, file);
+                e.target.value = '';
+              }}
+            />
+
+            {/* Camera button — mobile friendly */}
+            <button
+              onClick={startCamera}
+              className="mt-3 flex items-center justify-center gap-2 w-full py-3 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-slate-300 hover:border-primary hover:text-primary transition-colors"
+            >
+              <span className="material-symbols-outlined text-base">photo_camera</span>
+              Take a Pic
+            </button>
+          </>
 
           {/* Navigation buttons */}
           <div className="flex justify-between mt-8 w-full">
             <button
               disabled={currentStep === 1}
-              onClick={() => { setCurrentStep((p) => p - 1); stopCamera(); }}
+              onClick={() => { setCurrentStep((p) => p - 1); }}
               className="px-6 py-2 border border-white/10 text-slate-400 rounded-full text-sm font-bold hover:border-white/20 disabled:opacity-30 transition-colors"
             >
               ← Back
@@ -469,8 +403,8 @@ const ScanPage = () => {
             {currentStep < 3 ? (
               <button
                 disabled={!photos[currentStep]}
-                onClick={() => { setCurrentStep((p) => p + 1); stopCamera(); }}
-                className="px-6 py-2 bg-primary text-white rounded-full text-sm font-bold hover:opacity-90 disabled:opacity-40 transition-opacity"
+                onClick={() => { setCurrentStep((p) => p + 1); }}
+                className="px-6 py-2 bg-primary text-primary-foreground rounded-full text-sm font-bold hover:opacity-90 disabled:opacity-40 transition-opacity"
               >
                 Continue →
               </button>
@@ -478,7 +412,7 @@ const ScanPage = () => {
               <button
                 disabled={!photos[1] || !photos[2] || !photos[3]}
                 onClick={handleAnalyse}
-                className="px-6 py-2 bg-primary text-white rounded-full text-sm font-bold hover:opacity-90 disabled:opacity-40 transition-opacity"
+                className="px-6 py-2 bg-primary text-primary-foreground rounded-full text-sm font-bold hover:opacity-90 disabled:opacity-40 transition-opacity"
               >
                 Analyse My Smile →
               </button>
@@ -490,7 +424,7 @@ const ScanPage = () => {
             {[1, 2, 3].map((n) => (
               <button
                 key={n}
-                onClick={() => { setCurrentStep(n); stopCamera(); }}
+                onClick={() => { setCurrentStep(n); }}
                 aria-label={`Go to step ${n}`}
                 className={`size-14 rounded-xl border-2 overflow-hidden flex items-center justify-center transition-all ${
                   photos[n]

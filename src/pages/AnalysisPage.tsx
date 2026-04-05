@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { LayoutDashboard, BarChart3, User, LogOut, Settings } from "lucide-react";
+import { LayoutDashboard, BarChart3, User } from "lucide-react";
 import ScoreGauge from "@/components/ScoreGauge";
 import MetricBar from "@/components/MetricBar";
 import DoctorModal from "@/components/DoctorModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { deleteScan, loadScans, type ScanResult } from "@/lib/scanStorage";
 import { mockScores, mockJaw, mockRecommendation } from "@/data/mockData";
+import UserMenu from "@/components/UserMenu";
 
 const simulationTabs = ["Braces Overlay", "Whitening", "Jaw Alignment"];
 
@@ -28,10 +29,11 @@ const getGrade = (score: number) => {
 const AnalysisPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const [activeSimulation, setActiveSimulation] = useState("Braces Overlay");
   const [doctorModalOpen, setDoctorModalOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const userId = user?.id || "anonymous";
   const [scans, setScans] = useState<ScanResult[]>([]);
@@ -78,10 +80,6 @@ const AnalysisPage = () => {
     await deleteScan(userId, scan.id);
     navigate("/dashboard");
   };
-  const handleSignOut = async () => {
-    await signOut();
-    navigate("/");
-  };
 
   return (
     <div className="h-screen overflow-hidden flex font-display bg-background-dark relative">
@@ -115,23 +113,7 @@ const AnalysisPage = () => {
           >
             <User size={18} className={userMenuOpen ? "text-primary" : "text-slate-400 group-hover:text-ivory"} />
           </button>
-          {userMenuOpen && (
-            <div className="absolute left-14 bottom-0 w-48 bg-card-dark/95 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-left-2 duration-200">
-              <div className="px-4 py-3 border-b border-white/5">
-                <p className="text-xs font-bold text-ivory truncate">{displayName}</p>
-                <p className="text-[10px] text-slate-500 truncate">{user?.email}</p>
-              </div>
-              <button className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 hover:text-ivory hover:bg-white/5 transition-colors w-full">
-                <Settings size={14} />
-                Settings
-              </button>
-              <div className="border-t border-white/5" />
-              <button onClick={handleSignOut} className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-400/80 hover:text-red-400 hover:bg-red-400/5 transition-colors w-full">
-                <LogOut size={14} />
-                Sign Out
-              </button>
-            </div>
-          )}
+          <UserMenu userMenuOpen={userMenuOpen} setUserMenuOpen={setUserMenuOpen} />
         </div>
       </div>
 
@@ -149,7 +131,7 @@ const AnalysisPage = () => {
               <span className="material-symbols-outlined text-ivory">notifications</span>
               <div className="absolute -top-1 -right-1 size-2 bg-red-500 rounded-full" />
             </button>
-            <button className="hidden sm:flex items-center gap-2 px-5 py-2 bg-primary text-white rounded-lg font-bold text-sm hover:opacity-90 transition-opacity">
+            <button className="hidden sm:flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground rounded-lg font-bold text-sm hover:opacity-90 transition-opacity">
               <span className="material-symbols-outlined text-sm">save</span>
               Save Plan
             </button>
@@ -176,13 +158,13 @@ const AnalysisPage = () => {
                 <span className="text-lg font-black uppercase text-ivory">BEFORE & AFTER TRANSFORMATION</span>
                 <div className="flex gap-2">
                   <span className="bg-card-dark text-ivory text-[10px] font-bold uppercase px-2 py-1">FULL HD</span>
-                  <span className="bg-black text-white text-[10px] font-bold uppercase px-2 py-1">AI ENHANCED</span>
+                  <span className="bg-foreground text-background text-[10px] font-bold uppercase px-2 py-1">AI ENHANCED</span>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border-t-2 border-black/20">
                 <div className="relative aspect-[16/11] overflow-hidden bg-background-dark">
                   <img src={thumbnailUrl} alt="Original smile" className="h-full w-full object-cover" />
-                  <span className="absolute bottom-4 left-4 bg-black text-white px-3 py-1 text-[10px] font-bold uppercase">Original</span>
+                  <span className="absolute bottom-4 left-4 bg-foreground text-background px-3 py-1 text-[10px] font-bold uppercase">Original</span>
                 </div>
                 <div className="relative aspect-[16/11] overflow-hidden bg-background-dark">
                   {simulatedImage ? (
@@ -200,7 +182,7 @@ const AnalysisPage = () => {
                       </div>
                     </div>
                   )}
-                  <span className="absolute bottom-4 left-4 bg-black text-white px-3 py-1 text-[10px] font-bold uppercase">AI Simulated</span>
+                  <span className="absolute bottom-4 left-4 bg-foreground text-background px-3 py-1 text-[10px] font-bold uppercase">AI Simulated</span>
                 </div>
               </div>
               <div className="flex gap-2 p-4 border-t-2 border-black/20">
@@ -287,7 +269,7 @@ const AnalysisPage = () => {
             {/* Recommended Treatment */}
             <div className="border-2 border-black bg-primary/10 rounded-2xl p-6 flex flex-col gap-4">
               <div className="flex items-center gap-4">
-                <div className="size-12 bg-black text-white flex items-center justify-center shrink-0">
+                <div className="size-12 bg-foreground text-background flex items-center justify-center shrink-0">
                   <span className="material-symbols-outlined">lightbulb</span>
                 </div>
                 <span className="text-xl font-black uppercase text-ivory">RECOMMENDED TREATMENT</span>
@@ -310,7 +292,7 @@ const AnalysisPage = () => {
               </div>
               <button
                 onClick={() => setDoctorModalOpen(true)}
-                className="px-6 py-3 bg-black text-white border-2 border-black font-black uppercase text-sm hover:translate-x-1 hover:-translate-y-1 transition-transform shadow-[4px_4px_0px_0px_rgba(158,193,155,1)] w-full"
+                className="px-6 py-3 bg-foreground text-background border-2 border-foreground font-black uppercase text-sm hover:translate-x-1 hover:-translate-y-1 transition-transform shadow-[4px_4px_0px_0px_rgba(158,193,155,1)] w-full"
               >
                 BOOK CONSULTATION
               </button>
@@ -352,7 +334,7 @@ const AnalysisPage = () => {
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-card-dark/90 backdrop-blur-xl border-t border-white/[0.08] flex items-center justify-around py-2 px-4">
         <button onClick={() => navigate("/")} className="flex flex-col items-center gap-1 py-1">
           <div className="size-6 bg-primary rounded-md flex items-center justify-center">
-            <span className="material-symbols-outlined text-white text-xs">flare</span>
+            <span className="material-symbols-outlined text-primary-foreground text-xs">flare</span>
           </div>
         </button>
         <button onClick={() => navigate("/dashboard")} className="flex flex-col items-center gap-1 py-1">
@@ -360,17 +342,20 @@ const AnalysisPage = () => {
           <span className="text-[10px] font-bold text-slate-500">Home</span>
         </button>
         <button onClick={() => navigate("/scan")} className="size-12 -mt-4 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30">
-          <span className="material-symbols-outlined text-white">add</span>
+          <span className="material-symbols-outlined text-primary-foreground">add</span>
         </button>
         <button className="flex flex-col items-center gap-1 py-1">
           <BarChart3 size={20} className="text-primary" />
           <span className="text-[10px] font-bold text-primary">Analysis</span>
         </button>
-        <button className="flex flex-col items-center gap-1 py-1">
+        <button onClick={() => setMobileNavOpen(!mobileNavOpen)} className="flex flex-col items-center gap-1 py-1">
           <User size={20} className="text-slate-400" />
           <span className="text-[10px] font-bold text-slate-500">Profile</span>
         </button>
       </div>
+
+      {/* Mobile user menu overlay */}
+      <UserMenu userMenuOpen={mobileNavOpen} setUserMenuOpen={setMobileNavOpen} showBackdrop />
 
       <DoctorModal open={doctorModalOpen} onClose={() => setDoctorModalOpen(false)} scanId={id || "scan-001"} />
     </div>
