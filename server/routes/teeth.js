@@ -17,13 +17,25 @@ const upload = multer({
   },
 });
 
-function toPublicErrorMessage(error) {
+function toPublicErrorPayload(error) {
   const message = error?.message || "";
   if (message.includes("Only image files are allowed") || message.includes("No image uploaded")) {
-    return message;
+    return { error: message };
   }
 
-  return "We couldn't process the uploaded image. Please try another image.";
+  const isDev = process.env.NODE_ENV !== "production";
+  const diagnostics = error?.diagnostics;
+  const base = {
+    error: "We couldn't process the uploaded image. Please try another image.",
+    debugMessage: error?.message || "Unknown pipeline error",
+    debugType: error?.name || "Error",
+  };
+
+  if (isDev && Array.isArray(diagnostics)) {
+    base.modelDiagnostics = diagnostics;
+  }
+
+  return base;
 }
 
 async function assertValidImage(buffer) {
@@ -32,6 +44,23 @@ async function assertValidImage(buffer) {
     throw new Error("Invalid image payload");
   }
 }
+
+router.get("/status", (_req, res) => {
+  const proxyUrl =
+    process.env.http_proxy ||
+    process.env.HTTP_PROXY ||
+    process.env.https_proxy ||
+    process.env.HTTPS_PROXY;
+
+  res.json({
+    ok: true,
+    service: "teeth-simulation",
+    hfEndpoint: process.env.HF_ENDPOINT || "https://api-inference.huggingface.co",
+    proxyEnabled: Boolean(proxyUrl),
+    tokenConfigured: Boolean(process.env.HF_API_TOKEN || process.env.HUGGINGFACEHUB_API_TOKEN),
+    timestamp: new Date().toISOString(),
+  });
+});
 
 router.post("/simulate", (req, res, next) => {
   upload.single("image")(req, res, (err) => {
@@ -82,7 +111,7 @@ router.post("/simulate", (req, res, next) => {
     });
   } catch (error) {
     console.error("Pipeline error:", error);
-    sendEvent("error", { error: toPublicErrorMessage(error) });
+    sendEvent("error", toPublicErrorPayload(error));
   } finally {
     res.end();
   }

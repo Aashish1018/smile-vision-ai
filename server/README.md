@@ -12,6 +12,7 @@ npm run dev:api
 ## Endpoints
 
 - `GET /health`
+- `GET /api/teeth/status`
 - `POST /api/teeth/simulate` (multipart/form-data with `image`)
   - Streams `progress` + `complete` events via SSE.
   - `complete` now includes:
