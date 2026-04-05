@@ -56,5 +56,16 @@ export const pipelineResultSchema = z.object({
     segmentConfidence: z.number().min(0).max(1),
     brightness: z.number().min(0).max(100),
     maskCoverage: z.number().min(0).max(1),
+    endpoint: z.string().url().optional(),
+    proxyEnabled: z.boolean().optional(),
+    diagnostics: z.array(z.object({
+      task: z.string().min(1),
+      model: z.string().min(1),
+      status: z.enum(["success", "failed", "fallback"]),
+      message: z.string().min(1).optional(),
+      statusCode: z.number().int().optional(),
+      endpoint: z.string().optional(),
+      type: z.string().optional(),
+    })).optional(),
   }),
 });

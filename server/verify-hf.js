@@ -11,6 +11,9 @@ const proxyUrl =
   process.env.https_proxy ||
   process.env.HTTPS_PROXY;
 
+const HF_ENDPOINT = process.env.HF_ENDPOINT || "https://api-inference.huggingface.co";
+const API_BASE_URL = process.env.API_BASE_URL || "http://127.0.0.1:8787";
+
 const agent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
 
 if (proxyUrl) {
@@ -18,6 +21,8 @@ if (proxyUrl) {
 } else {
   console.log("[INFO] No proxy configured.");
 }
+console.log(`[INFO] HF endpoint: ${HF_ENDPOINT}`);
+console.log(`[INFO] Local API base URL: ${API_BASE_URL}`);
 
 const token = process.env.HF_API_TOKEN || process.env.HUGGINGFACEHUB_API_TOKEN;
 if (!token) {
@@ -36,8 +41,51 @@ const customFetch = (url, options) => {
 
 const hf = new HfInference(token, { fetch: customFetch });
 
+async function checkServerStatus() {
+  console.log("\n--- Local Server Status ---");
+  try {
+    const healthRes = await fetch(`${API_BASE_URL}/health`);
+    if (healthRes.ok) {
+      console.log("[OK] /health responded successfully.");
+    } else {
+      console.error(`[FAIL] /health returned status ${healthRes.status}.`);
+    }
+
+    const statusRes = await fetch(`${API_BASE_URL}/api/teeth/status`);
+    if (statusRes.ok) {
+      const payload = await statusRes.json();
+      console.log(`[OK] /api/teeth/status => ${JSON.stringify(payload)}`);
+      return true;
+    }
+
+    console.error(`[FAIL] /api/teeth/status returned status ${statusRes.status}.`);
+    return false;
+  } catch (error) {
+    console.error(`[ERROR] Local server check failed: ${error.message}`);
+    return false;
+  }
+}
+
+async function checkProxyPath() {
+  console.log("\n--- Proxy Connectivity Check ---");
+  try {
+    const res = await customFetch("https://httpbin.org/ip");
+    if (!res.ok) {
+      console.error(`[FAIL] Proxy/IP check failed with status ${res.status}.`);
+      return false;
+    }
+
+    const payload = await res.json();
+    console.log(`[OK] Outbound connectivity working. Detected IP payload: ${JSON.stringify(payload)}`);
+    return true;
+  } catch (error) {
+    console.error(`[ERROR] Proxy connectivity check failed: ${error.message}`);
+    return false;
+  }
+}
+
 async function checkHealth() {
-  console.log("\n--- Health Check ---");
+  console.log("\n--- Hugging Face Health Check ---");
   try {
     const res = await customFetch("https://huggingface.co/api/whoami-v2", {
       headers: { Authorization: `Bearer ${token}` },
@@ -84,6 +132,9 @@ async function testModel(task, modelName, inputs, parameters = undefined) {
 }
 
 async function runTests() {
+  await checkServerStatus();
+  await checkProxyPath();
+
   const isHealthy = await checkHealth();
   if (!isHealthy) return;
 

@@ -12,6 +12,8 @@ const proxyUrl =
   process.env.https_proxy ||
   process.env.HTTPS_PROXY;
 
+const HF_ENDPOINT = process.env.HF_ENDPOINT || "https://api-inference.huggingface.co";
+
 const agent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
 
 const customFetch = (url, options) => {
@@ -30,13 +32,59 @@ const hf = new HfInference(hfToken, { fetch: customFetch });
 const DEFAULT_PROMPT =
   "perfect teeth, straight natural ivory white teeth, subtle alignment correction, proportional width for face, realistic enamel texture, natural smile, photorealistic";
 
-async function withModelFallback(primaryCall, fallbackCall, warningMessage) {
-  try {
-    return await primaryCall();
-  } catch (error) {
-    console.warn(warningMessage, error.message);
-    return fallbackCall();
+function summarizeError(error) {
+  const status = error?.status || error?.response?.status;
+  const endpoint = error?.url || error?.response?.url || "unknown";
+  const message = error?.message || "Unknown model failure";
+  return {
+    message,
+    statusCode: typeof status === "number" ? status : undefined,
+    endpoint,
+    type: error?.name || "Error",
+  };
+}
+
+function createPipelineError(message, diagnostics, cause) {
+  const error = new Error(message);
+  error.name = "PipelineModelError";
+  error.diagnostics = diagnostics;
+  if (cause) {
+    error.cause = cause;
   }
+  return error;
+}
+
+async function withModelFallback(taskName, attempts, diagnostics) {
+  let lastError;
+
+  for (let i = 0; i < attempts.length; i += 1) {
+    const attempt = attempts[i];
+    try {
+      const result = await attempt.call();
+      diagnostics.push({
+        task: taskName,
+        model: attempt.model,
+        status: "success",
+      });
+      return result;
+    } catch (error) {
+      const detail = summarizeError(error);
+      diagnostics.push({
+        task: taskName,
+        model: attempt.model,
+        status: "failed",
+        ...detail,
+      });
+      lastError = error;
+      console.warn(`[Model Fallback] ${taskName} failed on ${attempt.model}: ${detail.message}`);
+    }
+  }
+
+  throw createPipelineError(
+    `${taskName} failed across ${attempts.length} model(s). Check HF token, model availability, endpoint (${HF_ENDPOINT}), and proxy (${proxyUrl || "not configured"}).`,
+    diagnostics,
+    lastError,
+  );
 }
 
 async function normalizeImage(buffer) {
@@ -82,22 +130,30 @@ function extractTeethMask(segmentationResult) {
   };
 }
 
-async function segmentTeeth(imageBuffer) {
+async function segmentTeeth(imageBuffer, diagnostics) {
   // Convert Buffer to Blob for HF API inputs
   const imageBlob = new Blob([imageBuffer]);
 
   try {
     const result = await withModelFallback(
-      () => hf.imageSegmentation({
-        model: "facebook/sam-vit-huge",
-        inputs: imageBlob,
-      }),
-      () =>
-        hf.imageSegmentation({
+      "segmentTeeth",
+      [
+        {
+          model: "facebook/sam-vit-huge",
+          call: () => hf.imageSegmentation({
+            model: "facebook/sam-vit-huge",
+            inputs: imageBlob,
+          }),
+        },
+        {
           model: "facebook/detr-resnet-50-panoptic",
-          inputs: imageBlob,
-        }),
-      "facebook/sam-vit-huge failed, falling back to facebook/detr-resnet-50-panoptic:",
+          call: () => hf.imageSegmentation({
+            model: "facebook/detr-resnet-50-panoptic",
+            inputs: imageBlob,
+          }),
+        },
+      ],
+      diagnostics,
     );
 
     const { maskBuffer: rawMask, segmentConfidence } = extractTeethMask(result);
@@ -110,82 +166,110 @@ async function segmentTeeth(imageBuffer) {
   }
 }
 
-async function analyzeIdealTeeth(imageBuffer) {
+async function analyzeIdealTeeth(imageBuffer, diagnostics) {
   try {
     const imageBlob = new Blob([imageBuffer]);
     const result = await withModelFallback(
-      () => hf.visualQuestionAnswering({
-        model: "llava-hf/llava-1.5-7b-hf",
-        inputs: {
-          image: imageBlob,
-          question: `You are a cosmetic dentist AI. Analyze this person's facial structure, lip shape, jaw width, face proportions, skin tone, and existing tooth structure.
+      "analyzeIdealTeeth",
+      [
+        {
+          model: "llava-hf/llava-1.5-7b-hf",
+          call: () => hf.visualQuestionAnswering({
+            model: "llava-hf/llava-1.5-7b-hf",
+            inputs: {
+              image: imageBlob,
+              question: `You are a cosmetic dentist AI. Analyze this person's facial structure, lip shape, jaw width, face proportions, skin tone, and existing tooth structure.
 Describe ideal teeth for this person as a Stable Diffusion positive prompt.
 Include tooth size/width, natural white shade, edge shape, alignment changes, and missing tooth restoration details.
 Output only one prompt beginning with "perfect teeth,".`,
+            },
+          }),
         },
-      }),
-      () => hf.visualQuestionAnswering({
-        model: "dandelin/vilt-b32-finetuned-vqa",
-        inputs: {
-          image: imageBlob,
-          question: `You are a cosmetic dentist AI. Analyze this person's facial structure, lip shape, jaw width, face proportions, skin tone, and existing tooth structure.
+        {
+          model: "dandelin/vilt-b32-finetuned-vqa",
+          call: () => hf.visualQuestionAnswering({
+            model: "dandelin/vilt-b32-finetuned-vqa",
+            inputs: {
+              image: imageBlob,
+              question: `You are a cosmetic dentist AI. Analyze this person's facial structure, lip shape, jaw width, face proportions, skin tone, and existing tooth structure.
 Describe ideal teeth for this person as a Stable Diffusion positive prompt.
 Include tooth size/width, natural white shade, edge shape, alignment changes, and missing tooth restoration details.
 Output only one prompt beginning with "perfect teeth,".`,
+            },
+          }),
         },
-      }),
-      "llava-hf/llava-1.5-7b-hf failed, falling back to dandelin/vilt-b32-finetuned-vqa:"
+      ],
+      diagnostics,
     );
 
     const answer = result?.answer?.trim();
     return answer && answer.length > 10 ? answer : DEFAULT_PROMPT;
   } catch (error) {
     console.warn("LLaVA analysis failed, falling back to default prompt:", error.message);
+    diagnostics.push({ task: "analyzeIdealTeeth", model: "default_prompt", status: "fallback" });
     return DEFAULT_PROMPT;
   }
 }
 
-async function detectIssues(imageBuffer) {
+async function detectIssues(imageBuffer, diagnostics) {
   try {
     const imageBlob = new Blob([imageBuffer]);
     const result = await withModelFallback(
-      () => hf.visualQuestionAnswering({
-        model: "Salesforce/blip-2-opt-2.7b",
-        inputs: {
-          image: imageBlob,
-          question:
-            "List visible dental issues such as discoloration, yellowing, gaps, chips, misalignment, overcrowding, gum inflammation, or missing teeth. Be concise.",
+      "detectIssues.vqa",
+      [
+        {
+          model: "Salesforce/blip-2-opt-2.7b",
+          call: () => hf.visualQuestionAnswering({
+            model: "Salesforce/blip-2-opt-2.7b",
+            inputs: {
+              image: imageBlob,
+              question:
+                "List visible dental issues such as discoloration, yellowing, gaps, chips, misalignment, overcrowding, gum inflammation, or missing teeth. Be concise.",
+            },
+          }),
         },
-      }),
-      () => hf.visualQuestionAnswering({
-        model: "dandelin/vilt-b32-finetuned-vqa",
-        inputs: {
-          image: imageBlob,
-          question:
-            "List visible dental issues such as discoloration, yellowing, gaps, chips, misalignment, overcrowding, gum inflammation, or missing teeth. Be concise.",
+        {
+          model: "dandelin/vilt-b32-finetuned-vqa",
+          call: () => hf.visualQuestionAnswering({
+            model: "dandelin/vilt-b32-finetuned-vqa",
+            inputs: {
+              image: imageBlob,
+              question:
+                "List visible dental issues such as discoloration, yellowing, gaps, chips, misalignment, overcrowding, gum inflammation, or missing teeth. Be concise.",
+            },
+          }),
         },
-      }),
-      "Salesforce/blip-2-opt-2.7b failed, falling back to dandelin/vilt-b32-finetuned-vqa:"
+      ],
+      diagnostics,
     );
 
     const summary = result?.answer?.trim();
     if (!summary) throw new Error("Issue detector returned empty summary");
 
-    const structured = await hf.textGeneration({
-      model: "google/flan-t5-large",
-      inputs: `Convert this dental issue summary to strict JSON.
+    const structured = await withModelFallback(
+      "detectIssues.structure",
+      [
+        {
+          model: "google/flan-t5-large",
+          call: () => hf.textGeneration({
+            model: "google/flan-t5-large",
+            inputs: `Convert this dental issue summary to strict JSON.
 Return ONLY minified JSON with this exact schema:
 {"issuesList":["string"],"issueFlags":{"discoloration":boolean,"gaps":boolean,"chips":boolean,"misalignment":boolean,"crowding":boolean,"missingTeeth":boolean,"gumIssue":boolean}}
 Rules:
 - issuesList should have 1 to 8 concise entries inferred from the summary.
 - All booleans must be explicitly true or false.
 Summary: ${summary}`,
-      parameters: {
-        max_new_tokens: 220,
-        temperature: 0.1,
-        return_full_text: false,
-      },
-    });
+            parameters: {
+              max_new_tokens: 220,
+              temperature: 0.1,
+              return_full_text: false,
+            },
+          }),
+        },
+      ],
+      diagnostics,
+    );
 
     const rawText = structured?.generated_text?.trim() || "";
     const jsonStart = rawText.indexOf("{");
@@ -200,6 +284,7 @@ Summary: ${summary}`,
     return normalized;
   } catch (error) {
     console.warn("Issue detection failed:", error.message);
+    diagnostics.push({ task: "detectIssues", model: "heuristic_default", status: "fallback", message: error.message });
     return {
       issuesList: ["Visible issue extraction requires a clearer or brighter smile photo"],
       issueFlags: {
@@ -215,30 +300,37 @@ Summary: ${summary}`,
   }
 }
 
-async function simulateTeeth(imageBuffer, maskBuffer, idealPrompt) {
+async function simulateTeeth(imageBuffer, maskBuffer, idealPrompt, diagnostics) {
   const imageBlob = new Blob([imageBuffer]);
   try {
     const resultBlob = await withModelFallback(
-      () =>
-        hf.imageToImage({
+      "simulateTeeth",
+      [
+        {
           model: "diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
-          inputs: imageBlob,
-          parameters: {
-            mask_image: maskBuffer.toString("base64"),
-            prompt: idealPrompt,
-            negative_prompt:
-              "cartoon, anime, blurry, distorted, unrealistic, yellow teeth, crooked, fake, cgi, rendered, artificial, oversaturated",
-            num_inference_steps: 50,
-            guidance_scale: 7.5,
-            strength: 0.85,
-          },
-        }),
-      () =>
-        hf.textToImage({
+          call: () => hf.imageToImage({
+            model: "diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
+            inputs: imageBlob,
+            parameters: {
+              mask_image: maskBuffer.toString("base64"),
+              prompt: idealPrompt,
+              negative_prompt:
+                "cartoon, anime, blurry, distorted, unrealistic, yellow teeth, crooked, fake, cgi, rendered, artificial, oversaturated",
+              num_inference_steps: 50,
+              guidance_scale: 7.5,
+              strength: 0.85,
+            },
+          }),
+        },
+        {
           model: "stabilityai/stable-diffusion-xl-base-1.0",
-          inputs: idealPrompt || "perfect teeth",
-        }),
-      "diffusers/stable-diffusion-xl-1.0-inpainting-0.1 failed, falling back to stabilityai/stable-diffusion-xl-base-1.0:",
+          call: () => hf.textToImage({
+            model: "stabilityai/stable-diffusion-xl-base-1.0",
+            inputs: idealPrompt || "perfect teeth",
+          }),
+        },
+      ],
+      diagnostics,
     );
 
     const arrayBuffer = await resultBlob.arrayBuffer();
@@ -272,19 +364,21 @@ async function computeImageStats(imageBuffer, maskBuffer) {
 }
 
 export async function runTeethPipeline(rawImageBuffer, onProgress) {
+  const diagnostics = [];
+
   if (onProgress) onProgress({ step: 1, message: "Analyzing your photo..." });
   const imageBuffer = await normalizeImage(rawImageBuffer);
-  const { maskBuffer, segmentConfidence } = await segmentTeeth(imageBuffer);
+  const { maskBuffer, segmentConfidence } = await segmentTeeth(imageBuffer, diagnostics);
 
   if (onProgress) onProgress({ step: 2, message: "Understanding your ideal smile and detecting surface issues..." });
   const [idealPrompt, issueData, imageStats] = await Promise.all([
-    analyzeIdealTeeth(imageBuffer),
-    detectIssues(imageBuffer),
+    analyzeIdealTeeth(imageBuffer, diagnostics),
+    detectIssues(imageBuffer, diagnostics),
     computeImageStats(imageBuffer, maskBuffer),
   ]);
 
   if (onProgress) onProgress({ step: 3, message: "Simulating ideal teeth..." });
-  const simulatedBuffer = await simulateTeeth(imageBuffer, maskBuffer, idealPrompt);
+  const simulatedBuffer = await simulateTeeth(imageBuffer, maskBuffer, idealPrompt, diagnostics);
 
   const scores = toScanScores({
     brightness: imageStats.brightness,
@@ -310,6 +404,9 @@ export async function runTeethPipeline(rawImageBuffer, onProgress) {
       segmentConfidence: Math.round(segmentConfidence * 1000) / 1000,
       brightness: Math.round(imageStats.brightness * 10) / 10,
       maskCoverage: Math.round(imageStats.maskCoverage * 10000) / 10000,
+      endpoint: HF_ENDPOINT,
+      proxyEnabled: Boolean(proxyUrl),
+      diagnostics,
     },
   };
 

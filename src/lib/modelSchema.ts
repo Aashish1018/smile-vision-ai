@@ -39,6 +39,17 @@ const apiSimulationResultSchema = z.object({
     segmentConfidence: z.number().min(0).max(1).optional(),
     brightness: z.number().min(0).max(100).optional(),
     maskCoverage: z.number().min(0).max(1).optional(),
+    endpoint: z.string().url().optional(),
+    proxyEnabled: z.boolean().optional(),
+    diagnostics: z.array(z.object({
+      task: z.string().min(1),
+      model: z.string().min(1),
+      status: z.enum(["success", "failed", "fallback"]),
+      message: z.string().min(1).optional(),
+      statusCode: z.number().int().optional(),
+      endpoint: z.string().min(1).optional(),
+      type: z.string().min(1).optional(),
+    })).optional(),
   }).optional(),
 });
 
