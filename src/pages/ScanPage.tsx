@@ -3,16 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   fileToScanImage,
-  generateHeuristicScores,
-  generateJawAnalysis,
-  generateRecommendation,
   loadScans,
   saveScans,
   type AngleModelResult,
   type ScanImage,
   type ScanResult,
-  type ScanScores,
 } from "@/lib/scanStorage";
+import {
+  averageScores,
+  mergeModelRecommendations,
+  parseApiSimulationResult,
+  type ApiSimulationResult,
+} from "@/lib/modelSchema";
 import refFront from "@/assets/guide-front.svg";
 import refRight from "@/assets/guide-right.svg";
 import refLeft from "@/assets/guide-left.svg";
@@ -51,35 +53,6 @@ const loadingSteps = [
   "Running dental geometry analysis…",
   "Preparing your smile preview…",
 ];
-
-
-interface ApiSimulationResult {
-  success: boolean;
-  simulatedImage: string;
-  originalImage: string;
-  issuesList: string[];
-  idealDescription: string;
-  scores: ScanScores;
-  jaw: ScanResult["jaw"];
-  recommendation: ScanResult["recommendation"];
-  modelMeta?: {
-    segmentConfidence?: number;
-    brightness?: number;
-    maskCoverage?: number;
-  };
-}
-
-const averageScores = (items: ScanScores[]): ScanScores => {
-  const fields: (keyof ScanScores)[] = ["alignment", "symmetry", "whiteness", "spacing", "gumHealth", "overbite", "toothShape", "midlineDeviation", "overall"];
-  const output = {} as ScanScores;
-
-  for (const field of fields) {
-    const total = items.reduce((sum, row) => sum + row[field], 0);
-    output[field] = Number((total / items.length).toFixed(field === "midlineDeviation" ? 1 : 0));
-  }
-
-  return output;
-};
 
 async function runModelForFile(file: File): Promise<ApiSimulationResult> {
   const formData = new FormData();
@@ -122,7 +95,7 @@ async function runModelForFile(file: File): Promise<ApiSimulationResult> {
       if (!data) continue;
       const parsed = JSON.parse(data);
       if (eventType === "error") throw new Error(parsed.error || "ML pipeline failed.");
-      if (eventType === "complete") completePayload = parsed as ApiSimulationResult;
+      if (eventType === "complete") completePayload = parseApiSimulationResult(parsed);
     }
   }
 
@@ -180,33 +153,30 @@ const ScanPage = () => {
 
       const angleResults: AngleModelResult[] = [];
       let frontResult: ApiSimulationResult | null = null;
-
-      try {
-        for (let i = 0; i < 3; i += 1) {
-          const file = photos[i + 1];
-          if (!file) continue;
-          const result = await runModelForFile(file);
-          if (i === 0) frontResult = result;
-          angleResults.push({
-            angle: angles[i],
-            issuesList: result.issuesList,
-            idealDescription: result.idealDescription,
-            scores: result.scores,
-            jaw: result.jaw,
-            recommendation: result.recommendation,
-            modelMeta: result.modelMeta,
-          });
-          setLoadingStepIdx(Math.min(4, i + 1));
-        }
-      } catch (mlError) {
-        console.warn("ML pipeline fallback to heuristic scoring:", mlError);
+      for (let i = 0; i < 3; i += 1) {
+        const file = photos[i + 1];
+        if (!file) continue;
+        const result = await runModelForFile(file);
+        if (i === 0) frontResult = result;
+        angleResults.push({
+          angle: angles[i],
+          issuesList: result.issuesList,
+          idealDescription: result.idealDescription,
+          scores: result.scores,
+          jaw: result.jaw,
+          recommendation: result.recommendation,
+          modelMeta: result.modelMeta,
+        });
+        setLoadingStepIdx(Math.min(4, i + 1));
       }
 
-      const scores = angleResults.length
-        ? averageScores(angleResults.map((item) => item.scores))
-        : generateHeuristicScores(scanImages);
-      const jaw = generateJawAnalysis(scores);
-      const recommendation = generateRecommendation(scores);
+      if (!angleResults.length || !frontResult) {
+        throw new Error("AI model chain did not return any structured results.");
+      }
+
+      const scores = averageScores(angleResults.map((item) => item.scores));
+      const jaw = frontResult.jaw;
+      const recommendation = mergeModelRecommendations([frontResult, ...angleResults.slice(1)]);
 
       setLoadingStepIdx(4);
 
