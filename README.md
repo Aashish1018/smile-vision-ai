@@ -1,3 +1,13 @@
+---
+title: Smile More
+emoji: 🦷
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # Dental Vision
 
 Dental Vision is an AI-powered dental simulation dashboard built to visualize confident smiles before treatment begins. The application uses a neo-brutalism design aesthetic characterized by bold borders, solid shadows, and high-contrast styling.
