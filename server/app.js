@@ -45,11 +45,9 @@ app.get("/health", (_req, res) => {
 
 app.use("/api/teeth", teethRouter);
 
-if (process.env.NODE_ENV !== "production") {
-  const PORT = process.env.PORT || 8787;
-  app.listen(PORT, () => {
-    console.log(`Teeth simulator API listening on port ${PORT}`);
-  });
-}
+const PORT = process.env.PORT || 7860;
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Backend running on port ${PORT}`);
+});
 
 export default app;

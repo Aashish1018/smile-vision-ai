@@ -54,11 +54,13 @@ const loadingSteps = [
   "Preparing your smile preview…",
 ];
 
+const API_BASE_URL = "https://ahsheesh-smile-more.hf.space";
+
 async function runModelForFile(file: File): Promise<ApiSimulationResult> {
   const formData = new FormData();
   formData.append("image", file);
 
-  const response = await fetch("/api/teeth/simulate", {
+  const response = await fetch(`${API_BASE_URL}/api/teeth/simulate`, {
     method: "POST",
     body: formData,
   });
