@@ -52,7 +52,8 @@ const TeethSimulatorPage = () => {
     formData.append("image", file);
 
     try {
-      const response = await fetch("/api/teeth/simulate", {
+      const API_BASE_URL = "https://ahsheesh-smile-more.hf.space";
+      const response = await fetch(`${API_BASE_URL}/api/teeth/simulate`, {
         method: "POST",
         body: formData,
       });

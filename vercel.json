@@ -5,20 +5,9 @@
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": { "distDir": "dist" }
-    },
-    {
-      "src": "server/app.js",
-      "use": "@vercel/node",
-      "config": {
-        "maxDuration": 60
-      }
     }
   ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/server/app.js"
-    },
     {
       "handle": "filesystem"
     },
