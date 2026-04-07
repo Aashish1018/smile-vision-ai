@@ -31,7 +31,7 @@ const HeroSection = ({ onAuthOpen }: HeroSectionProps) => {
 
         <div className="aspect-square rounded-3xl overflow-hidden relative dv-panel">
           <img
-            src="https://images.unsplash.com/photo-1594824475544-3d242f2f0f74?auto=format&fit=crop&w=900&q=80"
+            src="https://us.123rf.com/450wm/ximagination/ximagination1208/ximagination120800720/14996461-asian-dentist-pointing-to-an-x-ray-while-explaining-about-the-patient.jpg?ver=6&auto=format&fit=crop&w=900&q=80"
             alt="Future Smile Visualization"
             className="w-full h-full object-cover opacity-100 brightness-[0.90]"
           />
