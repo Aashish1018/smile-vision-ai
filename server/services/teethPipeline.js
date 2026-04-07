@@ -132,15 +132,23 @@ function extractTeethMask(segmentationResult) {
 
 async function segmentTeeth(imageBuffer, diagnostics) {
   const imageBlob = new Blob([imageBuffer]);
+  const metadata = await sharp(imageBuffer).metadata();
 
   try {
     const result = await withModelFallback(
       "segmentTeeth",
       [
         {
-          model: "facebook/sam-vit-base", // DOWNGRADED TO BASE
+          model: "facebook/detr-resnet-50-panoptic", // Highly available on free tier
           call: () => hf.imageSegmentation({
-            model: "facebook/sam-vit-base",
+            model: "facebook/detr-resnet-50-panoptic",
+            inputs: imageBlob,
+          }),
+        },
+        {
+          model: "nvidia/segformer-b1-finetuned-cityscapes-1024-1024", // Good backup
+          call: () => hf.imageSegmentation({
+            model: "nvidia/segformer-b1-finetuned-cityscapes-1024-1024",
             inputs: imageBlob,
           }),
         }
@@ -149,12 +157,31 @@ async function segmentTeeth(imageBuffer, diagnostics) {
     );
 
     const { maskBuffer: rawMask, segmentConfidence } = extractTeethMask(result);
-    const metadata = await sharp(imageBuffer).metadata();
     const normalizedMask = await ensureMaskDimensions(rawMask, metadata);
     return { maskBuffer: normalizedMask, segmentConfidence };
+    
   } catch (error) {
-    console.error("[Diagnostics] segmentTeeth failed completely:", error);
-    throw error;
+    console.warn("[Diagnostics] All AI segmentation failed. Generating emergency fallback mask.");
+    
+    // EMERGENCY FALLBACK: If HF models are down, don't crash! 
+    // Draw a generic centered rectangle mask where the mouth usually is.
+    const width = metadata.width || 1024;
+    const height = metadata.height || 1024;
+    
+    // Create a basic SVG rectangle in the lower-middle of the image
+    const svgMask = `
+      <svg width="${width}" height="${height}">
+        <rect x="${width * 0.25}" y="${height * 0.5}" width="${width * 0.5}" height="${height * 0.3}" fill="white"/>
+      </svg>
+    `;
+    
+    const fallbackMask = await sharp(Buffer.from(svgMask))
+      .png()
+      .toBuffer();
+
+    diagnostics.push({ task: "segmentTeeth", model: "emergency_dummy_mask", status: "fallback" });
+    
+    return { maskBuffer: fallbackMask, segmentConfidence: 0.1 };
   }
 }
 
