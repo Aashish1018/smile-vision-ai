@@ -8,6 +8,7 @@ const app = express();
 const defaultOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
+  "https://smile-vision-ai.vercel.app"
 ];
 
 const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || "")
