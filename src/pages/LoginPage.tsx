@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/supabase";
+import { isSupabaseConfigured, SUPABASE_CONFIG_ERROR, supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 
 const LoginPage = () => {
@@ -26,6 +26,10 @@ const LoginPage = () => {
 
   const handleGoogleAuth = async () => {
     setError("");
+    if (!isSupabaseConfigured) {
+      setError(SUPABASE_CONFIG_ERROR);
+      return;
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo: window.location.origin + "/dashboard" },
@@ -36,6 +40,10 @@ const LoginPage = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    if (!isSupabaseConfigured) {
+      setError(SUPABASE_CONFIG_ERROR);
+      return;
+    }
     setSubmitting(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setSubmitting(false);
@@ -46,6 +54,10 @@ const LoginPage = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    if (!isSupabaseConfigured) {
+      setError(SUPABASE_CONFIG_ERROR);
+      return;
+    }
     setSubmitting(true);
     const { error } = await supabase.auth.signUp({
       email,
@@ -154,6 +166,10 @@ const LoginPage = () => {
                 type="button"
                 onClick={async () => {
                   if (!email) { setError("Enter your email first"); return; }
+                  if (!isSupabaseConfigured) {
+                    setError(SUPABASE_CONFIG_ERROR);
+                    return;
+                  }
                   const { error } = await supabase.auth.resetPasswordForEmail(email, {
                     redirectTo: window.location.origin + "/reset-password",
                   });

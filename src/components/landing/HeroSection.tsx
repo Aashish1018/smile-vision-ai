@@ -1,3 +1,5 @@
+import heroConsultationImage from "@/assets/hero-dental.jpg";
+
 interface HeroSectionProps {
   onAuthOpen: () => void;
 }
@@ -31,10 +33,11 @@ const HeroSection = ({ onAuthOpen }: HeroSectionProps) => {
 
         <div className="aspect-square rounded-3xl overflow-hidden relative dv-panel">
           <img
-            src="https://images.unsplash.com/photo-1594824475544-3d242f2f0f74?auto=format&fit=crop&w=900&q=80"
-            alt="Future Smile Visualization"
-            className="w-full h-full object-cover opacity-100 brightness-[0.90]"
+            src={heroConsultationImage}
+            alt="Dentist showing scan results to a patient"
+            className="w-full h-full object-cover"
           />
+          <div className="absolute inset-0 bg-gradient-to-tr from-slate-950/55 via-slate-900/25 to-transparent" />
           <div className="absolute bottom-6 left-6 right-6 p-6 bg-slate-900/82 backdrop-blur rounded-2xl shadow-xl flex items-center gap-4">
             <div className="size-12 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
               <span className="material-symbols-outlined">auto_fix_high</span>
