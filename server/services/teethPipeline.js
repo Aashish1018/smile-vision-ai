@@ -131,7 +131,6 @@ function extractTeethMask(segmentationResult) {
 }
 
 async function segmentTeeth(imageBuffer, diagnostics) {
-  // Convert Buffer to Blob for HF API inputs
   const imageBlob = new Blob([imageBuffer]);
 
   try {
@@ -139,19 +138,12 @@ async function segmentTeeth(imageBuffer, diagnostics) {
       "segmentTeeth",
       [
         {
-          model: "facebook/sam-vit-huge",
+          model: "facebook/sam-vit-base", // DOWNGRADED TO BASE
           call: () => hf.imageSegmentation({
-            model: "facebook/sam-vit-huge",
+            model: "facebook/sam-vit-base",
             inputs: imageBlob,
           }),
-        },
-        {
-          model: "facebook/detr-resnet-50-panoptic",
-          call: () => hf.imageSegmentation({
-            model: "facebook/detr-resnet-50-panoptic",
-            inputs: imageBlob,
-          }),
-        },
+        }
       ],
       diagnostics,
     );
@@ -173,31 +165,15 @@ async function analyzeIdealTeeth(imageBuffer, diagnostics) {
       "analyzeIdealTeeth",
       [
         {
-          model: "llava-hf/llava-1.5-7b-hf",
+          model: "Salesforce/blip-vqa-base", // DOWNGRADED TO BLIP BASE
           call: () => hf.visualQuestionAnswering({
-            model: "llava-hf/llava-1.5-7b-hf",
+            model: "Salesforce/blip-vqa-base",
             inputs: {
               image: imageBlob,
-              question: `You are a cosmetic dentist AI. Analyze this person's facial structure, lip shape, jaw width, face proportions, skin tone, and existing tooth structure.
-Describe ideal teeth for this person as a Stable Diffusion positive prompt.
-Include tooth size/width, natural white shade, edge shape, alignment changes, and missing tooth restoration details.
-Output only one prompt beginning with "perfect teeth,".`,
+              question: "Describe ideal perfect straight white teeth for this person as a Stable Diffusion positive prompt.",
             },
           }),
-        },
-        {
-          model: "dandelin/vilt-b32-finetuned-vqa",
-          call: () => hf.visualQuestionAnswering({
-            model: "dandelin/vilt-b32-finetuned-vqa",
-            inputs: {
-              image: imageBlob,
-              question: `You are a cosmetic dentist AI. Analyze this person's facial structure, lip shape, jaw width, face proportions, skin tone, and existing tooth structure.
-Describe ideal teeth for this person as a Stable Diffusion positive prompt.
-Include tooth size/width, natural white shade, edge shape, alignment changes, and missing tooth restoration details.
-Output only one prompt beginning with "perfect teeth,".`,
-            },
-          }),
-        },
+        }
       ],
       diagnostics,
     );
@@ -205,7 +181,7 @@ Output only one prompt beginning with "perfect teeth,".`,
     const answer = result?.answer?.trim();
     return answer && answer.length > 10 ? answer : DEFAULT_PROMPT;
   } catch (error) {
-    console.warn("LLaVA analysis failed, falling back to default prompt:", error.message);
+    console.warn("Analysis failed, falling back to default prompt:", error.message);
     diagnostics.push({ task: "analyzeIdealTeeth", model: "default_prompt", status: "fallback" });
     return DEFAULT_PROMPT;
   }
@@ -218,27 +194,15 @@ async function detectIssues(imageBuffer, diagnostics) {
       "detectIssues.vqa",
       [
         {
-          model: "Salesforce/blip-2-opt-2.7b",
+          model: "Salesforce/blip-vqa-base", // DOWNGRADED TO BLIP BASE
           call: () => hf.visualQuestionAnswering({
-            model: "Salesforce/blip-2-opt-2.7b",
+            model: "Salesforce/blip-vqa-base",
             inputs: {
               image: imageBlob,
-              question:
-                "List visible dental issues such as discoloration, yellowing, gaps, chips, misalignment, overcrowding, gum inflammation, or missing teeth. Be concise.",
+              question: "List visible dental issues such as discoloration, yellowing, gaps, chips, misalignment, overcrowding, or missing teeth.",
             },
           }),
-        },
-        {
-          model: "dandelin/vilt-b32-finetuned-vqa",
-          call: () => hf.visualQuestionAnswering({
-            model: "dandelin/vilt-b32-finetuned-vqa",
-            inputs: {
-              image: imageBlob,
-              question:
-                "List visible dental issues such as discoloration, yellowing, gaps, chips, misalignment, overcrowding, gum inflammation, or missing teeth. Be concise.",
-            },
-          }),
-        },
+        }
       ],
       diagnostics,
     );
@@ -250,7 +214,7 @@ async function detectIssues(imageBuffer, diagnostics) {
       "detectIssues.structure",
       [
         {
-          model: "google/flan-t5-large",
+          model: "google/flan-t5-large", // THIS IS USUALLY FREE TIER FRIENDLY
           call: () => hf.textGeneration({
             model: "google/flan-t5-large",
             inputs: `Convert this dental issue summary to strict JSON.
@@ -288,13 +252,8 @@ Summary: ${summary}`,
     return {
       issuesList: ["Visible issue extraction requires a clearer or brighter smile photo"],
       issueFlags: {
-        discoloration: false,
-        gaps: false,
-        chips: false,
-        misalignment: false,
-        crowding: false,
-        missingTeeth: false,
-        gumIssue: false,
+        discoloration: false, gaps: false, chips: false, misalignment: false,
+        crowding: false, missingTeeth: false, gumIssue: false,
       },
     };
   }
@@ -307,28 +266,20 @@ async function simulateTeeth(imageBuffer, maskBuffer, idealPrompt, diagnostics) 
       "simulateTeeth",
       [
         {
-          model: "diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
+          model: "runwayml/stable-diffusion-inpainting", // DOWNGRADED TO SD 1.5 INPAINTING
           call: () => hf.imageToImage({
-            model: "diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
+            model: "runwayml/stable-diffusion-inpainting",
             inputs: imageBlob,
             parameters: {
               mask_image: maskBuffer.toString("base64"),
-              prompt: idealPrompt,
-              negative_prompt:
-                "cartoon, anime, blurry, distorted, unrealistic, yellow teeth, crooked, fake, cgi, rendered, artificial, oversaturated",
-              num_inference_steps: 50,
+              prompt: idealPrompt || DEFAULT_PROMPT,
+              negative_prompt: "cartoon, anime, blurry, distorted, unrealistic, yellow teeth, crooked, fake, cgi, rendered",
+              num_inference_steps: 30, // Reduced slightly for speed on free tier
               guidance_scale: 7.5,
               strength: 0.85,
             },
           }),
-        },
-        {
-          model: "stabilityai/stable-diffusion-xl-base-1.0",
-          call: () => hf.textToImage({
-            model: "stabilityai/stable-diffusion-xl-base-1.0",
-            inputs: idealPrompt || "perfect teeth",
-          }),
-        },
+        }
       ],
       diagnostics,
     );
