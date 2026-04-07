@@ -83,10 +83,12 @@ router.post("/simulate", (req, res, next) => {
   }
 
   // Set headers for Server-Sent Events (SSE)
+  // Set headers for Server-Sent Events (SSE)
   res.writeHead(200, {
     "Content-Type": "text/event-stream",
-    "Cache-Control": "no-cache",
-    Connection: "keep-alive",
+    "Cache-Control": "no-cache, no-transform", // 'no-transform' stops basic proxies from altering the stream
+    "Connection": "keep-alive",
+    "X-Accel-Buffering": "no",                 // This is the magic line that tells Hugging Face's Nginx to STOP buffering
   });
 
   const sendEvent = (event, data) => {
