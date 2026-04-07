@@ -293,7 +293,7 @@ async function simulateTeeth(imageBuffer, maskBuffer, idealPrompt, diagnostics) 
       "simulateTeeth",
       [
         {
-          model: "runwayml/stable-diffusion-inpainting", // DOWNGRADED TO SD 1.5 INPAINTING
+          model: "runwayml/stable-diffusion-inpainting",
           call: () => hf.imageToImage({
             model: "runwayml/stable-diffusion-inpainting",
             inputs: imageBlob,
@@ -301,9 +301,21 @@ async function simulateTeeth(imageBuffer, maskBuffer, idealPrompt, diagnostics) 
               mask_image: maskBuffer.toString("base64"),
               prompt: idealPrompt || DEFAULT_PROMPT,
               negative_prompt: "cartoon, anime, blurry, distorted, unrealistic, yellow teeth, crooked, fake, cgi, rendered",
-              num_inference_steps: 30, // Reduced slightly for speed on free tier
+              num_inference_steps: 30,
               guidance_scale: 7.5,
               strength: 0.85,
+            },
+          }),
+        },
+        {
+          model: "stabilityai/stable-diffusion-2-inpainting", // Backup AI Model
+          call: () => hf.imageToImage({
+            model: "stabilityai/stable-diffusion-2-inpainting",
+            inputs: imageBlob,
+            parameters: {
+              mask_image: maskBuffer.toString("base64"),
+              prompt: idealPrompt || "perfect white teeth",
+              negative_prompt: "blurry, bad quality",
             },
           }),
         }
@@ -314,8 +326,15 @@ async function simulateTeeth(imageBuffer, maskBuffer, idealPrompt, diagnostics) 
     const arrayBuffer = await resultBlob.arrayBuffer();
     return Buffer.from(arrayBuffer);
   } catch (error) {
-    console.error("[Diagnostics] simulateTeeth failed completely:", error);
-    throw error;
+    console.warn("[Diagnostics] All AI inpainting failed. Returning brightened fallback image.");
+    diagnostics.push({ task: "simulateTeeth", model: "sharp_brightness_filter", status: "fallback" });
+    
+    // EMERGENCY FALLBACK: If HF's image generators are down, don't crash!
+    // Instead, apply a basic digital "whitening" filter to the original image so the user still gets a result.
+    return await sharp(imageBuffer)
+      .modulate({ brightness: 1.15, saturation: 0.85 }) // Slightly brighter and whiter
+      .png()
+      .toBuffer();
   }
 }
 
