@@ -29,14 +29,19 @@ const HeroSection = ({ onAuthOpen }: HeroSectionProps) => {
           </div>
         </div>
 
-        <div className="aspect-square rounded-3xl overflow-hidden relative dv-panel">
+        <div className="relative aspect-[4/4.25] sm:aspect-[4/4] rounded-[2rem] overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black bg-card-dark">
           <img
-            src="https://us.123rf.com/450wm/ximagination/ximagination1208/ximagination120800720/14996461-asian-dentist-pointing-to-an-x-ray-while-explaining-about-the-patient.jpg?ver=6&auto=format&fit=crop&w=900&q=80"
+            src="https://images.unsplash.com/photo-1606811841689-23dfddce3e95?q=80&w=2000&auto=format&fit=crop"
             alt="Future Smile Visualization"
-            className="w-full h-full object-cover opacity-100 brightness-[0.90]"
+            className="w-full h-full object-cover scale-[1.01]"
           />
-          <div className="absolute bottom-6 left-6 right-6 p-6 bg-slate-900/82 backdrop-blur rounded-2xl shadow-xl flex items-center gap-4">
-            <div className="size-12 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
+          <div className="absolute inset-0 bg-gradient-to-tr from-[#161b22]/80 via-[#161b22]/30 to-[#9ec19b]/20" />
+          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#161b22] via-[#161b22]/50 to-transparent" />
+
+          <div className="absolute -top-12 -right-14 size-44 bg-[#9ec19b]/20 blur-3xl" />
+
+          <div className="absolute bottom-6 left-6 right-6 p-6 rounded-2xl border border-white/15 bg-slate-950/68 backdrop-blur-md shadow-xl flex items-center gap-4">
+            <div className="size-12 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0 ring-1 ring-primary/30">
               <span className="material-symbols-outlined">auto_fix_high</span>
             </div>
             <div>
