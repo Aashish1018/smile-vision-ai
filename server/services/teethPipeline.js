@@ -326,15 +326,50 @@ async function simulateTeeth(imageBuffer, maskBuffer, idealPrompt, diagnostics) 
     const arrayBuffer = await resultBlob.arrayBuffer();
     return Buffer.from(arrayBuffer);
   } catch (error) {
-    console.warn("[Diagnostics] All AI inpainting failed. Returning brightened fallback image.");
-    diagnostics.push({ task: "simulateTeeth", model: "sharp_brightness_filter", status: "fallback" });
+    console.warn("[Diagnostics] All AI inpainting failed. Generating advanced heuristic fallback.");
+    diagnostics.push({ task: "simulateTeeth", model: "sharp_advanced_heuristic", status: "fallback" });
     
-    // EMERGENCY FALLBACK: If HF's image generators are down, don't crash!
-    // Instead, apply a basic digital "whitening" filter to the original image so the user still gets a result.
-    return await sharp(imageBuffer)
-      .modulate({ brightness: 1.15, saturation: 0.85 }) // Slightly brighter and whiter
-      .png()
-      .toBuffer();
+    try {
+      const metadata = await sharp(imageBuffer).metadata();
+
+      // STEP 1: Perfect Whitening & Alignment (Color grading and edge softening)
+      const enhancedBase = await sharp(imageBuffer)
+        .modulate({ brightness: 1.35, saturation: 0.35 }) // Remove yellow, boost white
+        .blur(0.6) // Smooth out jagged edges to simulate alignment correction
+        .png()
+        .toBuffer();
+
+      // STEP 2: Extract just the teeth so lips and skin remain completely untouched
+      const isolatedTeeth = await sharp(enhancedBase)
+        .composite([{ input: maskBuffer, blend: 'dest-in' }])
+        .png()
+        .toBuffer();
+
+      // STEP 3: Minimal Gaps (Morphological Dilation via resizing)
+      // We expand the cut-out teeth by exactly 1.5% and overlay them, stretching the white over the gaps
+      const expandedTeeth = await sharp(isolatedTeeth)
+        .resize({
+          width: Math.round((metadata.width || 1024) * 1.015),
+          height: Math.round((metadata.height || 1024) * 1.015),
+          fit: 'fill'
+        })
+        .png()
+        .toBuffer();
+
+      // STEP 4: Composite the perfected teeth back over the original untouched photo
+      return await sharp(imageBuffer)
+        .composite([{ input: expandedTeeth, gravity: 'center' }])
+        .png()
+        .toBuffer();
+
+    } catch (sharpError) {
+      console.warn("Advanced heuristic failed, using simple global brighten.", sharpError);
+      // Absolute worst-case scenario failsafe
+      return await sharp(imageBuffer)
+        .modulate({ brightness: 1.15, saturation: 0.85 })
+        .png()
+        .toBuffer();
+    }
   }
 }
 
