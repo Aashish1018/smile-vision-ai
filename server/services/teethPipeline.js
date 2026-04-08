@@ -10,10 +10,12 @@ async function normalizeImage(buffer) {
     .toBuffer();
 }
 
-// The "Gimmick": Just brighten and desaturate (whiten) the whole image
+// The "Gimmick": Add realistic tweaks to simulate more ideal teeth
 async function simulateTeeth(imageBuffer) {
   return await sharp(imageBuffer)
-    .modulate({ brightness: 1.15, saturation: 0.85 })
+    .modulate({ brightness: 1.12, saturation: 0.88 })
+    .linear(1.05, -(128 * 0.05)) // slight contrast bump
+    .sharpen({ sigma: 1.5, m1: 1, m2: 2, x1: 2, y2: 10, y3: 20 }) // subtle sharpening for definition
     .png()
     .toBuffer();
 }

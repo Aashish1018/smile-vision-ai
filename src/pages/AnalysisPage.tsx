@@ -229,6 +229,17 @@ const AnalysisPage = () => {
                 </ul>
               </div>
             )}
+
+            {/* AI Summary Section */}
+            <div className="bg-primary/5 rounded-2xl border border-primary/20 p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="material-symbols-outlined text-primary">auto_awesome</span>
+                <span className="text-sm font-black uppercase text-foreground">AI SUMMARY</span>
+              </div>
+              <p className="text-sm text-foreground leading-relaxed">
+                {scan?.idealDescription || recommendation.summary || "Your smile has been successfully analysed. Based on the scan, you show great potential for improvement with the right guidance. See the detailed breakdown for specific metrics."}
+              </p>
+            </div>
           </div>
 
           {/* Column B */}
