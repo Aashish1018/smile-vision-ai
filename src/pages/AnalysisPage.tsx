@@ -82,7 +82,7 @@ const AnalysisPage = () => {
   };
 
   return (
-    <div className="h-screen overflow-hidden flex font-display bg-background-dark relative">
+    <div className="h-screen overflow-hidden flex font-display bg-background relative">
       {/* Floating glass nav — desktop */}
       <div className="hidden lg:flex fixed left-4 top-1/2 -translate-y-1/2 z-40 flex-col gap-2">
         <button
@@ -90,28 +90,28 @@ const AnalysisPage = () => {
           className="size-12 rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] flex items-center justify-center mb-2 hover:bg-white/[0.08] hover:border-primary/30 transition-all duration-300 group"
         >
           <div className="size-7 bg-primary rounded-lg flex items-center justify-center">
-            <span className="material-symbols-outlined text-white text-sm">flare</span>
+            <span className="material-symbols-outlined text-foreground text-sm">flare</span>
           </div>
         </button>
         <button
           onClick={() => navigate("/dashboard")}
           className="size-12 rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] flex items-center justify-center transition-all duration-300 group relative hover:bg-white/[0.08] hover:border-white/15"
         >
-          <LayoutDashboard size={18} className="text-slate-400 group-hover:text-ivory" />
-          <div className="absolute left-14 px-3 py-1.5 bg-card-dark/95 backdrop-blur-md border border-white/10 rounded-lg text-xs font-bold text-ivory opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">Dashboard</div>
+          <LayoutDashboard size={18} className="text-muted-foreground group-hover:text-foreground" />
+          <div className="absolute left-14 px-3 py-1.5 bg-card/95 backdrop-blur-md border border-border rounded-lg text-xs font-bold text-foreground opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">Dashboard</div>
         </button>
         <button
           className="size-12 rounded-2xl bg-primary/15 backdrop-blur-xl border border-primary/30 flex items-center justify-center transition-all duration-300 shadow-lg shadow-primary/10 group relative"
         >
           <BarChart3 size={18} className="text-primary" />
-          <div className="absolute left-14 px-3 py-1.5 bg-card-dark/95 backdrop-blur-md border border-white/10 rounded-lg text-xs font-bold text-ivory opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">Analytics</div>
+          <div className="absolute left-14 px-3 py-1.5 bg-card/95 backdrop-blur-md border border-border rounded-lg text-xs font-bold text-foreground opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">Analytics</div>
         </button>
         <div className="relative mt-auto">
           <button
             onClick={() => setUserMenuOpen(!userMenuOpen)}
             className={`size-12 rounded-2xl backdrop-blur-xl border flex items-center justify-center transition-all duration-300 group ${userMenuOpen ? "bg-primary/15 border-primary/30" : "bg-white/[0.04] border-white/[0.08] hover:bg-white/[0.08]"}`}
           >
-            <User size={18} className={userMenuOpen ? "text-primary" : "text-slate-400 group-hover:text-ivory"} />
+            <User size={18} className={userMenuOpen ? "text-primary" : "text-muted-foreground group-hover:text-foreground"} />
           </button>
           <UserMenu userMenuOpen={userMenuOpen} setUserMenuOpen={setUserMenuOpen} />
         </div>
@@ -121,21 +121,21 @@ const AnalysisPage = () => {
         {/* Top Bar */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate("/dashboard")} className="bg-card-dark p-2 rounded-lg border border-white/10">
-              <span className="material-symbols-outlined text-ivory">arrow_back</span>
+            <button onClick={() => navigate("/dashboard")} className="bg-card p-2 rounded-lg border border-border">
+              <span className="material-symbols-outlined text-foreground">arrow_back</span>
             </button>
-            <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tighter text-ivory">SMILE ANALYSIS</h1>
+            <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tighter text-foreground">SMILE ANALYSIS</h1>
           </div>
           <div className="flex items-center gap-3">
-            <button className="bg-card-dark p-2 rounded-lg border border-white/10 relative">
-              <span className="material-symbols-outlined text-ivory">notifications</span>
+            <button className="bg-card p-2 rounded-lg border border-border relative">
+              <span className="material-symbols-outlined text-foreground">notifications</span>
               <div className="absolute -top-1 -right-1 size-2 bg-red-500 rounded-full" />
             </button>
             <button className="hidden sm:flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground rounded-lg font-bold text-sm hover:opacity-90 transition-opacity">
               <span className="material-symbols-outlined text-sm">save</span>
               Save Plan
             </button>
-            <button className="hidden sm:flex items-center gap-2 px-5 py-2 bg-white/5 border border-white/10 text-ivory rounded-lg font-bold text-sm hover:border-primary transition-colors">
+            <button className="hidden sm:flex items-center gap-2 px-5 py-2 bg-muted border border-border text-foreground rounded-lg font-bold text-sm hover:border-primary transition-colors">
               <span className="material-symbols-outlined text-sm">share</span>
               Share
             </button>
@@ -155,18 +155,18 @@ const AnalysisPage = () => {
             {/* Before/After */}
             <div className="border-2 border-black bg-primary/20 p-1 rounded-lg overflow-hidden">
               <div className="bg-transparent border-b-2 border-black p-4 flex justify-between items-center">
-                <span className="text-lg font-black uppercase text-ivory">BEFORE & AFTER TRANSFORMATION</span>
+                <span className="text-lg font-black uppercase text-foreground">BEFORE & AFTER TRANSFORMATION</span>
                 <div className="flex gap-2">
-                  <span className="bg-card-dark text-ivory text-[10px] font-bold uppercase px-2 py-1">FULL HD</span>
+                  <span className="bg-card text-foreground text-[10px] font-bold uppercase px-2 py-1">FULL HD</span>
                   <span className="bg-foreground text-background text-[10px] font-bold uppercase px-2 py-1">AI ENHANCED</span>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border-t-2 border-black/20">
-                <div className="relative aspect-[16/11] overflow-hidden bg-background-dark">
+                <div className="relative aspect-[16/11] overflow-hidden bg-background">
                   <img src={thumbnailUrl} alt="Original smile" className="h-full w-full object-cover" />
                   <span className="absolute bottom-4 left-4 bg-foreground text-background px-3 py-1 text-[10px] font-bold uppercase">Original</span>
                 </div>
-                <div className="relative aspect-[16/11] overflow-hidden bg-background-dark">
+                <div className="relative aspect-[16/11] overflow-hidden bg-background">
                   {simulatedImage ? (
                     <img src={simulatedImage} alt="AI simulated smile" className="h-full w-full object-cover" />
                   ) : (
@@ -176,7 +176,7 @@ const AnalysisPage = () => {
                       </div>
                       <div>
                         <p className="text-sm font-black uppercase tracking-[0.24em] text-primary">Ideal simulation pending</p>
-                        <p className="mt-2 text-sm leading-relaxed text-slate-400 max-w-xs">
+                        <p className="mt-2 text-sm leading-relaxed text-muted-foreground max-w-xs">
                           Simulation is unavailable for this historic scan.
                         </p>
                       </div>
@@ -193,7 +193,7 @@ const AnalysisPage = () => {
                     className={`px-4 py-1.5 rounded-full text-xs font-bold cursor-pointer transition-colors ${
                       activeSimulation === tab
                         ? "bg-primary/20 border border-primary text-primary"
-                        : "bg-white/5 border border-white/5 text-slate-400 hover:border-white/20"
+                        : "bg-muted border border-border text-muted-foreground hover:border-white/20"
                     }`}
                   >
                     {tab}
@@ -203,13 +203,13 @@ const AnalysisPage = () => {
             </div>
 
             {/* Detailed Metrics */}
-            <div className="bg-card-dark rounded-2xl border border-white/5 overflow-hidden">
-              <div className="p-5 border-b border-white/5 flex items-center gap-2">
+            <div className="bg-card rounded-2xl border border-border overflow-hidden">
+              <div className="p-5 border-b border-border flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">analytics</span>
-                <span className="text-sm font-black uppercase text-ivory">DETAILED METRICS</span>
-                <span className="text-xs text-slate-500 ml-auto">8 parameters analysed</span>
+                <span className="text-sm font-black uppercase text-foreground">DETAILED METRICS</span>
+                <span className="text-xs text-muted-foreground ml-auto">8 parameters analysed</span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-white/5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-muted">
                 {metrics.map((m) => (
                   <MetricBar key={m.key} label={m.label} value={m.value} unit={m.unit} icon={m.icon} description={m.description} />
                 ))}
@@ -217,12 +217,12 @@ const AnalysisPage = () => {
             </div>
 
             {issuesList.length > 0 && (
-              <div className="bg-card-dark rounded-2xl p-5 border border-white/5">
+              <div className="bg-card rounded-2xl p-5 border border-border">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="material-symbols-outlined text-primary">fact_check</span>
-                  <span className="text-sm font-black uppercase text-ivory">VISIBLE ISSUE SUMMARY</span>
+                  <span className="text-sm font-black uppercase text-foreground">VISIBLE ISSUE SUMMARY</span>
                 </div>
-                <ul className="list-disc pl-5 text-sm text-slate-300 space-y-1">
+                <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
                   {issuesList.map((issue) => (
                     <li key={issue}>{issue}</li>
                   ))}
@@ -234,31 +234,31 @@ const AnalysisPage = () => {
           {/* Column B */}
           <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
             {/* Overall Score */}
-            <div className="bg-card-dark rounded-2xl p-6 flex flex-col items-center gap-4 border border-white/5">
+            <div className="bg-card rounded-2xl p-6 flex flex-col items-center gap-4 border border-border">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">clinical_notes</span>
-                <span className="text-[10px] font-black uppercase tracking-widest text-ivory">OVERALL SMILE SCORE</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-foreground">OVERALL SMILE SCORE</span>
               </div>
               <ScoreGauge score={scores.overall} size={128} />
               <span className={`px-3 py-1 rounded-full text-xs font-black border ${gradeInfo.style}`}>{gradeInfo.grade}</span>
             </div>
 
             {/* Jaw Analysis */}
-            <div className="bg-card-dark rounded-2xl border border-white/5 overflow-hidden">
-              <div className="p-4 border-b border-white/5 flex items-center gap-2">
+            <div className="bg-card rounded-2xl border border-border overflow-hidden">
+              <div className="p-4 border-b border-border flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">face</span>
-                <span className="text-sm font-black uppercase text-ivory">JAW SYMMETRY</span>
+                <span className="text-sm font-black uppercase text-foreground">JAW SYMMETRY</span>
               </div>
               <div className="p-5 flex flex-col items-center">
-                <div className="relative size-48 bg-slate-800 border border-white/10 rounded-full mb-6 flex items-center justify-center overflow-hidden">
+                <div className="relative size-48 bg-slate-800 border border-border rounded-full mb-6 flex items-center justify-center overflow-hidden">
                   <div className="absolute inset-0 bg-center bg-contain opacity-40 grayscale" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1576086213369-97a306d36557?w=400')" }} />
                   <div className="absolute w-full h-px bg-primary/30" />
                   <div className="absolute h-full w-px bg-primary/30" />
                 </div>
                 <div className="w-full space-y-0">
                   {jawMetrics.map((jm, i) => (
-                    <div key={jm.label} className={`flex justify-between items-center py-2 ${i < jawMetrics.length - 1 ? "border-b border-white/5" : ""}`}>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase">{jm.label}</span>
+                    <div key={jm.label} className={`flex justify-between items-center py-2 ${i < jawMetrics.length - 1 ? "border-b border-border" : ""}`}>
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase">{jm.label}</span>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeStyles[jm.status]}`}>{jm.value}</span>
                     </div>
                   ))}
@@ -272,9 +272,9 @@ const AnalysisPage = () => {
                 <div className="size-12 bg-foreground text-background flex items-center justify-center shrink-0">
                   <span className="material-symbols-outlined">lightbulb</span>
                 </div>
-                <span className="text-xl font-black uppercase text-ivory">RECOMMENDED TREATMENT</span>
+                <span className="text-xl font-black uppercase text-foreground">RECOMMENDED TREATMENT</span>
               </div>
-              <p className="text-sm font-medium leading-relaxed text-ivory">
+              <p className="text-sm font-medium leading-relaxed text-foreground">
                 Based on your results, <span className="underline font-bold">{recommendation.treatments[0]}</span>
                 {recommendation.treatments.length > 1 && (
                   <> combined with <span className="underline font-bold">{recommendation.treatments[1]}</span></>
@@ -283,11 +283,11 @@ const AnalysisPage = () => {
               <div className="flex gap-4 mt-2">
                 <div>
                   <span className="text-2xl font-black text-primary">{recommendation.matchPct}%</span>
-                  <p className="text-xs text-slate-400">match achievable</p>
+                  <p className="text-xs text-muted-foreground">match achievable</p>
                 </div>
                 <div>
                   <span className="text-2xl font-black text-primary">{recommendation.timelineMonths}</span>
-                  <p className="text-xs text-slate-400">months timeline</p>
+                  <p className="text-xs text-muted-foreground">months timeline</p>
                 </div>
               </div>
               <button
@@ -299,15 +299,15 @@ const AnalysisPage = () => {
             </div>
 
             {/* Find a Dentist */}
-            <div className="bg-card-dark rounded-2xl p-5 border border-white/5">
+            <div className="bg-card rounded-2xl p-5 border border-border">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">local_hospital</span>
-                <span className="text-sm font-black uppercase text-ivory">FIND A DENTIST</span>
+                <span className="text-sm font-black uppercase text-foreground">FIND A DENTIST</span>
               </div>
-              <p className="text-xs text-slate-400 mt-1 mb-4">Share your scan with a verified dental professional near you.</p>
+              <p className="text-xs text-muted-foreground mt-1 mb-4">Share your scan with a verified dental professional near you.</p>
               <button
                 onClick={() => setDoctorModalOpen(true)}
-                className="w-full bg-white/5 border border-white/10 text-ivory text-sm font-bold py-3 rounded-xl hover:border-primary hover:bg-primary/5 transition-colors"
+                className="w-full bg-muted border border-border text-foreground text-sm font-bold py-3 rounded-xl hover:border-primary hover:bg-primary/5 transition-colors"
               >
                 Browse Doctors →
               </button>
@@ -317,12 +317,12 @@ const AnalysisPage = () => {
 
         {/* Footer */}
         <div className="mt-8 border-t-2 border-black pt-6 pb-12">
-          <p className="text-[10px] text-slate-400 font-medium leading-relaxed uppercase">
+          <p className="text-[10px] text-muted-foreground font-medium leading-relaxed uppercase">
             Disclaimer: This simulation is for illustrative purposes only and does not constitute medical advice or a guaranteed clinical outcome. Actual results may vary based on individual biological factors and adherence to treatment plans. A physical examination by a licensed dental professional is required to confirm candidacy for the treatments shown. AI-generated metrics are estimates based on provided scan data.
           </p>
           <div className="flex gap-4 mt-3">
-            <a href="#" className="text-[10px] font-bold underline uppercase text-slate-400 hover:text-primary transition-colors">Privacy Policy</a>
-            <a href="#" className="text-[10px] font-bold underline uppercase text-slate-400 hover:text-primary transition-colors">Terms of Service</a>
+            <a href="#" className="text-[10px] font-bold underline uppercase text-muted-foreground hover:text-primary transition-colors">Privacy Policy</a>
+            <a href="#" className="text-[10px] font-bold underline uppercase text-muted-foreground hover:text-primary transition-colors">Terms of Service</a>
           </div>
         </div>
 
@@ -331,15 +331,15 @@ const AnalysisPage = () => {
       </main>
 
       {/* Mobile bottom nav */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-card-dark/90 backdrop-blur-xl border-t border-white/[0.08] flex items-center justify-around py-2 px-4">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/90 backdrop-blur-xl border-t border-white/[0.08] flex items-center justify-around py-2 px-4">
         <button onClick={() => navigate("/")} className="flex flex-col items-center gap-1 py-1">
           <div className="size-6 bg-primary rounded-md flex items-center justify-center">
             <span className="material-symbols-outlined text-primary-foreground text-xs">flare</span>
           </div>
         </button>
         <button onClick={() => navigate("/dashboard")} className="flex flex-col items-center gap-1 py-1">
-          <LayoutDashboard size={20} className="text-slate-400" />
-          <span className="text-[10px] font-bold text-slate-500">Home</span>
+          <LayoutDashboard size={20} className="text-muted-foreground" />
+          <span className="text-[10px] font-bold text-muted-foreground">Home</span>
         </button>
         <button onClick={() => navigate("/scan")} className="size-12 -mt-4 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30">
           <span className="material-symbols-outlined text-primary-foreground">add</span>
@@ -349,8 +349,8 @@ const AnalysisPage = () => {
           <span className="text-[10px] font-bold text-primary">Analysis</span>
         </button>
         <button onClick={() => setMobileNavOpen(!mobileNavOpen)} className="flex flex-col items-center gap-1 py-1">
-          <User size={20} className="text-slate-400" />
-          <span className="text-[10px] font-bold text-slate-500">Profile</span>
+          <User size={20} className="text-muted-foreground" />
+          <span className="text-[10px] font-bold text-muted-foreground">Profile</span>
         </button>
       </div>
 

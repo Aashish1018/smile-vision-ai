@@ -49,14 +49,14 @@ const DashboardPage = () => {
           <span className={`material-symbols-outlined text-sm ${scoreDiff >= 0 ? "text-primary" : "text-red-400"}`}>
             {scoreDiff >= 0 ? "arrow_upward" : "arrow_downward"}
           </span>
-          <span className="text-xs text-slate-500">{scoreDiff >= 0 ? "+" : ""}{scoreDiff} since last scan</span>
+          <span className="text-xs text-muted-foreground">{scoreDiff >= 0 ? "+" : ""}{scoreDiff} since last scan</span>
         </div>
-      ) : <span className="text-xs text-slate-500">Complete your first scan</span>,
+      ) : <span className="text-xs text-muted-foreground">Complete your first scan</span>,
     },
     {
       label: "TOTAL SCANS",
       value: String(totalScans),
-      sub: <span className="text-xs text-slate-500">{hasData ? `Last: ${latestDate}` : "No scans yet"}</span>,
+      sub: <span className="text-xs text-muted-foreground">{hasData ? `Last: ${latestDate}` : "No scans yet"}</span>,
     },
     {
       label: "BEST SCORE",
@@ -64,15 +64,15 @@ const DashboardPage = () => {
       sub: hasData ? (
         <div className="flex items-center gap-1">
           <span className="material-symbols-outlined text-primary text-sm">emoji_events</span>
-          <span className="text-xs text-slate-500">Your personal best</span>
+          <span className="text-xs text-muted-foreground">Your personal best</span>
         </div>
-      ) : <span className="text-xs text-slate-500">—</span>,
+      ) : <span className="text-xs text-muted-foreground">—</span>,
     },
     {
       label: "NEXT STEP",
       value: topRec,
       isText: true,
-      sub: <span className="text-xs text-slate-500">{hasData ? "Top recommendation" : "Get started"}</span>,
+      sub: <span className="text-xs text-muted-foreground">{hasData ? "Top recommendation" : "Get started"}</span>,
     },
   ];
 
@@ -107,7 +107,7 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="h-screen overflow-hidden flex font-display bg-background-dark relative">
+    <div className="h-screen overflow-hidden flex font-display bg-background relative">
       {/* Floating glass nav — desktop */}
       <div className="hidden lg:flex fixed left-4 top-1/2 -translate-y-1/2 z-40 flex-col gap-2">
         {/* Logo */}
@@ -129,8 +129,8 @@ const DashboardPage = () => {
               : "bg-white/[0.04] border-white/[0.08] hover:bg-white/[0.08] hover:border-white/15"
           }`}
         >
-          <LayoutDashboard size={18} className={activeNav === "dashboard" ? "text-primary" : "text-slate-400 group-hover:text-ivory"} />
-          <div className="absolute left-14 px-3 py-1.5 bg-card-dark/95 backdrop-blur-md border border-white/10 rounded-lg text-xs font-bold text-ivory opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+          <LayoutDashboard size={18} className={activeNav === "dashboard" ? "text-primary" : "text-muted-foreground group-hover:text-foreground"} />
+          <div className="absolute left-14 px-3 py-1.5 bg-card/95 backdrop-blur-md border border-border rounded-lg text-xs font-bold text-foreground opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
             Dashboard
           </div>
         </button>
@@ -144,8 +144,8 @@ const DashboardPage = () => {
               : "bg-white/[0.04] border-white/[0.08] hover:bg-white/[0.08] hover:border-white/15"
           }`}
         >
-          <BarChart3 size={18} className={activeNav === "analysis" ? "text-primary" : "text-slate-400 group-hover:text-ivory"} />
-          <div className="absolute left-14 px-3 py-1.5 bg-card-dark/95 backdrop-blur-md border border-white/10 rounded-lg text-xs font-bold text-ivory opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+          <BarChart3 size={18} className={activeNav === "analysis" ? "text-primary" : "text-muted-foreground group-hover:text-foreground"} />
+          <div className="absolute left-14 px-3 py-1.5 bg-card/95 backdrop-blur-md border border-border rounded-lg text-xs font-bold text-foreground opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
             Analytics
           </div>
         </button>
@@ -160,22 +160,22 @@ const DashboardPage = () => {
                 : "bg-white/[0.04] border-white/[0.08] hover:bg-white/[0.08] hover:border-white/15"
             }`}
           >
-            <User size={18} className={userMenuOpen ? "text-primary" : "text-slate-400 group-hover:text-ivory"} />
+            <User size={18} className={userMenuOpen ? "text-primary" : "text-muted-foreground group-hover:text-foreground"} />
           </button>
           <UserMenu userMenuOpen={userMenuOpen} setUserMenuOpen={setUserMenuOpen} />
         </div>
       </div>
 
       {/* Mobile bottom nav */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-card-dark/90 backdrop-blur-xl border-t border-white/[0.08] flex items-center justify-around py-2 px-4">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/90 backdrop-blur-xl border-t border-white/[0.08] flex items-center justify-around py-2 px-4">
         <button onClick={() => navigate("/")} className="flex flex-col items-center gap-1 py-1">
           <div className="size-6 bg-primary rounded-md flex items-center justify-center">
             <span className="material-symbols-outlined text-primary-foreground text-xs">flare</span>
           </div>
         </button>
         <button onClick={() => handleNavClick("dashboard")} className="flex flex-col items-center gap-1 py-1">
-          <LayoutDashboard size={20} className={activeNav === "dashboard" ? "text-primary" : "text-slate-400"} />
-          <span className={`text-[10px] font-bold ${activeNav === "dashboard" ? "text-primary" : "text-slate-500"}`}>Home</span>
+          <LayoutDashboard size={20} className={activeNav === "dashboard" ? "text-primary" : "text-muted-foreground"} />
+          <span className={`text-[10px] font-bold ${activeNav === "dashboard" ? "text-primary" : "text-muted-foreground"}`}>Home</span>
         </button>
         <button
           onClick={() => navigate("/scan")}
@@ -184,12 +184,12 @@ const DashboardPage = () => {
           <span className="material-symbols-outlined text-primary-foreground">add</span>
         </button>
         <button onClick={() => handleNavClick("analysis")} className="flex flex-col items-center gap-1 py-1">
-          <BarChart3 size={20} className={activeNav === "analysis" ? "text-primary" : "text-slate-400"} />
-          <span className={`text-[10px] font-bold ${activeNav === "analysis" ? "text-primary" : "text-slate-500"}`}>Analysis</span>
+          <BarChart3 size={20} className={activeNav === "analysis" ? "text-primary" : "text-muted-foreground"} />
+          <span className={`text-[10px] font-bold ${activeNav === "analysis" ? "text-primary" : "text-muted-foreground"}`}>Analysis</span>
         </button>
         <button onClick={() => setMobileNavOpen(!mobileNavOpen)} className="flex flex-col items-center gap-1 py-1 relative">
-          <User size={20} className="text-slate-400" />
-          <span className="text-[10px] font-bold text-slate-500">Profile</span>
+          <User size={20} className="text-muted-foreground" />
+          <span className="text-[10px] font-bold text-muted-foreground">Profile</span>
         </button>
       </div>
 
@@ -199,10 +199,10 @@ const DashboardPage = () => {
       <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:pl-20">
         {/* Top Bar */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tighter text-ivory">DASHBOARD</h1>
+          <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tighter text-foreground">DASHBOARD</h1>
           <div className="hidden sm:flex items-center gap-3">
-            <button className="bg-card-dark p-2 rounded-lg border border-white/10 relative">
-              <span className="material-symbols-outlined text-ivory">notifications</span>
+            <button className="bg-card p-2 rounded-lg border border-border relative">
+              <span className="material-symbols-outlined text-foreground">notifications</span>
               <div className="absolute -top-1 -right-1 size-2 bg-red-500 rounded-full" />
             </button>
             <button
@@ -218,9 +218,9 @@ const DashboardPage = () => {
         {/* Stats Row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {stats.map((s) => (
-            <div key={s.label} className="bg-card-dark rounded-xl p-5 border border-black shadow-[2px_2px_0px_0px_rgba(45,60,45,1)]">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{s.label}</p>
-              <p className={`${s.isText ? "text-lg" : "text-3xl"} font-black text-ivory mt-1 truncate`}>{s.value}</p>
+            <div key={s.label} className="bg-card rounded-xl p-5 border border-black shadow-[2px_2px_0px_0px_rgba(45,60,45,1)]">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{s.label}</p>
+              <p className={`${s.isText ? "text-lg" : "text-3xl"} font-black text-foreground mt-1 truncate`}>{s.value}</p>
               <div className="mt-1">{s.sub}</div>
             </div>
           ))}
@@ -232,24 +232,24 @@ const DashboardPage = () => {
           <div className="lg:col-span-2 flex flex-col gap-6">
             {/* Now vs Ideal */}
             {hasData ? (
-              <div className="bg-card-dark rounded-xl overflow-hidden border border-black shadow-[2px_2px_0px_0px_rgba(45,60,45,1)]">
-                <div className="flex justify-between items-center p-5 border-b border-white/5">
+              <div className="bg-card rounded-xl overflow-hidden border border-black shadow-[2px_2px_0px_0px_rgba(45,60,45,1)]">
+                <div className="flex justify-between items-center p-5 border-b border-border">
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-primary">compare</span>
-                    <span className="text-sm font-black uppercase text-ivory">NOW VS IDEAL</span>
+                    <span className="text-sm font-black uppercase text-foreground">NOW VS IDEAL</span>
                   </div>
-                  <span className="text-xs text-slate-500">Latest Scan — {latestDate}</span>
+                  <span className="text-xs text-muted-foreground">Latest Scan — {latestDate}</span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border-t border-white/5">
-                  <div className="relative aspect-[16/11] overflow-hidden bg-background-dark">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border-t border-border">
+                  <div className="relative aspect-[16/11] overflow-hidden bg-background">
                     <img
                       src={dashData!.latest.thumbnailUrl || "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800"}
                       alt="Latest center smile scan"
                       className="h-full w-full object-cover"
                     />
-                    <span className="absolute bottom-4 left-4 rounded-full bg-black/75 px-3 py-1 text-[10px] font-bold uppercase text-white">Current center scan</span>
+                    <span className="absolute bottom-4 left-4 rounded-full bg-black/75 px-3 py-1 text-[10px] font-bold uppercase text-foreground">Current center scan</span>
                   </div>
-                  <div className="relative aspect-[16/11] overflow-hidden bg-background-dark">
+                  <div className="relative aspect-[16/11] overflow-hidden bg-background">
                     {dashData!.latest.simulatedImage ? (
                       <img
                         src={dashData!.latest.simulatedImage}
@@ -263,23 +263,23 @@ const DashboardPage = () => {
                         </div>
                         <div>
                           <p className="text-sm font-black uppercase tracking-[0.24em] text-primary">Ideal simulation</p>
-                          <p className="mt-2 max-w-xs text-sm leading-relaxed text-slate-400">Simulation is not available for this older scan.</p>
+                          <p className="mt-2 max-w-xs text-sm leading-relaxed text-muted-foreground">Simulation is not available for this older scan.</p>
                         </div>
                       </div>
                     )}
-                    <span className="absolute bottom-4 left-4 rounded-full bg-black/75 px-3 py-1 text-[10px] font-bold uppercase text-white">AI simulation</span>
+                    <span className="absolute bottom-4 left-4 rounded-full bg-black/75 px-3 py-1 text-[10px] font-bold uppercase text-foreground">AI simulation</span>
                   </div>
                 </div>
-                <div className="p-4 flex items-center justify-between border-t border-white/5">
-                  <span className="text-xs text-slate-400"><span className="text-primary font-bold">{dashData!.latest.recommendation.matchPct}%</span> match achievable</span>
+                <div className="p-4 flex items-center justify-between border-t border-border">
+                  <span className="text-xs text-muted-foreground"><span className="text-primary font-bold">{dashData!.latest.recommendation.matchPct}%</span> match achievable</span>
                   <button onClick={() => navigate(`/analysis/${dashData!.latest.id}`)} className="text-xs font-bold text-primary cursor-pointer hover:underline">View Full Analysis →</button>
                 </div>
               </div>
             ) : (
-              <div className="bg-card-dark rounded-xl p-12 border border-black shadow-[2px_2px_0px_0px_rgba(45,60,45,1)] flex flex-col items-center gap-4 text-center">
-                <span className="material-symbols-outlined text-slate-600 text-6xl">add_a_photo</span>
-                <h3 className="text-lg font-black text-ivory">No scans yet</h3>
-                <p className="text-sm text-slate-400 max-w-sm">Take your first scan to see a before/after comparison and get your personalized smile health score.</p>
+              <div className="bg-card rounded-xl p-12 border border-black shadow-[2px_2px_0px_0px_rgba(45,60,45,1)] flex flex-col items-center gap-4 text-center">
+                <span className="material-symbols-outlined text-muted-foreground text-6xl">add_a_photo</span>
+                <h3 className="text-lg font-black text-foreground">No scans yet</h3>
+                <p className="text-sm text-muted-foreground max-w-sm">Take your first scan to see a before/after comparison and get your personalized smile health score.</p>
                 <button onClick={() => navigate("/scan")} className="mt-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-bold text-sm hover:opacity-90 transition-opacity">
                   Start First Scan
                 </button>
@@ -287,13 +287,13 @@ const DashboardPage = () => {
             )}
 
             {/* Progress Graph */}
-              <div className="bg-card-dark rounded-xl p-5 border border-black shadow-[2px_2px_0px_0px_rgba(45,60,45,1)]">
+              <div className="bg-card rounded-xl p-5 border border-black shadow-[2px_2px_0px_0px_rgba(45,60,45,1)]">
                 <div className="flex justify-between items-center mb-4">
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-primary">trending_up</span>
-                    <span className="text-sm font-black uppercase text-ivory">SMILE PROGRESS</span>
+                    <span className="text-sm font-black uppercase text-foreground">SMILE PROGRESS</span>
                   </div>
-                  <span className="text-xs text-slate-500">{hasData ? `${totalScans} scan${totalScans > 1 ? "s" : ""}` : "No data"}</span>
+                  <span className="text-xs text-muted-foreground">{hasData ? `${totalScans} scan${totalScans > 1 ? "s" : ""}` : "No data"}</span>
                 </div>
                 {hasData ? (
                   <>
@@ -307,12 +307,12 @@ const DashboardPage = () => {
                         <Line type="monotone" dataKey="predicted" stroke="#9ec19b" strokeWidth={2} strokeDasharray="6 3" dot={{ fill: "#9ec19b", r: 3, strokeDasharray: "0" }} connectNulls={false} />
                       </LineChart>
                     </ResponsiveContainer>
-                    <p className="text-xs text-slate-500 mt-2">
+                    <p className="text-xs text-muted-foreground mt-2">
                       Predicted to reach {Math.min(99, latestScore + 9)} with consistent treatment
                     </p>
                   </>
                 ) : (
-                  <div className="h-48 flex items-center justify-center text-slate-600 text-sm">
+                  <div className="h-48 flex items-center justify-center text-muted-foreground text-sm">
                     Complete a scan to see progress tracking
                   </div>
                 )}
@@ -322,17 +322,17 @@ const DashboardPage = () => {
           {/* Right Column — Scan History (vertical) + Share */}
           <div className="lg:col-span-1 flex flex-col gap-6">
             {/* Scan History — vertical cards */}
-            <div className="bg-card-dark rounded-xl p-5 border border-black shadow-[2px_2px_0px_0px_rgba(45,60,45,1)] flex flex-col flex-1">
+            <div className="bg-card rounded-xl p-5 border border-black shadow-[2px_2px_0px_0px_rgba(45,60,45,1)] flex flex-col flex-1">
               <div className="flex justify-between items-center mb-4">
-                <span className="text-sm font-black uppercase text-ivory">SCAN HISTORY</span>
+                <span className="text-sm font-black uppercase text-foreground">SCAN HISTORY</span>
                 <button onClick={() => navigate("/scan")} className="text-xs font-bold text-primary cursor-pointer hover:underline">New Scan +</button>
               </div>
               {scans.length === 0 ? (
                 <div className="flex flex-col items-center justify-center gap-4 py-8 text-center flex-1">
-                  <span className="material-symbols-outlined text-slate-600 text-4xl">image_search</span>
-                  <p className="text-sm text-slate-400 font-bold">No scans yet</p>
-                  <p className="text-xs text-slate-600">Take your first scan to get started.</p>
-                  <button onClick={() => navigate("/scan")} className="px-5 py-2 border border-white/10 text-slate-400 text-xs font-bold rounded-full hover:border-primary hover:text-primary transition-colors">
+                  <span className="material-symbols-outlined text-muted-foreground text-4xl">image_search</span>
+                  <p className="text-sm text-muted-foreground font-bold">No scans yet</p>
+                  <p className="text-xs text-muted-foreground">Take your first scan to get started.</p>
+                  <button onClick={() => navigate("/scan")} className="px-5 py-2 border border-border text-muted-foreground text-xs font-bold rounded-full hover:border-primary hover:text-primary transition-colors">
                     Start First Scan
                   </button>
                 </div>
@@ -342,23 +342,23 @@ const DashboardPage = () => {
                     <div
                       key={scan.id}
                       onClick={() => navigate(`/analysis/${scan.id}`)}
-                      className="bg-white/[0.02] rounded-xl p-3 border border-white/5 hover:border-primary/20 hover:bg-white/[0.04] transition-all cursor-pointer"
+                      className="bg-white/[0.02] rounded-xl p-3 border border-border hover:border-primary/20 hover:bg-white/[0.04] transition-all cursor-pointer"
                     >
                       <div className="flex items-center gap-3">
                         <div
-                          className="size-12 rounded-lg bg-cover bg-center border border-white/10 shrink-0"
+                          className="size-12 rounded-lg bg-cover bg-center border border-border shrink-0"
                           style={{ backgroundImage: scan.thumbnailUrl ? `url(${scan.thumbnailUrl})` : undefined, backgroundColor: scan.thumbnailUrl ? undefined : "#1c2030" }}
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="font-bold text-sm text-ivory">
+                          <p className="font-bold text-sm text-foreground">
                             {new Date(scan.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                           </p>
-                          <p className="text-xs text-slate-500 truncate">{scan.simulationType}</p>
+                          <p className="text-xs text-muted-foreground truncate">{scan.simulationType}</p>
                         </div>
                         <div className="text-right shrink-0 flex items-center gap-2">
                           <div>
                             <span className="text-lg font-black text-primary">{scan.scores.overall}</span>
-                            <span className="text-xs text-slate-500">/100</span>
+                            <span className="text-xs text-muted-foreground">/100</span>
                           </div>
                           <button
                             onClick={(e) => handleDeleteScan(scan.id, e)}
@@ -378,10 +378,10 @@ const DashboardPage = () => {
                         ].map((m) => (
                           <div key={m.label} className="flex-1">
                             <div className="flex justify-between">
-                              <span className="text-[8px] text-slate-600">{m.label}</span>
-                              <span className="text-[8px] text-slate-500">{m.val}</span>
+                              <span className="text-[8px] text-muted-foreground">{m.label}</span>
+                              <span className="text-[8px] text-muted-foreground">{m.val}</span>
                             </div>
-                            <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                            <div className="h-1 bg-muted rounded-full overflow-hidden">
                               <div className="h-full bg-primary/60 rounded-full" style={{ width: `${m.val}%` }} />
                             </div>
                           </div>
@@ -395,19 +395,19 @@ const DashboardPage = () => {
 
               {/* Shareable Badge Card */}
               {hasData && (
-                <div className="bg-card-dark rounded-xl border border-black shadow-[2px_2px_0px_0px_rgba(45,60,45,1)] p-5 flex flex-col w-full">
+                <div className="bg-card rounded-xl border border-black shadow-[2px_2px_0px_0px_rgba(45,60,45,1)] p-5 flex flex-col w-full">
                   <div className="flex items-center gap-2 mb-4">
                     <span className="material-symbols-outlined text-primary">badge</span>
-                    <span className="text-sm font-black uppercase text-ivory">YOUR BADGE</span>
+                    <span className="text-sm font-black uppercase text-foreground">YOUR BADGE</span>
                   </div>
-                  <div className="bg-background-dark rounded-xl p-6 border border-white/10 flex flex-col items-center gap-3 flex-1">
+                  <div className="bg-background rounded-xl p-6 border border-border flex flex-col items-center gap-3 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="material-symbols-outlined text-primary text-sm">flare</span>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Dental Vision AI</span>
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Dental Vision AI</span>
                     </div>
                     <ScoreGauge score={latestScore} size={100} strokeWidth={8} />
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Smile Health Score</span>
-                    <span className="text-xs text-ivory font-bold">{displayName}</span>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Smile Health Score</span>
+                    <span className="text-xs text-foreground font-bold">{displayName}</span>
                   </div>
                   <div className="flex gap-2 mt-4">
                     <button
@@ -437,7 +437,7 @@ const DashboardPage = () => {
 
             {/* Copy link button */}
             {hasData && (
-              <button onClick={handleCopyLink} className="flex items-center gap-2 w-full px-4 py-2.5 bg-card-dark border-2 border-black rounded-xl shadow-[4px_4px_0px_0px_rgba(158,193,155,1)] text-xs font-bold text-slate-300 hover:translate-x-1 hover:-translate-y-1 transition-transform">
+              <button onClick={handleCopyLink} className="flex items-center gap-2 w-full px-4 py-2.5 bg-card border-2 border-black rounded-xl shadow-[4px_4px_0px_0px_rgba(158,193,155,1)] text-xs font-bold text-muted-foreground hover:translate-x-1 hover:-translate-y-1 transition-transform">
                 <span className="material-symbols-outlined text-sm">link</span>
                 {copied ? "Copied!" : "Copy Public Link"}
               </button>

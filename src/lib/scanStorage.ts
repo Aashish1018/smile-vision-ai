@@ -138,13 +138,38 @@ export function generateRecommendation(scores: ScanScores): Recommendation {
   };
 }
 
+// Ensure we shrink the image significantly to avoid local storage bloat
 export function fileToScanImage(file: File, angle: ScanImage["angle"]): Promise<ScanImage> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
       const dataUrl = reader.result as string;
       const img = new Image();
-      img.onload = () => resolve({ angle, dataUrl, fileSize: file.size, width: img.naturalWidth, height: img.naturalHeight });
+      img.onload = () => {
+        // Create a small thumbnail for the local UI cache so we don't freeze the browser
+        const canvas = document.createElement('canvas');
+        const MAX_DIM = 400;
+        let { naturalWidth: width, naturalHeight: height } = img;
+
+        if (width > height && width > MAX_DIM) {
+          height = Math.round((height * MAX_DIM) / width);
+          width = MAX_DIM;
+        } else if (height > MAX_DIM) {
+          width = Math.round((width * MAX_DIM) / height);
+          height = MAX_DIM;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const thumbDataUrl = canvas.toDataURL('image/jpeg', 0.6);
+          resolve({ angle, dataUrl: thumbDataUrl, fileSize: file.size, width: img.naturalWidth, height: img.naturalHeight });
+        } else {
+          resolve({ angle, dataUrl, fileSize: file.size, width: img.naturalWidth, height: img.naturalHeight });
+        }
+      };
       img.onerror = reject;
       img.src = dataUrl;
     };
@@ -177,8 +202,42 @@ function loadLocal(userId: string): ScanResult[] {
   }
 }
 
+async function uploadBase64ToStorage(userId: string, base64Str: string, filename: string): Promise<string> {
+  if (!base64Str || !base64Str.startsWith("data:image")) return base64Str;
+
+  try {
+    // Convert base64 to blob
+    const res = await fetch(base64Str);
+    const blob = await res.blob();
+
+    // Upload to 'scans' bucket
+    const filePath = `${userId}/${Date.now()}_${filename}.png`;
+    const { error: uploadError } = await supabase.storage
+      .from('scans')
+      .upload(filePath, blob, { contentType: 'image/png', upsert: true });
+
+    if (uploadError) {
+      console.error("Storage upload failed:", uploadError);
+      return base64Str; // fallback to storing inline if upload fails
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage.from('scans').getPublicUrl(filePath);
+    return urlData.publicUrl;
+  } catch (err) {
+    console.error("Storage convert/upload error:", err);
+    return base64Str;
+  }
+}
+
 export async function saveScans(userId: string, scans: ScanResult[]) {
-  saveLocal(userId, scans);
+  // Try to limit local storage to 3 items to completely avoid freezing strings
+  try {
+    localStorage.setItem(getUserKey(userId), JSON.stringify(scans.slice(-3)));
+  } catch {
+    console.warn("Local storage limit exceeded");
+  }
+
   if (!userId || userId === "anonymous") return;
 
   try {
@@ -192,18 +251,32 @@ export async function saveScans(userId: string, scans: ScanResult[]) {
 
     if (missing.length === 0) return;
 
-    const rows = missing.map((scan) => ({
-      user_id: userId,
-      scan_id: scan.id,
-      created_at: scan.date,
-      payload: scan,
-      overall_score: scan.scores.overall,
-      simulation_type: scan.simulationType,
+    // Offload massive base64 images from JSON payload to Supabase Storage before DB insert
+    const rows = await Promise.all(missing.map(async (scan) => {
+      // Clone payload
+      const payloadClone = { ...scan };
+
+      // If we have massive original/simulated images from the HF API, upload them
+      if (payloadClone.originalImage && payloadClone.originalImage.length > 500) {
+        payloadClone.originalImage = await uploadBase64ToStorage(userId, payloadClone.originalImage, `orig_${scan.id}`);
+      }
+      if (payloadClone.simulatedImage && payloadClone.simulatedImage.length > 500) {
+        payloadClone.simulatedImage = await uploadBase64ToStorage(userId, payloadClone.simulatedImage, `sim_${scan.id}`);
+      }
+
+      return {
+        user_id: userId,
+        scan_id: scan.id,
+        created_at: scan.date,
+        payload: payloadClone,
+        overall_score: scan.scores.overall,
+        simulation_type: scan.simulationType,
+      };
     }));
 
     await supabase.from(SCANS_TABLE).insert(rows);
-  } catch {
-    // fallback stays in local cache
+  } catch (err) {
+    console.error("Failed to save to supabase DB", err);
   }
 }
 

@@ -61,18 +61,18 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background-dark flex items-center justify-center p-4 font-display">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 font-display">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex items-center gap-3 justify-center mb-8">
           <div className="size-10 bg-primary rounded-xl flex items-center justify-center">
             <span className="material-symbols-outlined text-white">flare</span>
           </div>
-          <span className="text-2xl font-black tracking-tight text-ivory">Dental Vision</span>
+          <span className="text-2xl font-black tracking-tight text-foreground">Dental Vision</span>
         </div>
 
-        <div className="bg-card-dark border border-white/10 rounded-2xl p-8 shadow-2xl dv-panel">
-          <h2 className="text-2xl font-black tracking-tight text-ivory text-center">Welcome back</h2>
+        <div className="bg-card border border-border rounded-2xl p-8 shadow-2xl dv-panel">
+          <h2 className="text-2xl font-black tracking-tight text-foreground text-center">Welcome back</h2>
           <p className="text-sm dv-muted mt-1 text-center">Sign in to analyse your smile and track your progress.</p>
 
           {/* Tab switcher */}
@@ -80,7 +80,7 @@ const LoginPage = () => {
             <button
               onClick={() => { setActiveTab("signin"); setError(""); }}
               className={`flex-1 py-2 text-sm font-bold rounded-full transition-colors ${
-                activeTab === "signin" ? "bg-primary text-white" : "text-slate-400 hover:text-ivory"
+                activeTab === "signin" ? "bg-primary text-white" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Sign In
@@ -88,7 +88,7 @@ const LoginPage = () => {
             <button
               onClick={() => { setActiveTab("signup"); setError(""); }}
               className={`flex-1 py-2 text-sm font-bold rounded-full transition-colors ${
-                activeTab === "signup" ? "bg-primary text-white" : "text-slate-400 hover:text-ivory"
+                activeTab === "signup" ? "bg-primary text-white" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Create Account
@@ -112,7 +112,7 @@ const LoginPage = () => {
           {/* Divider */}
           <div className="flex items-center gap-3 my-4">
             <div className="flex-1 h-px bg-white/10" />
-            <span className="text-xs text-slate-500">or</span>
+            <span className="text-xs text-muted-foreground">or</span>
             <div className="flex-1 h-px bg-white/10" />
           </div>
 
@@ -133,7 +133,7 @@ const LoginPage = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full dv-input-surface rounded-xl px-4 py-3 text-sm text-ivory placeholder:text-slate-500 focus:outline-none focus:border-primary transition-colors"
+                className="w-full dv-input-surface rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
               />
               <input
                 type="password"
@@ -141,7 +141,7 @@ const LoginPage = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full dv-input-surface rounded-xl px-4 py-3 text-sm text-ivory placeholder:text-slate-500 focus:outline-none focus:border-primary transition-colors"
+                className="w-full dv-input-surface rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
               />
               <button
                 type="submit"
@@ -160,7 +160,7 @@ const LoginPage = () => {
                   if (error) setError(sanitizeAuthError(error.message));
                   else setError("Check your email for a reset link.");
                 }}
-                className="text-xs text-slate-500 hover:text-primary transition-colors text-center mt-1"
+                className="text-xs text-muted-foreground hover:text-primary transition-colors text-center mt-1"
               >
                 Forgot password?
               </button>
@@ -176,7 +176,7 @@ const LoginPage = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full dv-input-surface rounded-xl px-4 py-3 text-sm text-ivory placeholder:text-slate-500 focus:outline-none focus:border-primary transition-colors"
+                className="w-full dv-input-surface rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
               />
               <input
                 type="email"
@@ -184,7 +184,7 @@ const LoginPage = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full dv-input-surface rounded-xl px-4 py-3 text-sm text-ivory placeholder:text-slate-500 focus:outline-none focus:border-primary transition-colors"
+                className="w-full dv-input-surface rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
               />
               <input
                 type="password"
@@ -192,7 +192,7 @@ const LoginPage = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full dv-input-surface rounded-xl px-4 py-3 text-sm text-ivory placeholder:text-slate-500 focus:outline-none focus:border-primary transition-colors"
+                className="w-full dv-input-surface rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
               />
               <button
                 type="submit"
@@ -211,7 +211,7 @@ const LoginPage = () => {
 
         <button
           onClick={() => navigate("/")}
-          className="text-sm text-slate-500 hover:text-primary transition-colors mt-6 mx-auto block"
+          className="text-sm text-muted-foreground hover:text-primary transition-colors mt-6 mx-auto block"
         >
           ← Back to home
         </button>
