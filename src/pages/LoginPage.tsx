@@ -27,74 +27,49 @@ const LoginPage = () => {
   const handleGoogleAuth = async () => {
     setError("");
     if (!isSupabaseConfigured) {
-      setError("Authentication is not configured yet. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.");
+      setError("Authentication is not configured yet. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
       return;
     }
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: window.location.origin + "/dashboard",
-          queryParams: {
-            prompt: 'select_account'
-          }
-        },
-      });
-      if (error) throw error;
-    } catch (err: unknown) {
-      console.error('Google OAuth Error:', err);
-      const errorMessage = err instanceof Error ? err.message : "Failed to initialize Google login.";
-      setError(sanitizeAuthError(errorMessage));
-    }
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin + "/dashboard" },
+    });
+    if (error) setError(sanitizeAuthError(error.message));
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     if (!isSupabaseConfigured) {
-      setError("Authentication is not configured yet. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.");
+      setError("Authentication is not configured yet. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
       return;
     }
     setSubmitting(true);
-    try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      navigate("/dashboard");
-    } catch (err: unknown) {
-      console.error('Sign In Error:', err);
-      const errorMessage = err instanceof Error ? err.message : "Failed to sign in.";
-      setError(sanitizeAuthError(errorMessage));
-    } finally {
-      setSubmitting(false);
-    }
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setSubmitting(false);
+    if (error) setError(sanitizeAuthError(error.message));
+    else navigate("/dashboard");
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     if (!isSupabaseConfigured) {
-      setError("Authentication is not configured yet. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.");
+      setError("Authentication is not configured yet. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
       return;
     }
     setSubmitting(true);
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { full_name: name },
-          emailRedirectTo: window.location.origin,
-        },
-      });
-      if (error) throw error;
-      navigate("/dashboard");
-    } catch (err: unknown) {
-      console.error('Sign Up Error:', err);
-      const errorMessage = err instanceof Error ? err.message : "Failed to sign up.";
-      setError(sanitizeAuthError(errorMessage));
-    } finally {
-      setSubmitting(false);
-    }
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: name },
+        emailRedirectTo: window.location.origin,
+      },
+    });
+    setSubmitting(false);
+    if (error) setError(sanitizeAuthError(error.message));
+    else navigate("/dashboard");
   };
 
   return (

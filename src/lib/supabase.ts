@@ -4,7 +4,7 @@ const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL ?? '').trim()
 const SUPABASE_ANON_KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY ?? '').trim()
 
 const isPlaceholderValue = (value: string) =>
-  /placeholder|your_supabase|your-project|example|your_supabase_project_url_here|your_supabase_anon_key_here/i.test(value)
+  /placeholder|your_supabase|your-project|example/i.test(value)
 
 export const isSupabaseConfigured =
   Boolean(SUPABASE_URL) &&
@@ -18,8 +18,7 @@ if (!isSupabaseConfigured) {
   )
 }
 
-// Don't instantiate with invalid placeholders if not configured
 export const supabase = createClient(
-  isSupabaseConfigured ? SUPABASE_URL : 'https://placeholder.supabase.co',
-  isSupabaseConfigured ? SUPABASE_ANON_KEY : 'placeholder-key',
+  SUPABASE_URL || 'https://invalid.supabase.local',
+  SUPABASE_ANON_KEY || 'invalid-anon-key',
 )
