@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 
 const LoginPage = () => {
@@ -26,10 +26,6 @@ const LoginPage = () => {
 
   const handleGoogleAuth = async () => {
     setError("");
-    if (!isSupabaseConfigured) {
-      setError("Authentication is not configured yet. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
-      return;
-    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo: window.location.origin + "/dashboard" },
@@ -40,10 +36,6 @@ const LoginPage = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!isSupabaseConfigured) {
-      setError("Authentication is not configured yet. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
-      return;
-    }
     setSubmitting(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setSubmitting(false);
@@ -54,10 +46,6 @@ const LoginPage = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!isSupabaseConfigured) {
-      setError("Authentication is not configured yet. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
-      return;
-    }
     setSubmitting(true);
     const { error } = await supabase.auth.signUp({
       email,
@@ -110,8 +98,7 @@ const LoginPage = () => {
           {/* Google OAuth */}
           <button
             onClick={handleGoogleAuth}
-            disabled={!isSupabaseConfigured}
-            className="w-full flex items-center justify-center gap-3 bg-white text-slate-900 font-bold text-sm py-3 px-6 rounded-full hover:bg-slate-100 transition-colors mt-4 disabled:cursor-not-allowed disabled:opacity-55"
+            className="w-full flex items-center justify-center gap-3 bg-white text-slate-900 font-bold text-sm py-3 px-6 rounded-full hover:bg-slate-100 transition-colors mt-4"
           >
             <svg width="18" height="18" viewBox="0 0 48 48">
               <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -158,14 +145,13 @@ const LoginPage = () => {
               />
               <button
                 type="submit"
-                disabled={submitting || !isSupabaseConfigured}
+                disabled={submitting}
                 className="w-full bg-primary text-white font-bold text-sm py-3 rounded-full hover:opacity-90 transition-opacity mt-1 disabled:opacity-50"
               >
                 {submitting ? "Signing in…" : "Sign In"}
               </button>
               <button
                 type="button"
-                disabled={!isSupabaseConfigured}
                 onClick={async () => {
                   if (!email) { setError("Enter your email first"); return; }
                   const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -174,7 +160,7 @@ const LoginPage = () => {
                   if (error) setError(sanitizeAuthError(error.message));
                   else setError("Check your email for a reset link.");
                 }}
-                className="text-xs text-slate-500 hover:text-primary transition-colors text-center mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="text-xs text-slate-500 hover:text-primary transition-colors text-center mt-1"
               >
                 Forgot password?
               </button>
@@ -210,7 +196,7 @@ const LoginPage = () => {
               />
               <button
                 type="submit"
-                disabled={submitting || !isSupabaseConfigured}
+                disabled={submitting}
                 className="w-full bg-primary text-white font-bold text-sm py-3 rounded-full hover:opacity-90 transition-opacity mt-1 disabled:opacity-50"
               >
                 {submitting ? "Creating account…" : "Create Account"}
