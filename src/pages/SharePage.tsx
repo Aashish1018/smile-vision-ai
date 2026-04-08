@@ -8,15 +8,15 @@ const SharePage = () => {
   const { id } = useParams();
 
   return (
-    <div className="min-h-screen bg-background-dark font-display">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 dv-topbar">
+    <div className="min-h-screen bg-background font-display">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border dv-topbar">
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-primary">flare</span>
-          <span className="font-black text-ivory">Dental Vision</span>
+          <span className="font-black text-foreground">Dental Vision</span>
         </div>
         <button
           onClick={() => navigate("/")}
-          className="px-4 py-2 bg-primary text-white rounded-full text-xs font-bold hover:opacity-90 transition-opacity"
+          className="px-4 py-2 bg-primary text-foreground rounded-full text-xs font-bold hover:opacity-90 transition-opacity"
         >
           Analyse Your Smile →
         </button>
@@ -31,9 +31,9 @@ const SharePage = () => {
           </button>
         </div>
 
-        <div className="bg-card-dark rounded-3xl p-8 flex flex-col items-center gap-6 border border-white/10 shadow-2xl">
+        <div className="bg-card rounded-3xl p-8 flex flex-col items-center gap-6 border border-border shadow-2xl">
           <ScoreGauge score={mockScores.overall} size={148} strokeWidth={12} />
-          <span className="text-[10px] font-black uppercase tracking-widest text-ivory">SMILE HEALTH SCORE</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-foreground">SMILE HEALTH SCORE</span>
 
           <div className="w-full grid grid-cols-2 gap-3">
             <MetricBar label="Alignment" value={mockScores.alignment} icon="straighten" />
@@ -48,15 +48,15 @@ const SharePage = () => {
           </p>
         </div>
 
-        <div className="mt-8 rounded-2xl overflow-hidden border border-white/10 bg-card-dark">
+        <div className="mt-8 rounded-2xl overflow-hidden border border-border bg-card">
           <div className="grid grid-cols-1 md:grid-cols-2">
-            <div className="relative aspect-[4/3] overflow-hidden bg-background-dark">
+            <div className="relative aspect-[4/3] overflow-hidden bg-background">
               <img
                 src="https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800"
                 alt="Original"
                 className="h-full w-full object-cover"
               />
-              <span className="absolute bottom-4 left-4 bg-black text-white px-3 py-1 text-[10px] font-bold uppercase">Original</span>
+              <span className="absolute bottom-4 left-4 bg-black text-foreground px-3 py-1 text-[10px] font-bold uppercase">Original</span>
             </div>
             <div className="flex aspect-[4/3] flex-col items-center justify-center gap-4 bg-gradient-to-br from-primary/10 via-white/0 to-primary/15 p-8 text-center">
               <div className="size-16 rounded-2xl border border-primary/20 bg-primary/10 flex items-center justify-center text-primary">
@@ -75,17 +75,17 @@ const SharePage = () => {
         <div className="bg-primary/10 border border-primary/20 rounded-2xl p-6 mt-8">
           <div className="flex items-center gap-3 mb-3">
             <span className="material-symbols-outlined text-primary">lightbulb</span>
-            <span className="text-sm font-black uppercase text-ivory">AI RECOMMENDATION</span>
+            <span className="text-sm font-black uppercase text-foreground">AI RECOMMENDATION</span>
           </div>
-          <p className="text-sm text-ivory leading-relaxed">{mockRecommendation.summary}</p>
+          <p className="text-sm text-foreground leading-relaxed">{mockRecommendation.summary}</p>
         </div>
 
         <div className="flex flex-col items-center gap-4 mt-10 text-center">
-          <h3 className="text-xl font-black text-ivory">Want to know your smile score?</h3>
+          <h3 className="text-xl font-black text-foreground">Want to know your smile score?</h3>
           <p className="text-sm dv-muted">Get your free AI dental analysis in under 60 seconds.</p>
           <button
             onClick={() => navigate("/")}
-            className="px-8 py-3 bg-primary text-white rounded-full font-black text-sm hover:opacity-90 transition-opacity"
+            className="px-8 py-3 bg-primary text-foreground rounded-full font-black text-sm hover:opacity-90 transition-opacity"
           >
             Analyse My Smile — It's Free
           </button>

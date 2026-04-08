@@ -15,10 +15,6 @@ import {
   parseApiSimulationResult,
   type ApiSimulationResult,
 } from "@/lib/modelSchema";
-import refFront from "@/assets/guide-front.svg";
-import refRight from "@/assets/guide-right.svg";
-import refLeft from "@/assets/guide-left.svg";
-
 const steps = [
   {
     step: 1,
@@ -26,7 +22,7 @@ const steps = [
     icon: "face",
     title: "Center Face Photo",
     instruction: "Look straight ahead in portrait mode. Keep your chin level and both ears visible. This center shot is used in dashboard and ideal scan preview.",
-    goodExample: refFront,
+    goodExample: "https://api.dicebear.com/9.x/notionists/svg?seed=front&backgroundColor=f8f5e6",
   },
   {
     step: 2,
@@ -34,7 +30,7 @@ const steps = [
     icon: "face_retouching_natural",
     title: "Right Side Jaw Photo",
     instruction: "Turn your head 90° to the right so only the right profile is visible. Keep your jaw relaxed and stay in the same light.",
-    goodExample: refRight,
+    goodExample: "https://api.dicebear.com/9.x/notionists/svg?seed=right&backgroundColor=f8f5e6&flip=true",
   },
   {
     step: 3,
@@ -42,7 +38,7 @@ const steps = [
     icon: "face_retouching_natural",
     title: "Left Side Jaw Photo",
     instruction: "Turn your head 90° to the left so only the left profile is visible. Keep your jaw relaxed and use the same light.",
-    goodExample: refLeft,
+    goodExample: "https://api.dicebear.com/9.x/notionists/svg?seed=left&backgroundColor=f8f5e6",
   },
 ];
 
@@ -124,14 +120,6 @@ const ScanPage = () => {
     setPreviews((prev) => ({ ...prev, [step]: url }));
     // Scroll to top of content on mobile after selection
     contentRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const startCamera = async () => {
-    // Instead of using a custom UI, trigger the native file input with 'capture' attribute
-    const input = document.getElementById(`camera-input-${currentStep}`);
-    if (input) {
-      input.click();
-    }
   };
 
   const handleAnalyse = useCallback(async () => {
@@ -223,7 +211,8 @@ const ScanPage = () => {
 
       navigate(`/analysis/${scanId}`);
     } catch (err) {
-      console.error("Scan processing error:", err);
+      const errorMessage = err instanceof Error ? err.message : "Fallback error";
+      // 🛡️ Sentinel: Remove potentially sensitive error logging to console
       setLoading(false);
     }
   }, [photos, previews, user, navigate]);
@@ -235,10 +224,10 @@ const ScanPage = () => {
   }, [loading]);
 
   return (
-    <div className="min-h-screen bg-background-dark flex flex-col font-display">
+    <div className="min-h-screen bg-background flex flex-col font-display">
       {/* Loading overlay */}
       {loading && (
-        <div className="fixed inset-0 z-50 bg-background-dark/95 backdrop-blur-md flex flex-col items-center justify-center gap-6">
+        <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-md flex flex-col items-center justify-center gap-6">
           <span className="material-symbols-outlined text-primary text-6xl animate-pulse">auto_fix_high</span>
           <p className="text-lg font-bold text-foreground animate-fade-up">{loadingSteps[loadingStepIdx]}</p>
           <div className="w-64 h-1.5 bg-slate-800 rounded-full overflow-hidden">
@@ -251,20 +240,20 @@ const ScanPage = () => {
       )}
 
       {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 shrink-0">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
         <button
           onClick={() => navigate("/dashboard")}
-          className="bg-card-dark p-2 rounded-lg border border-white/10"
+          className="bg-card p-2 rounded-lg border border-border"
           aria-label="Back to dashboard"
         >
-          <span className="material-symbols-outlined text-ivory">arrow_back</span>
+          <span className="material-symbols-outlined text-foreground">arrow_back</span>
         </button>
-        <span className="text-sm font-bold text-slate-400">Step {currentStep} of 3</span>
-        <span className="font-black text-sm tracking-tight text-ivory">DENTAL VISION</span>
+        <span className="text-sm font-bold text-muted-foreground">Step {currentStep} of 3</span>
+        <span className="font-black text-sm tracking-tight text-foreground">DENTAL VISION</span>
       </div>
 
       {/* Progress bar */}
-      <div className="h-1 bg-white/5 w-full shrink-0">
+      <div className="h-1 bg-muted w-full shrink-0">
         <div
           className="h-full bg-primary transition-all duration-500"
           style={{ width: `${(currentStep / 3) * 100}%` }}
@@ -282,37 +271,36 @@ const ScanPage = () => {
             </span>
           </div>
 
-          <h2 className="text-3xl font-black tracking-tight text-ivory text-center mb-2">{currentStepData.title}</h2>
-          <p className="text-sm text-slate-400 text-center leading-relaxed max-w-sm mb-8">{currentStepData.instruction}</p>
+          <h2 className="text-3xl font-black tracking-tight text-foreground text-center mb-2">{currentStepData.title}</h2>
+          <p className="text-sm text-muted-foreground text-center leading-relaxed max-w-sm mb-8">{currentStepData.instruction}</p>
 
           {/* Guide example */}
-          <div className="w-full max-w-sm rounded-[28px] border border-white/10 bg-card-dark/80 p-5 mb-8 shadow-[0_18px_40px_rgba(0,0,0,0.16)]">
+          <div className="w-full max-w-sm rounded-[28px] border border-border bg-card/80 p-5 mb-8 shadow-[0_18px_40px_rgba(0,0,0,0.16)]">
             <img
               src={currentStepData.goodExample}
               alt={`${currentStepData.angle} guide`}
               className="size-40 rounded-[24px] object-cover mx-auto"
             />
-            <div className="mt-4 rounded-2xl bg-white/5 px-4 py-3 text-left">
+            <div className="mt-4 rounded-2xl bg-muted px-4 py-3 text-left">
               <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-primary">Framing guide</p>
-              <p className="mt-1 text-sm text-slate-300">Use this reference for head direction only. Upload from your gallery, or tap <span className="font-semibold text-ivory">Take a Pic</span> to open the camera.</p>
+              <p className="mt-1 text-sm text-muted-foreground">Use this reference for head direction only. Upload from your gallery, or tap <span className="font-semibold text-foreground">Take a Pic</span> to open the camera.</p>
             </div>
           </div>
 
           {/* Upload zone */}
           <>
-            <div
-              onClick={() => document.getElementById(`photo-input-${currentStep}`)?.click()}
+            <label
+              htmlFor={`photo-input-${currentStep}`}
               className={`border-2 border-dashed rounded-2xl p-10 flex flex-col items-center gap-4 cursor-pointer transition-all w-full ${
                 photos[currentStep]
                   ? "border-primary bg-primary/5"
-                  : "border-white/10 hover:border-primary/50 bg-white/[0.02]"
+                  : "border-border hover:border-primary/50 bg-white/[0.02]"
               }`}
             >
               <input
                 id={`photo-input-${currentStep}`}
                 type="file"
-                accept="image/jpg,image/jpeg,image/png,image/heic"
-                capture={undefined}
+                accept="image/jpg,image/jpeg,image/png,image/heic,image/webp"
                 className="hidden"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
@@ -327,40 +315,38 @@ const ScanPage = () => {
                       alt="Preview"
                       className="w-32 h-32 object-cover rounded-xl border border-primary/30"
                     />
-                    <p className="text-sm font-bold text-ivory truncate max-w-full">{photos[currentStep]!.name}</p>
-                    <p className="text-xs text-slate-500">Click to replace</p>
+                    <p className="text-sm font-bold text-foreground truncate max-w-full">{photos[currentStep]!.name}</p>
+                    <p className="text-xs text-muted-foreground">Click to replace</p>
                   </>
                 ) : (
                 <>
-                  <span className="material-symbols-outlined text-slate-400 text-4xl">cloud_upload</span>
-                  <p className="text-sm font-bold text-slate-300">Upload {currentStepData.angle} photo from gallery</p>
-                  <p className="text-xs text-slate-600">JPG, PNG, HEIC · Max 10MB</p>
+                  <span className="material-symbols-outlined text-muted-foreground text-4xl">cloud_upload</span>
+                  <p className="text-sm font-bold text-foreground">Upload {currentStepData.angle} photo from gallery</p>
+                  <p className="text-xs text-muted-foreground">JPG, PNG, HEIC · Max 10MB</p>
                 </>
               )}
-            </div>
+            </label>
 
-            {/* Native Camera Input (hidden) */}
-            <input
-              id={`camera-input-${currentStep}`}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleFileChange(currentStep, file);
-                e.target.value = '';
-              }}
-            />
-
-            {/* Camera button — mobile friendly */}
-            <button
-              onClick={startCamera}
-              className="mt-3 flex items-center justify-center gap-2 w-full py-3 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-slate-300 hover:border-primary hover:text-primary transition-colors"
+            {/* Native Camera Input Label acting as button */}
+            <label
+              htmlFor={`camera-input-${currentStep}`}
+              className="mt-3 flex items-center justify-center gap-2 w-full py-3 bg-muted border border-border rounded-xl text-sm font-bold text-muted-foreground hover:border-primary hover:text-primary transition-colors cursor-pointer"
             >
               <span className="material-symbols-outlined text-base">photo_camera</span>
               Take a Pic
-            </button>
+              <input
+                id={`camera-input-${currentStep}`}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleFileChange(currentStep, file);
+                  e.target.value = '';
+                }}
+              />
+            </label>
           </>
 
           {/* Navigation buttons */}
@@ -368,7 +354,7 @@ const ScanPage = () => {
             <button
               disabled={currentStep === 1}
               onClick={() => { setCurrentStep((p) => p - 1); }}
-              className="px-6 py-2 border border-white/10 text-slate-400 rounded-full text-sm font-bold hover:border-white/20 disabled:opacity-30 transition-colors"
+              className="px-6 py-2 border border-border text-muted-foreground rounded-full text-sm font-bold hover:border-white/20 disabled:opacity-30 transition-colors"
             >
               ← Back
             </button>
@@ -403,13 +389,13 @@ const ScanPage = () => {
                     ? "border-primary"
                     : n === currentStep
                     ? "border-primary/50 border-dashed"
-                    : "border-white/10"
+                    : "border-border"
                 }`}
               >
                 {previews[n] ? (
                   <img src={previews[n]} alt="" className="w-full h-full object-cover" />
                 ) : (
-                  <span className="material-symbols-outlined text-slate-600 text-lg">add_photo_alternate</span>
+                  <span className="material-symbols-outlined text-muted-foreground text-lg">add_photo_alternate</span>
                 )}
               </button>
             ))}
