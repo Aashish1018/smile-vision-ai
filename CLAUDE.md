@@ -46,7 +46,11 @@ uv run python -m evals.run --suite answers                # LLM-judged answers (
 cd apps/web
 pnpm install && pnpm dev                                  # web on :5173
 pnpm lint && pnpm typecheck && pnpm test && pnpm build
-pnpm gen:api                                              # regenerate src/lib/api-types.ts from the running API
+pnpm gen:api                                              # regenerate src/lib/api-types.ts from openapi.json
+# (export the spec first: cd services/api && uv run python -m smileos.openapi > ../../apps/web/openapi.json)
+
+docker compose -f compose.yaml -f compose.e2e.yaml up -d --build --wait   # full stack with a stub LLM
+cd apps/web && pnpm test:e2e                              # Playwright journey
 ```
 
 ## Rules that matter
