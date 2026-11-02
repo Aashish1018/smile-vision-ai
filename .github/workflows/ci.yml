@@ -1,0 +1,143 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  api:
+    name: API · lint, types, tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/api
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.1-pg17
+        env:
+          POSTGRES_USER: smileos
+          POSTGRES_PASSWORD: smileos
+          POSTGRES_DB: smileos_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U smileos" --health-interval 3s --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql+asyncpg://smileos:smileos@localhost:5432/smileos_test
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pyright
+      - run: uv run pytest --cov --cov-report=term --cov-report=xml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-api
+          path: services/api/coverage.xml
+
+  web:
+    name: Web · lint, types, tests, build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: apps/web/package.json
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: apps/web/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+
+  contract:
+    name: API contract is in sync with the web client
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: apps/web/package.json
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: apps/web/pnpm-lock.yaml
+      - run: cd services/api && uv sync --locked && ENV=test uv run python -m smileos.openapi > ../../apps/web/openapi.json
+      - run: cd apps/web && pnpm install --frozen-lockfile && pnpm gen:api
+      - name: Fail if generated types drifted
+        run: git diff --exit-code -- apps/web/openapi.json apps/web/src/lib/api-types.ts
+
+  evals:
+    name: Evals · retrieval + safety (gated)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/api
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - uses: actions/cache@v4
+        with:
+          path: /home/runner/.cache/fastembed
+          key: fastembed-${{ hashFiles('services/api/src/smileos/core/config.py') }}
+      - run: uv sync --locked
+      - run: uv run python -m evals.run --suite retrieval,safety
+        env:
+          ENV: test
+          FASTEMBED_CACHE_PATH: /home/runner/.cache/fastembed
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-report
+          path: services/api/eval-report.json
+
+  e2e:
+    name: E2E · full stack with a stub LLM
+    runs-on: ubuntu-latest
+    needs: [api, web]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: apps/web/package.json
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: apps/web/pnpm-lock.yaml
+      - run: docker compose -f compose.yaml -f compose.e2e.yaml up -d --build --wait
+      - run: cd apps/web && pnpm install --frozen-lockfile && pnpm exec playwright install --with-deps chromium
+      - run: cd apps/web && pnpm test:e2e
+        env:
+          CI: "true"
+      - if: failure()
+        run: docker compose -f compose.yaml -f compose.e2e.yaml logs api
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report

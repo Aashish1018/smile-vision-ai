@@ -1,0 +1,68 @@
+# Local stack: `docker compose up --build`, then open http://localhost:5173
+#   Ports are configurable: API_PORT=8001 WEB_PORT=5174 docker compose up
+#   Ollama on the host is used by default (see README for model setup).
+#   `--profile ollama` runs Ollama in a container instead.
+#   `--profile observability` adds Jaeger for OpenTelemetry traces at http://localhost:16686
+name: smileos
+
+services:
+  db:
+    image: pgvector/pgvector:0.8.1-pg17
+    environment:
+      POSTGRES_USER: smileos
+      POSTGRES_PASSWORD: smileos
+      POSTGRES_DB: smileos
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smileos"]
+      interval: 3s
+      retries: 20
+
+  api:
+    build: services/api
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      ENV: development
+      DATABASE_URL: postgresql+asyncpg://smileos:smileos@db:5432/smileos
+      ALLOW_DEV_LOGIN: "true"
+      CORS_ORIGINS: '["http://localhost:${WEB_PORT:-5173}"]'
+      LLM_PROVIDERS: >-
+        [{"name":"ollama","base_url":"${OLLAMA_BASE_URL:-http://host.docker.internal:11434/v1}",
+          "chat_model":"${CHAT_MODEL:-gemma3:4b}","vision_model":"${VISION_MODEL:-gemma3:4b}"}]
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    ports: ["${API_PORT:-8000}:8000"]
+    volumes: [objects:/app/var]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/readyz')"]
+      interval: 5s
+      retries: 30
+
+  web:
+    build:
+      context: apps/web
+      args:
+        VITE_API_URL: http://localhost:${API_PORT:-8000}
+        VITE_ENABLE_DEV_LOGIN: "true"
+    depends_on: [api]
+    environment:
+      API_ORIGIN: http://localhost:${API_PORT:-8000}
+    ports: ["${WEB_PORT:-5173}:8080"]
+
+  ollama:
+    profiles: [ollama]
+    image: ollama/ollama:0.30.8
+    ports: ["11434:11434"]
+    volumes: [ollama:/root/.ollama]
+
+  jaeger:
+    profiles: [observability]
+    image: jaegertracing/jaeger:2.10.0
+    ports: ["16686:16686", "4318:4318"]
+
+volumes:
+  pgdata:
+  objects:
+  ollama:
