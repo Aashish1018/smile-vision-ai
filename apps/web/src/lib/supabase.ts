@@ -1,8 +1,7 @@
-// src/lib/supabase.ts
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-// TODO: Replace with real values from Supabase dashboard → Project Settings → API
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL ?? 'https://placeholder.supabase.co'
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY ?? 'placeholder-anon-key'
+const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+/** Null when Supabase isn't configured; the app then relies on dev login (see AuthContext). */
+export const supabase: SupabaseClient | null = url && anonKey ? createClient(url, anonKey) : null;
