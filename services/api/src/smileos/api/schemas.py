@@ -132,6 +132,13 @@ class ClinicOut(BaseModel):
     currency: str
 
 
+class TreatmentOut(BaseModel):
+    code: str
+    name: str
+    unit: str
+    duration: str
+
+
 class SearchHit(BaseModel):
     chunk_id: str
     title: str
@@ -140,3 +147,23 @@ class SearchHit(BaseModel):
     score: float
     dense_rank: int | None
     sparse_rank: int | None
+
+
+class LLMOperationStats(BaseModel):
+    operation: str
+    model: str
+    calls: int
+    success_rate: float
+    p50_ms: int
+    p95_ms: int
+    prompt_tokens: int
+    completion_tokens: int
+    avg_repairs: float
+
+
+class MetricsOut(BaseModel):
+    window_days: int
+    llm: list[LLMOperationStats]
+    triage: dict[str, int]
+    plans: dict[str, int]
+    preview_rate: float

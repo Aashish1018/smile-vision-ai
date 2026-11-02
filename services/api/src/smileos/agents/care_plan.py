@@ -7,7 +7,8 @@
 
 Only `draft` uses the LLM. Everything clinically load-bearing is deterministic code the model
 can't override: triage gating, allowed treatment codes, citation checks, clinical sequencing
-(stabilise → restore → align → whiten → cosmetic) and costs.
+(stabilise → restore → align → whiten → cosmetic), least-invasive pruning
+and costs.
 `validate` sends the draft back to `draft` with concrete errors, up to `MAX_DRAFTS` attempts.
 `review` pauses the graph until a dentist approves, edits or rejects the plan.
 """
@@ -29,7 +30,7 @@ from smileos.rag.retriever import HybridRetriever
 from smileos.vision.schemas import Category, Findings
 from smileos.vision.triage import Triage, TriageLevel
 
-PLAN_PROMPT_VERSION = "care-plan-v2"
+PLAN_PROMPT_VERSION = "care-plan-v3"
 MAX_DRAFTS = 2
 MIN_CONFIDENCE = 0.4
 
@@ -43,6 +44,14 @@ PHASE: dict[str, int] = {
     "WHITEN_OFFICE": 4, "WHITEN_HOME": 4,
     "BONDING": 5, "VENEER": 5, "CROWN": 5, "IMPLANT": 5, "BRIDGE": 5,
 }  # fmt: skip
+
+# Least to most invasive. Used to prune redundant cosmetic steps: when two treatments fix the same
+# finding, the gentler one stays in the plan and the other becomes an alternative.
+INVASIVENESS: list[str] = [
+    "WHITEN_HOME", "WHITEN_OFFICE", "BONDING", "ALIGNERS", "BRACES", "VENEER", "CROWN", "BRIDGE", "IMPLANT",
+]  # fmt: skip
+# Diagnostic and disease-control steps are never pruned as "redundant".
+NEVER_PRUNED = {"EXAM", "SPECIALIST_REFERRAL", "CLEAN", "SRP", "FILLING", "RCT"}
 
 
 class PlanStep(BaseModel):
@@ -83,13 +92,33 @@ class AgentDeps:
 DRAFT_SYSTEM = """\
 You draft dental care plans for a licensed dentist to review. Use only the allowed treatment
 codes. Every step must cite the evidence numbers that support it. Prefer the least invasive
-option that addresses the observation; put more invasive options under alternatives.
+option that addresses the observation; put more invasive options under alternatives. Never put
+two treatments that solve the same problem in steps.
 Never diagnose. The patient_summary must say the plan is a draft pending the dentist's review.
 """
 
 
 def _observed(findings: Findings) -> set[Category]:
     return {o.category for o in findings.observations if o.confidence >= MIN_CONFIDENCE}
+
+
+def prune_redundant(
+    steps: list[PlanStep], catalog: Catalog, observed: set[Category]
+) -> tuple[list[PlanStep], list[PlanStep]]:
+    """Least-invasive set cover over the observed findings. Returns (kept, moved_to_alternatives)."""
+    rank = {code: i for i, code in enumerate(INVASIVENESS)}
+    kept, moved, covered = [], [], set()
+    for step in sorted(steps, key=lambda s: rank.get(s.code, -1)):
+        if step.code in NEVER_PRUNED:
+            kept.append(step)
+            continue
+        adds = (set(catalog.treatments[step.code].addresses) & observed) - covered
+        if adds:
+            covered |= adds
+            kept.append(step)
+        else:
+            moved.append(step)
+    return kept, moved
 
 
 def _allowed_codes(catalog: Catalog, findings: Findings) -> list[str]:
@@ -191,10 +220,13 @@ def build_care_plan_graph(deps: AgentDeps, checkpointer: Any = None):
                     kept.append(s)
             return kept
 
-        plan.steps = sorted(_clean(plan.steps, "Plan"), key=lambda s: PHASE.get(s.code, 9))
+        kept, redundant = prune_redundant(_clean(plan.steps, "Plan"), catalog, _observed(findings))
+        plan.steps = sorted(kept, key=lambda s: PHASE.get(s.code, 9))
         plan.alternatives = [
-            a for a in _clean(plan.alternatives, "Alternative") if a.code not in {s.code for s in plan.steps}
-        ]
+            a
+            for a in [*redundant, *_clean(plan.alternatives, "Alternative")]
+            if a.code not in {s.code for s in plan.steps}
+        ][:3]
         if not any(s.code == "EXAM" for s in plan.steps):
             plan.steps.insert(
                 0,

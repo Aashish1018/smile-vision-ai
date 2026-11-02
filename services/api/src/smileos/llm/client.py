@@ -165,6 +165,7 @@ class OpenAICompatChatModel:
         for provider in self._providers:
             started = time.perf_counter()
             emitted = False
+            usage = None
             try:
                 stream = await self._clients[provider.name].chat.completions.create(
                     model=provider.chat_model,
@@ -172,8 +173,11 @@ class OpenAICompatChatModel:
                     temperature=0.2,
                     seed=self._seed,
                     stream=True,
+                    stream_options={"include_usage": True},
                 )
                 async for chunk in stream:
+                    if chunk.usage:
+                        usage = chunk.usage
                     delta = chunk.choices[0].delta.content if chunk.choices else None
                     if delta:
                         emitted = True
@@ -184,7 +188,7 @@ class OpenAICompatChatModel:
                 if emitted:  # can't transparently switch providers mid-answer
                     raise ModelUnavailable(detail=f"{operation}: stream interrupted") from exc
                 continue
-            await self._record(operation, provider, provider.chat_model, started, ok=True)
+            await self._record(operation, provider, provider.chat_model, started, ok=True, usage=usage)
             return
         raise ModelUnavailable(detail=f"{operation}: all providers failed ({last_error!r})")
 

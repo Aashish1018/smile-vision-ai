@@ -8,7 +8,7 @@ from fastapi import APIRouter
 from sqlalchemy import Integer, case, func, select
 
 from smileos.api.deps import ContainerDep, PrincipalDep
-from smileos.api.schemas import PlanOut, ReviewIn, ScanOut
+from smileos.api.schemas import LLMOperationStats, MetricsOut, PlanOut, ReviewIn, ScanOut
 from smileos.db.models import CarePlan, LLMCallRecord, Scan
 from smileos.services import plans
 from smileos.services.scans import require_dentist
@@ -35,8 +35,8 @@ async def review(plan_id: uuid.UUID, body: ReviewIn, c: ContainerDep, principal:
     return PlanOut.of(plan)
 
 
-@router.get("/metrics")
-async def metrics(c: ContainerDep, principal: PrincipalDep) -> dict:
+@router.get("/metrics", response_model=MetricsOut)
+async def metrics(c: ContainerDep, principal: PrincipalDep) -> MetricsOut:
     """LLM latency, reliability, token use and repair rate, plus clinical funnel numbers."""
     clinic = require_dentist(principal)
     async with c.sessionmaker() as session:
@@ -67,23 +67,23 @@ async def metrics(c: ContainerDep, principal: PrincipalDep) -> dict:
                 select(func.avg(case((Scan.preview_applied, 1.0), else_=0.0))).where(Scan.clinic_slug == clinic)
             )
         ).scalar()
-    return {
-        "window_days": 30,
-        "llm": [
-            {
-                "operation": op,
-                "model": model,
-                "calls": n,
-                "success_rate": round(float(ok or 0), 3),
-                "p50_ms": int(p50 or 0),
-                "p95_ms": int(p95 or 0),
-                "prompt_tokens": int(pt or 0),
-                "completion_tokens": int(ct or 0),
-                "avg_repairs": round(float(rep or 0), 3),
-            }
+    return MetricsOut(
+        window_days=30,
+        llm=[
+            LLMOperationStats(
+                operation=op,
+                model=model,
+                calls=n,
+                success_rate=round(float(ok or 0), 3),
+                p50_ms=int(p50 or 0),
+                p95_ms=int(p95 or 0),
+                prompt_tokens=int(pt or 0),
+                completion_tokens=int(ct or 0),
+                avg_repairs=round(float(rep or 0), 3),
+            )
             for op, model, n, ok, p50, p95, pt, ct, rep in llm_rows
         ],
-        "triage": dict(triage_rows.all()),
-        "plans": dict(plan_rows.all()),
-        "preview_rate": round(float(preview_rate or 0), 3),
-    }
+        triage=dict(triage_rows.tuples().all()),
+        plans=dict(plan_rows.tuples().all()),
+        preview_rate=round(float(preview_rate or 0), 3),
+    )

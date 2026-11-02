@@ -8,7 +8,7 @@ from fastapi import APIRouter, Response
 from sqlalchemy import text
 
 from smileos.api.deps import ContainerDep, PrincipalDep
-from smileos.api.schemas import ClinicOut, DevLoginIn, MeOut, SharedScanOut, TokenOut
+from smileos.api.schemas import ClinicOut, DevLoginIn, MeOut, SharedScanOut, TokenOut, TreatmentOut
 from smileos.core.errors import BadRequest, Forbidden, NotFound
 from smileos.services import scans
 from smileos.vision.scoring import Scores
@@ -35,6 +35,14 @@ async def me(principal: PrincipalDep) -> MeOut:
 @router.get("/api/clinics", response_model=list[ClinicOut], tags=["clinic"])
 async def clinics(c: ContainerDep) -> list[ClinicOut]:
     return [ClinicOut(slug=k.slug, name=k.name, currency=k.currency) for k in c.catalog.clinics.values()]
+
+
+@router.get("/api/treatments", response_model=list[TreatmentOut], tags=["clinic"])
+async def treatments(c: ContainerDep, response: Response) -> list[TreatmentOut]:
+    response.headers["Cache-Control"] = "public, max-age=3600"
+    return [
+        TreatmentOut(code=t.code, name=t.name, unit=t.unit, duration=t.duration) for t in c.catalog.treatments.values()
+    ]
 
 
 @router.get("/api/public/share/{token}", response_model=SharedScanOut, tags=["public"])

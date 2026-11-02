@@ -2,7 +2,8 @@
 # Multi-stage build: uv resolves the locked environment in a builder; the runtime image holds
 # only the virtualenv, source and pre-downloaded ONNX models, and runs as a non-root user.
 
-FROM ghcr.io/astral-sh/uv:0.12.18-python3.12-bookworm-slim AS builder
+FROM python:3.12-slim-bookworm AS builder
+COPY --from=ghcr.io/astral-sh/uv:0.12.18 /uv /uvx /bin/
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never
 WORKDIR /app
 RUN --mount=type=cache,target=/root/.cache/uv \

@@ -311,6 +311,7 @@ def main() -> None:
     parser.add_argument("--suite", default="retrieval,safety", help="comma-separated: retrieval,safety,answers")
     parser.add_argument("--embedder", choices=["fastembed", "hashing"], default="fastembed")
     parser.add_argument("--out", default="eval-report.json")
+    parser.add_argument("--no-gate", action="store_true", help="report only; always exit 0")
     args = parser.parse_args()
     report = asyncio.run(run_suites(args))
 
@@ -325,7 +326,7 @@ def main() -> None:
     if summary := os.environ.get("GITHUB_STEP_SUMMARY"):
         with Path(summary).open("a") as f:
             f.write(md + "\n")
-    sys.exit(1 if breaches else 0)
+    sys.exit(1 if breaches and not args.no_gate else 0)
 
 
 if __name__ == "__main__":

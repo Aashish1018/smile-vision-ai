@@ -99,3 +99,29 @@ async def test_model_cannot_add_codes_outside_the_menu(retriever, catalog, findi
     llm = FakeChatModel(responses={"PlanDraft": _draft(("WHITEN_HOME", 1, [1]), (code, 1, [1]))})
     _, _, state = await _run(retriever, catalog, findings, llm)
     assert code not in [s["code"] for s in state["draft"]["steps"]]
+
+
+async def test_redundant_treatments_for_the_same_finding_become_alternatives(retriever, catalog, findings_factory):
+    # Seen with a real 3.8B model: aligners *and* bonding proposed for one small gap.
+    findings = findings_factory(("discoloration", "moderate", 0.8), ("spacing", "mild", 0.7))
+    llm = FakeChatModel(
+        responses={
+            "PlanDraft": _draft(("CLEAN", 1, [1]), ("ALIGNERS", 1, [1]), ("WHITEN_HOME", 1, [1]), ("BONDING", 1, [1]))
+        }
+    )
+    _, _, state = await _run(retriever, catalog, findings, llm)
+    assert [s["code"] for s in state["draft"]["steps"]] == ["EXAM", "CLEAN", "WHITEN_HOME", "BONDING"]
+    assert [a["code"] for a in state["draft"]["alternatives"]] == ["ALIGNERS"]
+    assert "ALIGNERS" not in [line["code"] for line in state["estimate"]["lines"]]
+
+
+def test_prune_keeps_disease_control_and_gentlest_cosmetic(catalog):
+    from smileos.agents.care_plan import PlanStep, prune_redundant
+    from smileos.vision.schemas import Category
+
+    steps = [
+        PlanStep(code=c, quantity=1, rationale="r", citations=[1]) for c in ["VENEER", "WHITEN_OFFICE", "SRP", "CLEAN"]
+    ]
+    kept, moved = prune_redundant(steps, catalog, {Category.DISCOLORATION, Category.GUM_INFLAMMATION})
+    assert {s.code for s in kept} == {"WHITEN_OFFICE", "SRP", "CLEAN"}
+    assert [s.code for s in moved] == ["VENEER"]

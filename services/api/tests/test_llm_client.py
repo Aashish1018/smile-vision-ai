@@ -100,14 +100,16 @@ async def test_raises_when_all_providers_fail():
         )
 
 
-async def test_stream_yields_tokens():
+async def test_stream_yields_tokens_and_records_usage():
     sse = (
         'data: {"id":"x","object":"chat.completion.chunk","created":0,"model":"m","choices":[{"index":0,"delta":{"content":"Hel"}}]}\n\n'
         'data: {"id":"x","object":"chat.completion.chunk","created":0,"model":"m","choices":[{"index":0,"delta":{"content":"lo"}}]}\n\n'
+        'data: {"id":"x","object":"chat.completion.chunk","created":0,"model":"m","choices":[],"usage":{"prompt_tokens":7,"completion_tokens":2,"total_tokens":9}}\n\n'
         "data: [DONE]\n\n"
     )
     hosts = FakeHosts(local=httpx2.Response(200, text=sse, headers={"content-type": "text/event-stream"}))
-    tokens = [
-        t async for t in hosts.model(_settings(), MemoryUsageRecorder()).stream(operation="t", system="s", messages=[])
-    ]
+    recorder = MemoryUsageRecorder()
+    tokens = [t async for t in hosts.model(_settings(), recorder).stream(operation="t", system="s", messages=[])]
     assert "".join(tokens) == "Hello"
+    assert hosts.requests[0][1]["stream_options"] == {"include_usage": True}
+    assert (recorder.calls[-1].prompt_tokens, recorder.calls[-1].completion_tokens) == (7, 2)
