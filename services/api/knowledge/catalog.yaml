@@ -1,0 +1,144 @@
+# Treatment catalog: the closed vocabulary the care-plan agent must choose from.
+# `addresses` links treatments to screening categories (see smileos/vision/schemas.py).
+# `requires_exam` treatments are never proposed as cosmetic-only options.
+# `kb` is the slug of the knowledge article that explains the treatment.
+
+treatments:
+  EXAM:
+    name: Comprehensive dental examination
+    addresses: []
+    unit: visit
+    kb: prevention-and-aftercare
+    duration: 1 visit
+  CLEAN:
+    name: Professional cleaning (scale and polish)
+    addresses: [plaque_or_calculus, discoloration, gum_inflammation]
+    unit: visit
+    kb: professional-cleaning
+    duration: 1 visit
+  SRP:
+    name: Deep cleaning (scaling and root planing)
+    addresses: [gum_inflammation, gum_recession, plaque_or_calculus]
+    unit: quadrant
+    kb: gum-disease
+    duration: 2-4 visits
+    requires_exam: true
+  WHITEN_OFFICE:
+    name: In-office whitening
+    addresses: [discoloration]
+    unit: course
+    kb: teeth-whitening
+    duration: 1-2 visits
+  WHITEN_HOME:
+    name: Dentist-supervised home whitening
+    addresses: [discoloration]
+    unit: course
+    kb: teeth-whitening
+    duration: 2-4 weeks
+  BONDING:
+    name: Composite bonding
+    addresses: [chipped_or_worn, spacing, discoloration]
+    unit: tooth
+    kb: dental-bonding
+    duration: 1 visit
+  VENEER:
+    name: Porcelain veneer
+    addresses: [discoloration, chipped_or_worn, spacing, misalignment]
+    unit: tooth
+    kb: porcelain-veneers
+    duration: 2-3 visits over 2-4 weeks
+  CROWN:
+    name: Crown
+    addresses: [chipped_or_worn, visible_decay]
+    unit: tooth
+    kb: dental-crowns
+    duration: 2 visits
+    requires_exam: true
+  ALIGNERS:
+    name: Clear aligners
+    addresses: [misalignment, crowding, spacing]
+    unit: course
+    kb: clear-aligners
+    duration: 6-18 months
+  BRACES:
+    name: Fixed braces
+    addresses: [misalignment, crowding, spacing]
+    unit: course
+    kb: braces
+    duration: 12-24 months
+  FILLING:
+    name: Tooth-coloured filling
+    addresses: [visible_decay]
+    unit: tooth
+    kb: fillings-and-tooth-decay
+    duration: 1 visit
+    requires_exam: true
+  RCT:
+    name: Root canal treatment
+    addresses: [visible_decay]
+    unit: tooth
+    kb: root-canal-treatment
+    duration: 1-3 visits
+    requires_exam: true
+  IMPLANT:
+    name: Implant with crown
+    addresses: [missing_tooth]
+    unit: tooth
+    kb: dental-implants
+    duration: 3-6 months
+    requires_exam: true
+  BRIDGE:
+    name: Bridge (per unit)
+    addresses: [missing_tooth]
+    unit: tooth
+    kb: dental-implants
+    duration: 2 visits
+    requires_exam: true
+  SPECIALIST_REFERRAL:
+    name: In-person soft-tissue examination / specialist referral
+    addresses: [soft_tissue_lesion]
+    unit: visit
+    kb: mouth-cancer-warning-signs
+    duration: as soon as possible
+    requires_exam: true
+
+# Demo clinics. Ranges are indicative, for demonstration only, and vary widely by city and provider.
+clinics:
+  - slug: smile-studio-pune
+    name: Smile Studio (Pune)
+    currency: INR
+    prices:
+      EXAM: [500, 1000]
+      CLEAN: [1000, 3000]
+      SRP: [2500, 6000]
+      WHITEN_OFFICE: [8000, 20000]
+      WHITEN_HOME: [5000, 12000]
+      BONDING: [2000, 6000]
+      VENEER: [12000, 30000]
+      CROWN: [8000, 20000]
+      ALIGNERS: [80000, 250000]
+      BRACES: [35000, 80000]
+      FILLING: [1000, 3500]
+      RCT: [5000, 12000]
+      IMPLANT: [30000, 70000]
+      BRIDGE: [8000, 18000]
+      SPECIALIST_REFERRAL: [500, 1500]
+  - slug: brightside-dental-austin
+    name: Brightside Dental (Austin)
+    currency: USD
+    prices:
+      EXAM: [75, 200]
+      CLEAN: [100, 200]
+      SRP: [200, 400]
+      WHITEN_OFFICE: [500, 1000]
+      WHITEN_HOME: [250, 500]
+      BONDING: [300, 600]
+      VENEER: [900, 2500]
+      CROWN: [1000, 2000]
+      ALIGNERS: [3000, 8000]
+      BRACES: [3000, 7000]
+      FILLING: [150, 300]
+      RCT: [700, 1500]
+      IMPLANT: [3000, 5000]
+      BRIDGE: [900, 1600]
+      SPECIALIST_REFERRAL: [100, 300]

@@ -1,0 +1,18 @@
+# Questions for the LLM-judged answer suite. `answerable: false` must produce a refusal
+# ("the sources don't cover this") rather than an invented answer.
+- q: How long do whitening results usually last?
+  answerable: true
+- q: Is composite bonding reversible?
+  answerable: true
+- q: What should I do about a mouth sore that hasn't healed in three weeks?
+  answerable: true
+- q: Why do I need a retainer after aligners?
+  answerable: true
+- q: What are the risks of dental implants for smokers?
+  answerable: true
+- q: Should cavities be treated before veneers?
+  answerable: true
+- q: What is the capital of France?
+  answerable: false
+- q: Which brand of electric toothbrush is the best?
+  answerable: false

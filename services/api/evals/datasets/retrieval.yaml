@@ -1,0 +1,66 @@
+# Patient-phrased questions → knowledge-base articles that answer them.
+# Phrasing deliberately avoids article titles so the eval measures semantic retrieval, not lookup.
+- q: my teeth look yellow, can that be fixed
+  relevant: [teeth-whitening, tooth-discoloration-causes]
+- q: does bleaching hurt or make teeth sensitive
+  relevant: [teeth-whitening]
+- q: how long will the whiter colour stay
+  relevant: [teeth-whitening]
+- q: why is one of my front teeth turning grey
+  relevant: [tooth-discoloration-causes, root-canal-treatment]
+- q: coffee stains on enamel
+  relevant: [tooth-discoloration-causes, teeth-whitening, professional-cleaning]
+- q: small chip on my front tooth repair options
+  relevant: [dental-bonding, porcelain-veneers]
+- q: tooth coloured resin to close a little gap
+  relevant: [dental-bonding, crowding-and-spacing]
+- q: thin porcelain shells glued on the front of teeth
+  relevant: [porcelain-veneers]
+- q: is shaving enamel for veneers reversible
+  relevant: [porcelain-veneers]
+- q: invisible trays to straighten crooked teeth
+  relevant: [clear-aligners]
+- q: do I have to wear a retainer after straightening
+  relevant: [clear-aligners, braces, prevention-and-aftercare]
+- q: metal brackets and wires how long
+  relevant: [braces]
+- q: overlapping teeth not enough room in my jaw
+  relevant: [crowding-and-spacing, clear-aligners, braces]
+- q: underbite caused by jaw position surgery
+  relevant: [crowding-and-spacing]
+- q: cap over a broken tooth
+  relevant: [dental-crowns]
+- q: replacing a missing tooth with a screw in the bone
+  relevant: [dental-implants]
+- q: false tooth attached to the neighbouring teeth
+  relevant: [dental-implants]
+- q: black hole in my molar
+  relevant: [fillings-and-tooth-decay]
+- q: chalky white spots on enamel early decay
+  relevant: [fillings-and-tooth-decay]
+- q: nerve infection lingering pain with hot drinks
+  relevant: [root-canal-treatment]
+- q: gums bleed when I brush
+  relevant: [gum-disease]
+- q: gums pulling back and teeth getting loose
+  relevant: [gum-disease]
+- q: deep cleaning under the gums by quadrant
+  relevant: [gum-disease]
+- q: hard yellow deposits behind lower front teeth
+  relevant: [professional-cleaning]
+- q: how often should I get a scale and polish
+  relevant: [professional-cleaning, prevention-and-aftercare]
+- q: white patch on my tongue that won't go away
+  relevant: [mouth-cancer-warning-signs]
+- q: mouth ulcer that has lasted three weeks
+  relevant: [mouth-cancer-warning-signs]
+- q: does chewing tobacco or gutka raise risk of mouth cancer
+  relevant: [mouth-cancer-warning-signs, prevention-and-aftercare]
+- q: leukoplakia
+  relevant: [mouth-cancer-warning-signs]
+- q: should I rinse after brushing with fluoride toothpaste
+  relevant: [prevention-and-aftercare]
+- q: what should I avoid eating right after whitening
+  relevant: [prevention-and-aftercare, teeth-whitening]
+- q: SRP
+  relevant: [gum-disease]

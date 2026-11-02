@@ -1,0 +1,1 @@
+"""SmileOS AI service."""
