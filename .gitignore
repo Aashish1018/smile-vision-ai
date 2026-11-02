@@ -27,10 +27,21 @@ dist-ssr
 .env
 .env.*.local
 
-# Ignore images and screenshots for the HF backend
-images/
-*.png
-*.jpg
-*.jpeg
 *.lockb
 
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+services/api/var/
+eval-report.json
+
+# Playwright
+apps/web/test-results/
+apps/web/playwright-report/
