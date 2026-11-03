@@ -12,7 +12,7 @@ ARG VITE_SUPABASE_ANON_KEY=
 RUN pnpm build
 
 # Unprivileged nginx: listens on 8080 and runs as a non-root user.
-FROM nginxinc/nginx-unprivileged:1.27-alpine
+FROM nginxinc/nginx-unprivileged:1.31-alpine
 ENV API_ORIGIN=http://localhost:8000
 COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /app/dist /usr/share/nginx/html
