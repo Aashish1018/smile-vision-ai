@@ -41,7 +41,7 @@ jobs:
       - run: uv run ruff format --check .
       - run: uv run pyright
       - run: uv run pytest --cov --cov-report=term --cov-report=xml
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: coverage-api
           path: services/api/coverage.xml
@@ -109,7 +109,7 @@ jobs:
         env:
           ENV: test
           FASTEMBED_CACHE_PATH: /home/runner/.cache/fastembed
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: eval-report
@@ -136,7 +136,7 @@ jobs:
           CI: "true"
       - if: failure()
         run: docker compose -f compose.yaml -f compose.e2e.yaml logs api
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-report
