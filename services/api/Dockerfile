@@ -2,7 +2,7 @@
 # Multi-stage build: uv resolves the locked environment in a builder; the runtime image holds
 # only the virtualenv, source and pre-downloaded ONNX models, and runs as a non-root user.
 
-FROM python:3.12-slim-bookworm AS builder
+FROM python:3.15-slim-bookworm AS builder
 COPY --from=ghcr.io/astral-sh/uv:0.12.18 /uv /uvx /bin/
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never
 WORKDIR /app
@@ -20,7 +20,7 @@ from fastembed import TextEmbedding; from fastembed.rerank.cross_encoder import 
 from smileos.core.config import Settings; s = Settings(); \
 TextEmbedding(s.embedding_model); TextCrossEncoder(s.reranker_model)"
 
-FROM python:3.12-slim-bookworm AS runtime
+FROM python:3.15-slim-bookworm AS runtime
 RUN groupadd --system app && useradd --system --gid app --home /app app
 WORKDIR /app
 COPY --from=builder --chown=app:app /app /app
