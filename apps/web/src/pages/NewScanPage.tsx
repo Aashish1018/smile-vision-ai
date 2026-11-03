@@ -18,6 +18,8 @@ const STAGES = [
 ] as const;
 
 const MAX_BYTES = 10 * 1024 * 1024;
+// Mirrors ALLOWED_FORMATS in services/api imaging/normalize.py; also keeps SVG out of the preview.
+const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export default function NewScanPage() {
   const navigate = useNavigate();
@@ -38,7 +40,7 @@ export default function NewScanPage() {
 
   const pick = (f: File | undefined) => {
     if (!f) return;
-    if (!f.type.startsWith("image/")) return toast.error("Please choose an image file.");
+    if (!ACCEPTED_TYPES.includes(f.type)) return toast.error("Please choose a JPEG, PNG or WebP photo.");
     if (f.size > MAX_BYTES) return toast.error("Photos must be under 10 MB.");
     setFile(f);
   };
@@ -101,7 +103,7 @@ export default function NewScanPage() {
                   <span className="sr-only">Take a photo</span>
                   <input
                     type="file"
-                    accept="image/*"
+                    accept={ACCEPTED_TYPES.join(",")}
                     capture="user"
                     className="hidden"
                     onChange={(e) => pick(e.target.files?.[0])}
@@ -117,7 +119,7 @@ export default function NewScanPage() {
           <input
             ref={inputRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept={ACCEPTED_TYPES.join(",")}
             className="hidden"
             data-testid="file-input"
             onChange={(e) => pick(e.target.files?.[0])}
