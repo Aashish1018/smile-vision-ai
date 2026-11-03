@@ -1,0 +1,18 @@
+# Deterministic end-to-end stack: swaps the LLM for a stub OpenAI-compatible server.
+#   docker compose -f compose.yaml -f compose.e2e.yaml up -d --build --wait
+#   cd apps/web && pnpm test:e2e
+services:
+  stub-llm:
+    image: python:3.12-slim
+    command: sh -c "pip install -q 'fastapi>=0.115' 'uvicorn>=0.30' && python /stub/stub_llm.py --port 9100"
+    volumes: ["./services/api/tests/stub_llm.py:/stub/stub_llm.py:ro,z"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('localhost', 9100))"]
+      interval: 3s
+      retries: 40
+
+  api:
+    depends_on:
+      stub-llm: { condition: service_healthy }
+    environment:
+      LLM_PROVIDERS: '[{"name":"stub","base_url":"http://stub-llm:9100/v1","chat_model":"stub","vision_model":"stub"}]'

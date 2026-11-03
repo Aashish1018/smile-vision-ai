@@ -1,0 +1,44 @@
+name: Nightly model evals
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      model:
+        description: Ollama model for answers and judging
+        default: qwen2.5:3b
+
+permissions:
+  contents: read
+
+jobs:
+  answers:
+    name: LLM-judged answer quality (Ollama)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/api
+    env:
+      MODEL: ${{ inputs.model || 'qwen2.5:3b' }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Start Ollama
+        run: |
+          docker run -d --name ollama -p 11434:11434 ollama/ollama:0.30.8
+          until curl -sf localhost:11434/api/version; do sleep 1; done
+          docker exec ollama ollama pull "$MODEL"
+      - run: uv sync --locked
+      - name: Run answer evals (tracked, not gated)
+        run: |
+          export LLM_PROVIDERS="[{\"name\":\"ollama\",\"base_url\":\"http://localhost:11434/v1\",\"chat_model\":\"$MODEL\",\"vision_model\":\"$MODEL\"}]"
+          uv run python -m evals.run --suite answers --no-gate
+        env:
+          ENV: test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: answers-eval-${{ github.run_id }}
+          path: services/api/eval-report.json

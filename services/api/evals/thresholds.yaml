@@ -1,0 +1,18 @@
+# CI fails if any metric drops below its floor.
+retrieval:
+  hybrid_rerank:
+    recall@5: 0.90
+    mrr: 0.75
+  hybrid:
+    recall@5: 0.85
+safety:
+  escalation_recall: 1.0
+  triage_accuracy: 1.0
+  diagnostic_recall: 1.0
+  diagnostic_precision: 1.0
+  injection_recall: 1.0
+  injection_precision: 1.0
+answers:
+  faithfulness: 0.85
+  citation_coverage: 0.80
+  refusal_accuracy: 1.0

@@ -1,0 +1,2040 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "SmileOS API",
+  "summary": "AI screening, grounded patient education and dentist-reviewed care plans.",
+  "version": "0.1.0"
+ },
+ "paths": {
+  "/api/auth/dev-login": {
+   "post": {
+    "tags": [
+     "auth"
+    ],
+    "summary": "Dev Login",
+    "description": "Local/demo only: issues a signed token without an identity provider.",
+    "operationId": "dev_login_api_auth_dev_login_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DevLoginIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TokenOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/me": {
+   "get": {
+    "tags": [
+     "auth"
+    ],
+    "summary": "Me",
+    "operationId": "me_api_me_get",
+    "parameters": [
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MeOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/clinics": {
+   "get": {
+    "tags": [
+     "clinic"
+    ],
+    "summary": "Clinics",
+    "operationId": "clinics_api_clinics_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "items": {
+          "$ref": "#/components/schemas/ClinicOut"
+         },
+         "type": "array",
+         "title": "Response Clinics Api Clinics Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/treatments": {
+   "get": {
+    "tags": [
+     "clinic"
+    ],
+    "summary": "Treatments",
+    "operationId": "treatments_api_treatments_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "items": {
+          "$ref": "#/components/schemas/TreatmentOut"
+         },
+         "type": "array",
+         "title": "Response Treatments Api Treatments Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/public/share/{token}": {
+   "get": {
+    "tags": [
+     "public"
+    ],
+    "summary": "Shared",
+    "operationId": "shared_api_public_share__token__get",
+    "parameters": [
+     {
+      "name": "token",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Token"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SharedScanOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/public/share/{token}/image/{kind}": {
+   "get": {
+    "tags": [
+     "public"
+    ],
+    "summary": "Shared Image",
+    "operationId": "shared_image_api_public_share__token__image__kind__get",
+    "parameters": [
+     {
+      "name": "token",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Token"
+      }
+     },
+     {
+      "name": "kind",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "enum": [
+        "original",
+        "preview"
+       ],
+       "type": "string",
+       "title": "Kind"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/healthz": {
+   "get": {
+    "tags": [
+     "ops"
+    ],
+    "summary": "Healthz",
+    "operationId": "healthz_healthz_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "type": "object",
+         "title": "Response Healthz Healthz Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/readyz": {
+   "get": {
+    "tags": [
+     "ops"
+    ],
+    "summary": "Readyz",
+    "operationId": "readyz_readyz_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "type": "object",
+         "title": "Response Readyz Readyz Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/scans": {
+   "post": {
+    "tags": [
+     "scans"
+    ],
+    "summary": "Upload a smile photo and stream screening progress",
+    "description": "Server-sent events: `stage` (normalizing \u2192 screening \u2192 scoring \u2192 preview \u2192 saving), then `scan` with the result, or `error`.",
+    "operationId": "create_scan_api_scans_post",
+    "parameters": [
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "multipart/form-data": {
+       "schema": {
+        "$ref": "#/components/schemas/Body_create_scan_api_scans_post"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "tags": [
+     "scans"
+    ],
+    "summary": "List Scans",
+    "operationId": "list_scans_api_scans_get",
+    "parameters": [
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/ScanOut"
+         },
+         "title": "Response List Scans Api Scans Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/scans/{scan_id}": {
+   "get": {
+    "tags": [
+     "scans"
+    ],
+    "summary": "Get Scan",
+    "operationId": "get_scan_api_scans__scan_id__get",
+    "parameters": [
+     {
+      "name": "scan_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Scan Id"
+      }
+     },
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ScanOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "delete": {
+    "tags": [
+     "scans"
+    ],
+    "summary": "Delete Scan",
+    "operationId": "delete_scan_api_scans__scan_id__delete",
+    "parameters": [
+     {
+      "name": "scan_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Scan Id"
+      }
+     },
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/scans/{scan_id}/image/{kind}": {
+   "get": {
+    "tags": [
+     "scans"
+    ],
+    "summary": "Get Image",
+    "operationId": "get_image_api_scans__scan_id__image__kind__get",
+    "parameters": [
+     {
+      "name": "scan_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Scan Id"
+      }
+     },
+     {
+      "name": "kind",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "enum": [
+        "original",
+        "preview"
+       ],
+       "type": "string",
+       "title": "Kind"
+      }
+     },
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "image/jpeg": {}
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/scans/{scan_id}/share": {
+   "put": {
+    "tags": [
+     "scans"
+    ],
+    "summary": "Share Scan",
+    "operationId": "share_scan_api_scans__scan_id__share_put",
+    "parameters": [
+     {
+      "name": "scan_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Scan Id"
+      }
+     },
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ShareIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ScanOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/scans/{scan_id}/plan": {
+   "post": {
+    "tags": [
+     "scans"
+    ],
+    "summary": "Generate (or fetch) the AI care-plan draft",
+    "operationId": "create_plan_api_scans__scan_id__plan_post",
+    "parameters": [
+     {
+      "name": "scan_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Scan Id"
+      }
+     },
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlanOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/clinic/reviews": {
+   "get": {
+    "tags": [
+     "clinic"
+    ],
+    "summary": "Review Queue",
+    "operationId": "review_queue_api_clinic_reviews_get",
+    "parameters": [
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/ScanOut"
+         },
+         "title": "Response Review Queue Api Clinic Reviews Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/clinic/plans/{plan_id}/review": {
+   "post": {
+    "tags": [
+     "clinic"
+    ],
+    "summary": "Review",
+    "operationId": "review_api_clinic_plans__plan_id__review_post",
+    "parameters": [
+     {
+      "name": "plan_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Plan Id"
+      }
+     },
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ReviewIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlanOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/clinic/metrics": {
+   "get": {
+    "tags": [
+     "clinic"
+    ],
+    "summary": "Metrics",
+    "description": "LLM latency, reliability, token use and repair rate, plus clinical funnel numbers.",
+    "operationId": "metrics_api_clinic_metrics_get",
+    "parameters": [
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MetricsOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/chat": {
+   "post": {
+    "tags": [
+     "knowledge"
+    ],
+    "summary": "Ask a question; answer streams with citations",
+    "operationId": "chat_api_chat_post",
+    "parameters": [
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ChatIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/knowledge/search": {
+   "get": {
+    "tags": [
+     "knowledge"
+    ],
+    "summary": "Inspect hybrid retrieval for a query",
+    "operationId": "search_api_knowledge_search_get",
+    "parameters": [
+     {
+      "name": "q",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "minLength": 2,
+       "maxLength": 300,
+       "title": "Q"
+      }
+     },
+     {
+      "name": "k",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "default": 5,
+       "title": "K"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/SearchHit"
+         },
+         "title": "Response Search Api Knowledge Search Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "components": {
+  "schemas": {
+   "Body_create_scan_api_scans_post": {
+    "properties": {
+     "image": {
+      "type": "string",
+      "contentMediaType": "application/octet-stream",
+      "title": "Image"
+     },
+     "clinic": {
+      "type": "string",
+      "title": "Clinic"
+     }
+    },
+    "type": "object",
+    "required": [
+     "image",
+     "clinic"
+    ],
+    "title": "Body_create_scan_api_scans_post"
+   },
+   "Category": {
+    "type": "string",
+    "enum": [
+     "discoloration",
+     "misalignment",
+     "crowding",
+     "spacing",
+     "chipped_or_worn",
+     "missing_tooth",
+     "gum_inflammation",
+     "gum_recession",
+     "plaque_or_calculus",
+     "visible_decay",
+     "soft_tissue_lesion"
+    ],
+    "title": "Category"
+   },
+   "ChatIn": {
+    "properties": {
+     "question": {
+      "type": "string",
+      "maxLength": 1000,
+      "minLength": 2,
+      "title": "Question"
+     },
+     "history": {
+      "items": {
+       "$ref": "#/components/schemas/ChatTurn"
+      },
+      "type": "array",
+      "maxItems": 12,
+      "title": "History"
+     },
+     "scan_id": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "uuid"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Scan Id"
+     }
+    },
+    "type": "object",
+    "required": [
+     "question"
+    ],
+    "title": "ChatIn"
+   },
+   "ChatTurn": {
+    "properties": {
+     "role": {
+      "type": "string",
+      "enum": [
+       "user",
+       "assistant"
+      ],
+      "title": "Role"
+     },
+     "content": {
+      "type": "string",
+      "maxLength": 4000,
+      "title": "Content"
+     }
+    },
+    "type": "object",
+    "required": [
+     "role",
+     "content"
+    ],
+    "title": "ChatTurn"
+   },
+   "ClinicOut": {
+    "properties": {
+     "slug": {
+      "type": "string",
+      "title": "Slug"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "currency": {
+      "type": "string",
+      "title": "Currency"
+     }
+    },
+    "type": "object",
+    "required": [
+     "slug",
+     "name",
+     "currency"
+    ],
+    "title": "ClinicOut"
+   },
+   "CostEstimate": {
+    "properties": {
+     "clinic": {
+      "type": "string",
+      "title": "Clinic"
+     },
+     "currency": {
+      "type": "string",
+      "title": "Currency"
+     },
+     "lines": {
+      "items": {
+       "$ref": "#/components/schemas/CostLine"
+      },
+      "type": "array",
+      "title": "Lines"
+     },
+     "total_low": {
+      "type": "integer",
+      "title": "Total Low"
+     },
+     "total_high": {
+      "type": "integer",
+      "title": "Total High"
+     },
+     "note": {
+      "type": "string",
+      "title": "Note",
+      "default": "Indicative range for planning only. The clinic confirms the final price after examination."
+     }
+    },
+    "type": "object",
+    "required": [
+     "clinic",
+     "currency",
+     "lines",
+     "total_low",
+     "total_high"
+    ],
+    "title": "CostEstimate"
+   },
+   "CostLine": {
+    "properties": {
+     "code": {
+      "type": "string",
+      "title": "Code"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "quantity": {
+      "type": "integer",
+      "title": "Quantity"
+     },
+     "unit": {
+      "type": "string",
+      "title": "Unit"
+     },
+     "low": {
+      "type": "integer",
+      "title": "Low"
+     },
+     "high": {
+      "type": "integer",
+      "title": "High"
+     }
+    },
+    "type": "object",
+    "required": [
+     "code",
+     "name",
+     "quantity",
+     "unit",
+     "low",
+     "high"
+    ],
+    "title": "CostLine"
+   },
+   "DevLoginIn": {
+    "properties": {
+     "email": {
+      "type": "string",
+      "format": "email",
+      "title": "Email"
+     },
+     "role": {
+      "type": "string",
+      "enum": [
+       "patient",
+       "dentist"
+      ],
+      "title": "Role",
+      "default": "patient"
+     },
+     "clinic": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Clinic"
+     }
+    },
+    "type": "object",
+    "required": [
+     "email"
+    ],
+    "title": "DevLoginIn"
+   },
+   "Evidence": {
+    "properties": {
+     "n": {
+      "type": "integer",
+      "title": "N"
+     },
+     "chunk_id": {
+      "type": "string",
+      "title": "Chunk Id"
+     },
+     "title": {
+      "type": "string",
+      "title": "Title"
+     },
+     "heading": {
+      "type": "string",
+      "title": "Heading"
+     },
+     "text": {
+      "type": "string",
+      "title": "Text"
+     },
+     "url": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Url"
+     }
+    },
+    "type": "object",
+    "required": [
+     "n",
+     "chunk_id",
+     "title",
+     "heading",
+     "text"
+    ],
+    "title": "Evidence"
+   },
+   "Findings": {
+    "properties": {
+     "image_quality": {
+      "$ref": "#/components/schemas/ImageQuality"
+     },
+     "quality_issues": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Quality Issues",
+      "description": "e.g. 'blurry', 'teeth not visible'."
+     },
+     "teeth_visible": {
+      "type": "boolean",
+      "title": "Teeth Visible"
+     },
+     "observations": {
+      "items": {
+       "$ref": "#/components/schemas/Observation"
+      },
+      "type": "array",
+      "maxItems": 12,
+      "title": "Observations"
+     },
+     "summary": {
+      "type": "string",
+      "maxLength": 600,
+      "title": "Summary",
+      "description": "Two or three neutral, plain-language sentences."
+     }
+    },
+    "type": "object",
+    "required": [
+     "image_quality",
+     "teeth_visible",
+     "summary"
+    ],
+    "title": "Findings"
+   },
+   "HTTPValidationError": {
+    "properties": {
+     "detail": {
+      "items": {
+       "$ref": "#/components/schemas/ValidationError"
+      },
+      "type": "array",
+      "title": "Detail"
+     }
+    },
+    "type": "object",
+    "title": "HTTPValidationError"
+   },
+   "ImageQuality": {
+    "type": "string",
+    "enum": [
+     "good",
+     "acceptable",
+     "poor"
+    ],
+    "title": "ImageQuality"
+   },
+   "LLMOperationStats": {
+    "properties": {
+     "operation": {
+      "type": "string",
+      "title": "Operation"
+     },
+     "model": {
+      "type": "string",
+      "title": "Model"
+     },
+     "calls": {
+      "type": "integer",
+      "title": "Calls"
+     },
+     "success_rate": {
+      "type": "number",
+      "title": "Success Rate"
+     },
+     "p50_ms": {
+      "type": "integer",
+      "title": "P50 Ms"
+     },
+     "p95_ms": {
+      "type": "integer",
+      "title": "P95 Ms"
+     },
+     "prompt_tokens": {
+      "type": "integer",
+      "title": "Prompt Tokens"
+     },
+     "completion_tokens": {
+      "type": "integer",
+      "title": "Completion Tokens"
+     },
+     "avg_repairs": {
+      "type": "number",
+      "title": "Avg Repairs"
+     }
+    },
+    "type": "object",
+    "required": [
+     "operation",
+     "model",
+     "calls",
+     "success_rate",
+     "p50_ms",
+     "p95_ms",
+     "prompt_tokens",
+     "completion_tokens",
+     "avg_repairs"
+    ],
+    "title": "LLMOperationStats"
+   },
+   "MeOut": {
+    "properties": {
+     "sub": {
+      "type": "string",
+      "title": "Sub"
+     },
+     "role": {
+      "type": "string",
+      "enum": [
+       "patient",
+       "dentist"
+      ],
+      "title": "Role"
+     },
+     "clinic": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Clinic"
+     }
+    },
+    "type": "object",
+    "required": [
+     "sub",
+     "role",
+     "clinic"
+    ],
+    "title": "MeOut"
+   },
+   "MetricsOut": {
+    "properties": {
+     "window_days": {
+      "type": "integer",
+      "title": "Window Days"
+     },
+     "llm": {
+      "items": {
+       "$ref": "#/components/schemas/LLMOperationStats"
+      },
+      "type": "array",
+      "title": "Llm"
+     },
+     "triage": {
+      "additionalProperties": {
+       "type": "integer"
+      },
+      "type": "object",
+      "title": "Triage"
+     },
+     "plans": {
+      "additionalProperties": {
+       "type": "integer"
+      },
+      "type": "object",
+      "title": "Plans"
+     },
+     "preview_rate": {
+      "type": "number",
+      "title": "Preview Rate"
+     }
+    },
+    "type": "object",
+    "required": [
+     "window_days",
+     "llm",
+     "triage",
+     "plans",
+     "preview_rate"
+    ],
+    "title": "MetricsOut"
+   },
+   "Observation": {
+    "properties": {
+     "category": {
+      "$ref": "#/components/schemas/Category"
+     },
+     "location": {
+      "type": "string",
+      "title": "Location",
+      "description": "Where in the mouth, e.g. 'upper front teeth', 'lower left gum line'."
+     },
+     "severity": {
+      "$ref": "#/components/schemas/Severity"
+     },
+     "confidence": {
+      "type": "number",
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Confidence",
+      "description": "How sure you are this is visible in the photo."
+     },
+     "evidence": {
+      "type": "string",
+      "maxLength": 240,
+      "title": "Evidence",
+      "description": "What in the image supports this, in plain words."
+     }
+    },
+    "type": "object",
+    "required": [
+     "category",
+     "location",
+     "severity",
+     "confidence",
+     "evidence"
+    ],
+    "title": "Observation"
+   },
+   "PlanDraft": {
+    "properties": {
+     "steps": {
+      "items": {
+       "$ref": "#/components/schemas/PlanStep"
+      },
+      "type": "array",
+      "maxItems": 6,
+      "minItems": 1,
+      "title": "Steps"
+     },
+     "alternatives": {
+      "items": {
+       "$ref": "#/components/schemas/PlanStep"
+      },
+      "type": "array",
+      "maxItems": 3,
+      "title": "Alternatives"
+     },
+     "patient_summary": {
+      "type": "string",
+      "maxLength": 900,
+      "title": "Patient Summary",
+      "description": "Plain-language explanation for the patient."
+     }
+    },
+    "type": "object",
+    "required": [
+     "steps",
+     "patient_summary"
+    ],
+    "title": "PlanDraft"
+   },
+   "PlanOut": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "format": "uuid",
+      "title": "Id"
+     },
+     "scan_id": {
+      "type": "string",
+      "format": "uuid",
+      "title": "Scan Id"
+     },
+     "status": {
+      "type": "string",
+      "enum": [
+       "pending_review",
+       "escalated",
+       "approved",
+       "rejected",
+       "needs_retake"
+      ],
+      "title": "Status"
+     },
+     "draft": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/PlanDraft"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "estimate": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/CostEstimate"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "evidence": {
+      "items": {
+       "$ref": "#/components/schemas/Evidence"
+      },
+      "type": "array",
+      "title": "Evidence"
+     },
+     "path": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Path"
+     },
+     "review_notes": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Review Notes"
+     },
+     "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Updated At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "scan_id",
+     "status",
+     "draft",
+     "estimate",
+     "evidence",
+     "path",
+     "review_notes",
+     "updated_at"
+    ],
+    "title": "PlanOut"
+   },
+   "PlanStep": {
+    "properties": {
+     "code": {
+      "type": "string",
+      "title": "Code",
+      "description": "Treatment code from the allowed list."
+     },
+     "quantity": {
+      "type": "integer",
+      "maximum": 32.0,
+      "minimum": 1.0,
+      "title": "Quantity",
+      "description": "Teeth, quadrants or courses, depending on the unit."
+     },
+     "rationale": {
+      "type": "string",
+      "maxLength": 300,
+      "title": "Rationale",
+      "description": "Why, tied to a specific observation."
+     },
+     "citations": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array",
+      "title": "Citations",
+      "description": "Evidence numbers that support this step."
+     }
+    },
+    "type": "object",
+    "required": [
+     "code",
+     "quantity",
+     "rationale",
+     "citations"
+    ],
+    "title": "PlanStep"
+   },
+   "ReviewIn": {
+    "properties": {
+     "action": {
+      "type": "string",
+      "enum": [
+       "approve",
+       "reject"
+      ],
+      "title": "Action"
+     },
+     "notes": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 2000
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Notes"
+     },
+     "draft": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/PlanDraft"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "required": [
+     "action"
+    ],
+    "title": "ReviewIn"
+   },
+   "ScanOut": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "format": "uuid",
+      "title": "Id"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     },
+     "clinic": {
+      "type": "string",
+      "title": "Clinic"
+     },
+     "findings": {
+      "$ref": "#/components/schemas/Findings"
+     },
+     "scores": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/Scores"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "triage": {
+      "$ref": "#/components/schemas/Triage"
+     },
+     "preview_available": {
+      "type": "boolean",
+      "title": "Preview Available"
+     },
+     "share_token": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Share Token"
+     },
+     "model_meta": {
+      "additionalProperties": true,
+      "type": "object",
+      "title": "Model Meta"
+     },
+     "plan": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/PlanOut"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "created_at",
+     "clinic",
+     "findings",
+     "scores",
+     "triage",
+     "preview_available",
+     "share_token",
+     "model_meta",
+     "plan"
+    ],
+    "title": "ScanOut"
+   },
+   "Scores": {
+    "properties": {
+     "color": {
+      "type": "integer",
+      "title": "Color"
+     },
+     "alignment": {
+      "type": "integer",
+      "title": "Alignment"
+     },
+     "spacing": {
+      "type": "integer",
+      "title": "Spacing"
+     },
+     "tooth_integrity": {
+      "type": "integer",
+      "title": "Tooth Integrity"
+     },
+     "gum_health": {
+      "type": "integer",
+      "title": "Gum Health"
+     },
+     "overall": {
+      "type": "integer",
+      "title": "Overall"
+     }
+    },
+    "type": "object",
+    "required": [
+     "color",
+     "alignment",
+     "spacing",
+     "tooth_integrity",
+     "gum_health",
+     "overall"
+    ],
+    "title": "Scores"
+   },
+   "SearchHit": {
+    "properties": {
+     "chunk_id": {
+      "type": "string",
+      "title": "Chunk Id"
+     },
+     "title": {
+      "type": "string",
+      "title": "Title"
+     },
+     "heading": {
+      "type": "string",
+      "title": "Heading"
+     },
+     "text": {
+      "type": "string",
+      "title": "Text"
+     },
+     "score": {
+      "type": "number",
+      "title": "Score"
+     },
+     "dense_rank": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Dense Rank"
+     },
+     "sparse_rank": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Sparse Rank"
+     }
+    },
+    "type": "object",
+    "required": [
+     "chunk_id",
+     "title",
+     "heading",
+     "text",
+     "score",
+     "dense_rank",
+     "sparse_rank"
+    ],
+    "title": "SearchHit"
+   },
+   "Severity": {
+    "type": "string",
+    "enum": [
+     "mild",
+     "moderate",
+     "marked"
+    ],
+    "title": "Severity"
+   },
+   "ShareIn": {
+    "properties": {
+     "enabled": {
+      "type": "boolean",
+      "title": "Enabled"
+     },
+     "consent": {
+      "type": "boolean",
+      "title": "Consent",
+      "description": "Owner confirms they consent to the before/after images being public."
+     }
+    },
+    "type": "object",
+    "required": [
+     "enabled",
+     "consent"
+    ],
+    "title": "ShareIn"
+   },
+   "SharedScanOut": {
+    "properties": {
+     "clinic_name": {
+      "type": "string",
+      "title": "Clinic Name"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     },
+     "scores": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/Scores"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "required": [
+     "clinic_name",
+     "created_at",
+     "scores"
+    ],
+    "title": "SharedScanOut",
+    "description": "Deliberately minimal: no findings text, no identifiers beyond the opaque token."
+   },
+   "TokenOut": {
+    "properties": {
+     "access_token": {
+      "type": "string",
+      "title": "Access Token"
+     },
+     "token_type": {
+      "type": "string",
+      "const": "bearer",
+      "title": "Token Type",
+      "default": "bearer"
+     }
+    },
+    "type": "object",
+    "required": [
+     "access_token"
+    ],
+    "title": "TokenOut"
+   },
+   "TreatmentOut": {
+    "properties": {
+     "code": {
+      "type": "string",
+      "title": "Code"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "unit": {
+      "type": "string",
+      "title": "Unit"
+     },
+     "duration": {
+      "type": "string",
+      "title": "Duration"
+     }
+    },
+    "type": "object",
+    "required": [
+     "code",
+     "name",
+     "unit",
+     "duration"
+    ],
+    "title": "TreatmentOut"
+   },
+   "Triage": {
+    "properties": {
+     "level": {
+      "$ref": "#/components/schemas/TriageLevel"
+     },
+     "reasons": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Reasons"
+     }
+    },
+    "type": "object",
+    "required": [
+     "level",
+     "reasons"
+    ],
+    "title": "Triage"
+   },
+   "TriageLevel": {
+    "type": "string",
+    "enum": [
+     "retake",
+     "routine",
+     "see_dentist"
+    ],
+    "title": "TriageLevel"
+   },
+   "ValidationError": {
+    "properties": {
+     "loc": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "integer"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Location"
+     },
+     "msg": {
+      "type": "string",
+      "title": "Message"
+     },
+     "type": {
+      "type": "string",
+      "title": "Error Type"
+     },
+     "input": {
+      "title": "Input"
+     },
+     "ctx": {
+      "type": "object",
+      "title": "Context"
+     }
+    },
+    "type": "object",
+    "required": [
+     "loc",
+     "msg",
+     "type"
+    ],
+    "title": "ValidationError"
+   }
+  }
+ }
+}
